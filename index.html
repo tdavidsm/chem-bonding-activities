@@ -582,14 +582,14 @@ const A3={
    Covalent drawing engine (shared by activities 4, 5, 6)
    ===================================================================== */
 const COV={
-  H :{cap:1,v:1,rk:11,Rv:34,rad:30,col:'#dfe6f7',tx:'#1b2440'},
-  C :{cap:4,v:4,rk:18,Rv:48,rad:46,col:'#6b7280',tx:'#fff'},
-  N :{cap:3,v:5,rk:18,Rv:48,rad:43,col:'#5c86ff',tx:'#fff'},
-  O :{cap:2,v:6,rk:18,Rv:48,rad:41,col:'#ff6b6b',tx:'#fff'},
-  F :{cap:1,v:7,rk:18,Rv:48,rad:39,col:'#4fd18b',tx:'#0a2a18'},
-  Cl:{cap:1,v:7,rk:21,Rv:56,rad:52,col:'#38c26b',tx:'#0a2a18'},
-  S :{cap:2,v:6,rk:21,Rv:56,rad:52,col:'#e6c84a',tx:'#2a2204'},
-  P :{cap:3,v:5,rk:21,Rv:56,rad:52,col:'#ff9a3c',tx:'#2a1604'}
+  H :{cap:1,v:1,rk:11,Rv:38,rad:30,col:'#dfe6f7',tx:'#1b2440'},
+  C :{cap:4,v:4,rk:18,Rv:58,rad:46,col:'#6b7280',tx:'#fff'},
+  N :{cap:3,v:5,rk:18,Rv:54,rad:43,col:'#5c86ff',tx:'#fff'},
+  O :{cap:2,v:6,rk:18,Rv:51,rad:41,col:'#ff6b6b',tx:'#fff'},
+  F :{cap:1,v:7,rk:18,Rv:49,rad:39,col:'#4fd18b',tx:'#0a2a18'},
+  Cl:{cap:1,v:7,rk:21,Rv:65,rad:52,col:'#38c26b',tx:'#0a2a18'},
+  S :{cap:2,v:6,rk:21,Rv:65,rad:52,col:'#e6c84a',tx:'#2a2204'},
+  P :{cap:3,v:5,rk:21,Rv:65,rad:52,col:'#ff9a3c',tx:'#2a1604'}
 };
 const ECOL=['#7fd4ff','#ffcf6b','#ff8fc7','#a6f58a','#c3a1ff','#ff9f6b','#6bf0e0','#f5f08a'];
 function mkCov(sym,x,y,ci,sc){ sc=sc||1; const d=COV[sym]; return {id:++uid,sym,x,y,vx:0,vy:0,v:d.v,rk:d.rk*sc,Rv:d.Rv*sc,sc,col:ECOL[ci%ECOL.length],dir:Math.random()<.5?1:-1,ph:Math.random()*TAU,lone:[],drag:false,cnt:d.v}; }
@@ -606,17 +606,24 @@ function relaxLone(X,bondAngs){ const L=X.v-X.bsum; const nL=Math.ceil(Math.max(
     for(let k=0;k<all.length;k++){ const o=all[k]; if(o.f) continue; const pv=all[(k-1+all.length)%all.length],nx=all[(k+1)%all.length];
       let pa=pv.a,na=nx.a; if(all.length===1){ continue; } if(pa>=o.a) pa-=TAU; if(na<=o.a) na+=TAU; const mid=(pa+na)/2; X.lone[o.i]=o.a+(mid-o.a)*.35; } } }
 function ringPos(X,i,v,t){ const a=X.dir*t*1.3+i*TAU/v+X.ph; return [X.x+X.Rv*Math.cos(a),X.y+X.Rv*Math.sin(a)]; }
+function lensOf(A,B){ const dx=B.x-A.x,dy=B.y-A.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d,Ra=A.Rv,Rb=B.Rv;
+  const left=d-Rb,w=Math.max(6,(Ra-left)/2),xi=(d*d+Ra*Ra-Rb*Rb)/(2*d),h=Math.max(12,Math.sqrt(Math.max(0,Ra*Ra-xi*xi))),c=(left+Ra)/2;
+  return {cx:A.x+ux*c,cy:A.y+uy*c,ux,uy,w:Math.min(w,Math.min(Ra,Rb)),h,overlap:d<Ra+Rb}; }
 function drawMol(atoms,bonds,t){
-  for(const b of bonds){ if(b.s<.02) continue; const A=atoms[b.a],B=atoms[b.b],mx=(A.x+B.x)/2,my=(A.y+B.y)/2,d=Math.hypot(A.x-B.x,A.y-B.y);
-    const g=ctx.createRadialGradient(mx,my,0,mx,my,d*.58); g.addColorStop(0,`rgba(255,236,170,${.34*b.s})`); g.addColorStop(1,'rgba(255,236,170,0)'); circ(mx,my,d*.58,g); }
+  for(const b of bonds){ const A=atoms[b.a],B=atoms[b.b]; if(Math.hypot(A.x-B.x,A.y-B.y)>=A.Rv+B.Rv) continue; // Venn overlap region of the two valence shells
+    ctx.save(); ctx.beginPath(); ctx.arc(A.x,A.y,A.Rv,0,TAU); ctx.clip(); ctx.beginPath(); ctx.arc(B.x,B.y,B.Rv,0,TAU); ctx.fillStyle=`rgba(255,226,130,${.14+.22*b.s})`; ctx.fill(); ctx.restore();
+    ctx.strokeStyle=`rgba(255,214,102,${.35+.5*b.s})`; ctx.lineWidth=2;
+    ctx.save(); ctx.beginPath(); ctx.arc(A.x,A.y,A.Rv,0,TAU); ctx.clip(); ctx.beginPath(); ctx.arc(B.x,B.y,B.Rv,0,TAU); ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.arc(B.x,B.y,B.Rv,0,TAU); ctx.clip(); ctx.beginPath(); ctx.arc(A.x,A.y,A.Rv,0,TAU); ctx.stroke(); ctx.restore(); }
   for(const X of atoms){ dashCirc(X.x,X.y,X.Rv,'rgba(255,255,255,.2)',1.2,[4,5]); }
   for(const X of atoms){ const d=COV[X.sym],sc=X.sc||1; const g=ctx.createRadialGradient(X.x-X.rk*.3,X.y-X.rk*.35,1,X.x,X.y,X.rk); g.addColorStop(0,'#ffffff55'); g.addColorStop(1,'#00000000');
     circ(X.x,X.y,X.rk,d.col,'rgba(0,0,0,.4)',1.3); circ(X.x,X.y,X.rk,g); txt(X.sym,X.x,d.rk>14?X.y-3*sc:X.y,(d.rk>14?17:14)*sc,d.tx);
     if(d.rk>14) txt(d.v+'+',X.x,X.y+11*sc,9.5*sc,d.tx,'center',600); }
   atoms.forEach((X,xi)=>{ const myB=bonds.filter(b=>b.a===xi||b.b===xi); let i=0; const v=X.v; const pts=[];
-    for(const b of myB){ const A=atoms[b.a],B=atoms[b.b],isB=b.b===xi,dx=B.x-A.x,dy=B.y-A.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d,nx=-uy,ny=ux,mx=(A.x+B.x)/2,my=(A.y+B.y)/2;
-      for(let j=0;j<b.order;j++){ if(i>=v) break; const fr=ringPos(X,i,v,t),sc=X.sc||1,lane=(j-(b.order-1)/2)*14*sc,gap=Math.max(14,d-A.rk-B.rk),ea=Math.max(8,gap*.4),eb=b.order===1?Math.min(d*.17,gap*.3):7*sc,ph=2.3*t+(isB?Math.PI:0)+j*1.4;
-        const sx=mx+nx*lane+ux*ea*Math.cos(ph)+nx*eb*Math.sin(ph),sy=my+ny*lane+uy*ea*Math.cos(ph)+ny*eb*Math.sin(ph),s=ease(clamp(b.s,0,1));
+    for(const b of myB){ const A=atoms[b.a],B=atoms[b.b],isB=b.b===xi,ln=lensOf(A,B),nx=-ln.uy,ny=ln.ux;
+      for(let j=0;j<b.order;j++){ if(i>=v) break; const fr=ringPos(X,i,v,t),k=b.order===1?.62:.4+.5*j/(b.order-1),ph=2.3*t+(isB?Math.PI:0)+j*1.1,
+          ea=Math.max(3,ln.w*k),eb=ln.h*k*.92; // stay inside the overlap (the Venn region)
+        const sx=ln.cx+ln.ux*ea*Math.cos(ph)+nx*eb*Math.sin(ph),sy=ln.cy+ln.uy*ea*Math.cos(ph)+ny*eb*Math.sin(ph),s=ease(clamp(b.s,0,1));
         pts.push({x:fr[0]+(sx-fr[0])*s,y:fr[1]+(sy-fr[1])*s,sh:s}); i++; } }
     const L=v-i, sL=myB.reduce((m,b)=>Math.max(m,b.s),0);
     for(let m=0;m<L;m++){ const p=Math.floor(m/2),fr=ringPos(X,i+m,v,t); const pair=(m%2===1)||(m+1<L); const base=X.lone[p]!==undefined?X.lone[p]:0;
@@ -647,7 +654,7 @@ function makeBondLab(id,opts){ return {
     $('#c3').innerHTML=`<div class="status" id="blst"></div><div class="ledger" id="blled"></div><div id="blq"></div>`;
     document.querySelectorAll('#blm .chip').forEach(c=>c.onclick=()=>{ this.mol=c.dataset.m; this.load(); });
     $('#blreset').onclick=()=>this.load(); this.load(); this.quizShown=false; this.renderQuiz(); },
-  load(){ const m=BL[this.mol],c=COV[m.sym]; this.A=mkCov(m.sym,170,300,0,BLSC); this.B=mkCov(m.sym,540,300,1,BLSC); this.B.col=ECOL[1]; this.A.dir=1; this.B.dir=-1; this.steady=0; this.s=0;
+  load(){ const m=BL[this.mol],c=COV[m.sym]; this.A=mkCov(m.sym,170,300,0,BLSC); this.B=mkCov(m.sym,540,300,1,BLSC); this.A.Rv=this.B.Rv=m.d0*.8; this.B.col=ECOL[1]; this.A.dir=1; this.B.dir=-1; this.steady=0; this.s=0;
     document.querySelectorAll('#blm .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===this.mol)); this.led(); this.checks(); },
   led(){ const m=BL[this.mol]; $('#blled').innerHTML=`<span>Bond</span><b>${m.sym}${m.order===1?'–':m.order===2?'=':'≡'}${m.sym} (${m.bond})</b><span>Electrons shared</span><b>${m.order*2}</b><span>Real bond length</span><b>${m.pm} pm</b><span>Energy to break 1 mol</span><b>${m.kJ} kJ</b>`; },
   checks(){ const o=this.opts; const n=Object.keys(this.formed).length; const el=$('#blck'); if(!el) return;
@@ -664,7 +671,7 @@ function makeBondLab(id,opts){ return {
       let F=-(2*De*a*(1-e)*e); F=clamp(F,-3500,3500); // F>0 means repulsive (push apart)
       for(const [X,sg] of [[A,-1],[B,1]]){ if(X.drag){X.vx=X.vy=0;continue;} X.vx+=sg*ux*F*h+rnd(-1,1)*300*h; X.vy+=sg*uy*F*h+rnd(-1,1)*300*h; const dm=Math.exp(-2.4*h); X.vx*=dm; X.vy*=dm; X.x+=X.vx*h; X.y+=X.vy*h;
         X.x=clamp(X.x,X.Rv,700-X.Rv); X.y=clamp(X.y,X.Rv+30,H-X.Rv-6); } }
-    const d=Math.hypot(B.x-A.x,B.y-A.y); const far=A.Rv+B.Rv+16, near=m.d0*1.18; this.s=ease(clamp((far-d)/(far-near),0,1)); this.d=d;
+    const d=Math.hypot(B.x-A.x,B.y-A.y); const far=A.Rv+B.Rv, near=m.d0*1.04; this.s=ease(clamp((far-d)/(far-near),0,1)); this.d=d;
     const bond={a:0,b:1,order:m.order,s:this.s}; this.bonds=[bond]; A.bsum=B.bsum=this.s>.5?m.order:0;
     A.bsum=B.bsum=m.order; const ang=Math.atan2(B.y-A.y,B.x-A.x); relaxLone(A,[ang]); relaxLone(B,[ang+Math.PI]);
     A.cnt=B.cnt=m.sym==='H'?1+(this.s>.9?1:0):COV[m.sym].v+(this.s>.9?m.order:0); A.showCnt=B.showCnt=true;
