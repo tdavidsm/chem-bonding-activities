@@ -1,0 +1,37 @@
+# ⚛️ Chemical Bonding Lab
+
+Six hands-on simulations that show high school chemistry students how **ionic**, **metallic**, and **covalent** bonds form. Everything runs in the browser, with no install and no accounts.
+
+**▶ Open it:** https://tdavidsm.github.io/chem-bonding-activities/
+
+## The six activities
+
+| # | Tab | The big idea | To earn the ⭐ |
+|---|-----|--------------|----------------|
+| 1 | **Ionic: Electron Transfer** | Metal atoms (Bohr models) give valence electrons to nonmetal atoms. Keep adding atoms until every atom is a stable ion, then read off the formula. | Make 4 different compounds |
+| 2 | **Ionic: Crystal Lattice** | Cooling a melt of Na⁺ and Cl⁻ grows a checkerboard crystal from a seed. Then drag ions toward the crystal and watch them get pulled and pushed into place. | Grow a crystal, then add 6 ions that settle |
+| 3 | **Metallic: Electron Sea** | Atoms dropped onto a metal lattice give their valence electrons to the shared sea. A voltage makes the sea flow. | Add 6 atoms (2 different metals) and turn on the voltage |
+| 4 | **Covalent: Sharing a Pair** | Two nonmetal atoms (H₂, F₂, Cl₂) approach. Electrons orbiting each atom shift into the space between the nuclei. A live energy curve shows the bond length. | Bond H₂ and F₂/Cl₂, answer the check question |
+| 5 | **Covalent: Double Bond** | O₂ shares two pairs (bonus: N₂ triple bond). Compare bond length and energy to single bonds. | Bond O₂, answer the check question |
+| 6 | **Covalent: Build a Molecule** | Add H, C, N, O, F, Cl, S, P atoms and drag them together. Atoms share until every atom has a full outer shell, then the molecule is named. | Build H₂O, NH₃, CH₄, CO₂ (bonus: HCN, C₂H₄) |
+
+Finishing all six gives a **completion code** with the student's initials in the **3rd and 6th** spots. Progress is saved on the device.
+
+## Modeling notes (for teachers)
+- **Activity 1:** a nonmetal is stable at 8 valence electrons; a metal is stable once its valence shell is empty. Electrons that came from the metal stay gold so students can track them. The formula uses the simplest ratio (2 Na + 2 Cl is still NaCl).
+- **Activity 2:** ions feel real Coulomb attraction/repulsion plus a hard core. A gentle "lattice-site pull" (it fades as temperature rises) stands in for the periodic potential of the rest of the crystal.
+- **Activity 3:** electrons are drawn as dots in a sea around fixed cores. The model does not include electron waves or band theory.
+- **Activities 4–6:** electrons are shown as dots, and they blend from orbiting their own atom to the bond region as the atoms approach. Bond lengths and energies shown are textbook values (H–H 74 pm/436 kJ, F–F 143/159, Cl–Cl 199/243, O=O 121/498, N≡N 110/945).
+- Molecules in activity 6 are drawn flat (2-D). Real CH₄ is a tetrahedron and water is bent at about 105°.
+
+## Develop
+It's one file. Edit `index.html` and reload. For a local server:
+
+```bash
+python3 -m http.server 8790
+```
+
+then open http://localhost:8790/index.html
+
+## Tech
+Single self-contained `index.html`: plain HTML/CSS/JS, canvas animation, Pointer Events (touch + mouse), no dependencies. Built for iPad Safari and also works on Chromebooks and laptops. Deployed via GitHub Pages from `main`.
