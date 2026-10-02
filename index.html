@@ -95,6 +95,9 @@
   .quiz .opt:hover{border-color:var(--accent)}
   .quiz .opt.right{border-color:var(--good);background:#153b28;color:#8ff0b6}
   .quiz .opt.wrong{border-color:var(--bad);background:#3a1620;color:#ff9aa9}
+  .quiz.locked{opacity:.45}
+  .quiz .opt:disabled{cursor:default}
+  .quiz .opt.wrong:disabled{opacity:.8}
   .quiz .fb{font-size:13px;margin-top:6px;line-height:1.45}
 
   .modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:30;padding:18px}
@@ -163,7 +166,7 @@
   <h2>Nice work, <span id="winName"></span>!</h2>
   <p>Your completion code:</p>
   <div class="code" id="codeOut"></div>
-  <p class="muted" style="font-size:13px">Your initials are in the <b>3rd</b> and <b>6th</b> spots. Press <b>Turn it in</b> to open the class form with your name and code already filled in, then press Submit there. (Form won't open? Screenshot this page or copy the code.)</p>
+  <p class="muted" style="font-size:13px">Press <b>Turn it in</b> to open the class form with your name and code already filled in, then press Submit there. (Form won't open? Screenshot this page or copy the code.)</p>
   <div class="row2" style="justify-content:center;flex-wrap:wrap"><a class="btn" id="turnIn" target="_blank" rel="noopener">Turn it in →</a><button class="btn secondary" id="copyBtn">Copy code</button><button class="btn secondary" id="winClose">Close</button></div>
 </div></div>
 
@@ -230,18 +233,20 @@ const ACTS=[
 ];
 let state={done:{},a1:[],a6:[],q:{},code:'',name:''};
 try{ const d=JSON.parse(localStorage.getItem(KEY)||'null'); if(d) state=Object.assign(state,d); }catch(e){}
+function sanitize(){ [['a1','a1',1],['a2','a2',1],['a4','a4',1],['a5','a5',1],['a6','a6',3],['a7','a7',3]].forEach(([id,k,n])=>{ if(state.done[id]&&!mqDone(k,n)) state.done[id]=false; }); }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+sanitize();
 let toastT=0;
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3600); }
 function doneCount(){ return ACTS.filter(a=>state.done[a.id]).length; }
 function award(id){ if(state.done[id]) return; state.done[id]=true; save(); renderChrome();
   toast(`⭐ Activity complete! (${doneCount()}/${ACTS.length})`);
-  if(doneCount()===ACTS.length) setTimeout(()=>{ if(!state.code) openName(); },1800); }
+  if(canGetCode()) setTimeout(()=>{ if(!state.code) openName(); },1800); }
 function renderChrome(){
   $('#medals').innerHTML=ACTS.map(a=>`<div class="medal ${state.done[a.id]?'won':''}" title="${a.nm}">${state.done[a.id]?'★':ACTS.indexOf(a)+1}</div>`).join('');
   $('#tabs').innerHTML=ACTS.map((a,i)=>`<button class="tab ${i===cur_i?'sel':''}" data-i="${i}" data-g="${a.g}"><span class="badge">${state.done[a.id]?'⭐':''}</span><div class="n">${a.n}</div><div class="nm">${a.nm}</div></button>`).join('');
   document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchTo(+b.dataset.i));
-  $('#codeBtn').style.display=doneCount()===ACTS.length?'':'none';
+  $('#codeBtn').style.display=canGetCode()?'':'none';
 }
 
 /* ---------------- completion code (same scheme as the other classroom apps) ---------------- */
@@ -250,7 +255,7 @@ function initials(name){ const p=name.trim().split(/\s+/).filter(Boolean);
   const a=letter((p[0]||'')[0]); const b=letter(p.length>1?(p[p.length-1]||'')[0]:((p[0]||'')[1]||(p[0]||'')[0])); return [a,b]; }
 function makeCode(name){ const [i1,i2]=initials(name); const cs='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; const r=()=>cs[Math.floor(Math.random()*cs.length)];
   return [r(),r(),i1,r(),r(),i2,r(),r()].join(''); }
-function openName(){ if(state.code){ showCode(); return; } $('#nameField').value=''; $('#nameErr').textContent=''; $('#nameModal').classList.add('show'); setTimeout(()=>$('#nameField').focus(),50); }
+function openName(){ if(!canGetCode()) return; if(state.code){ showCode(); return; } $('#nameField').value=''; $('#nameErr').textContent=''; $('#nameModal').classList.add('show'); setTimeout(()=>$('#nameField').focus(),50); }
 const FORM_BASE='https://docs.google.com/forms/d/e/1FAIpQLSdWMUSHB0cym2_ke-mQ-wd1abj46G8BVvWsJmk9aQac5r-7AA/viewform';
 const FORM_ENTRY={name:'entry.2072631698',code:'entry.1611661514'}; // "Name" and "Code" questions on the class form
 function turnInURL(){ const q=new URLSearchParams({usp:'pp_url'}); q.append(FORM_ENTRY.name,state.name||''); q.append(FORM_ENTRY.code,state.code||''); return FORM_BASE+'?'+q.toString(); }
@@ -274,38 +279,45 @@ function wireQuiz(q,onRight){ document.querySelectorAll('.quiz .opt').forEach(b=
 
 /* several multiple-choice questions, remembered on the device (state.q[key][i] === true when answered correctly) */
 function mqHTML(qs,key,off){ off=off||0; const got=(state.q&&state.q[key])||[];
-  return qs.map((q,qi)=>`<div class="quiz" data-qi="${qi+off}"><div class="q">${qs.length>1||off?(qi+off+1)+'. ':''}${q.q}</div>${q.opts.map((o,i)=>`<button class="opt ${got[qi+off]&&i===q.ans?'right':''}" data-i="${i}">${o}</button>`).join('')}<div class="fb">${got[qi+off]?'✓ '+q.why:''}</div></div>`).join(''); }
+  return qs.map((q,qi)=>{ const g=qi+off, locked=g>0&&!got[g-1]&&!got[g];
+    return `<div class="quiz ${locked?'locked':''}" data-key="${key}" data-qi="${g}"><div class="q">${qs.length>1||off?(g+1)+'. ':''}${q.q}</div>${q.opts.map((o,i)=>`<button class="opt ${got[g]&&i===q.ans?'right':''}" data-i="${i}" ${locked||got[g]?'disabled':''}>${o}</button>`).join('')}<div class="fb">${got[g]?'✓ '+q.why:locked?'🔒 Answer the question above first.':''}</div></div>`; }).join(''); }
 function mqDone(key,n){ const got=(state.q&&state.q[key])||[]; for(let i=0;i<n;i++) if(!got[i]) return false; return true; }
 function mqWire(root,qs,key,onChange,off){ off=off||0; root.querySelectorAll('.quiz').forEach(box=>{ const qi=+box.dataset.qi,q=qs[qi-off],fb=box.querySelector('.fb');
-  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i;
-    if(i===q.ans){ b.classList.remove('wrong'); b.classList.add('right'); fb.innerHTML='✓ '+q.why; (state.q[key]=state.q[key]||[])[qi]=true; save(); onChange&&onChange(); }
-    else{ b.classList.add('wrong'); fb.textContent='Not quite — look back at the simulation and try again.'; } }); }); }
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i; if(box.classList.contains('locked')) return;
+    if(i===q.ans){ box.querySelectorAll('.opt').forEach(o=>{ o.disabled=true; if(o!==b) o.classList.remove('wrong'); }); b.classList.add('right'); fb.innerHTML='✓ '+q.why; (state.q[key]=state.q[key]||[])[qi]=true; save();
+      const nx=document.querySelector(`.quiz[data-key="${key}"][data-qi="${qi+1}"]`); if(nx&&nx.classList.contains('locked')){ nx.classList.remove('locked'); nx.querySelectorAll('.opt').forEach(o=>o.disabled=false); nx.querySelector('.fb').textContent=''; }
+      onChange&&onChange(); }
+    else{ b.classList.add('wrong'); b.disabled=true; fb.innerHTML='<b>Not quite.</b> Hint: '+q.hint+' Pick another answer.'; } }); }); }
+// every question in the lab, with the progress key that records it
+const ALL_Q=[['a1',1],['a2',1],['a4',1],['a5',1],['a6',3],['a7',3]];
+const allQuestionsRight=()=>ALL_Q.every(([k,n])=>mqDone(k,n));
+const canGetCode=()=>ACTS.every(a=>state.done[a.id])&&allQuestionsRight();
 const Q_A1=[{q:'Magnesium has 2 valence electrons, and each chlorine atom needs just 1 more. Why is the formula MgCl₂ and not MgCl?',
   opts:['Chlorine atoms are larger than magnesium atoms','Each Mg gives away 2 electrons but each Cl can accept only 1, so two Cl atoms are needed','Magnesium shares one electron with each chlorine','Chlorine has 2 valence electrons'],ans:1,
-  why:'The electrons given must equal the electrons taken: one Mg gives 2, and each Cl takes 1, so the ratio is 1 Mg : 2 Cl.'}];
+  hint:'Count the electrons. How many does one Mg atom have to give away, and how many can one Cl atom accept?',why:'The electrons given must equal the electrons taken: one Mg gives 2, and each Cl takes 1, so the ratio is 1 Mg : 2 Cl.'}];
 const Q_A2=[{q:'In a NaCl crystal, why does every Na⁺ sit next to Cl⁻ ions instead of other Na⁺ ions?',
   opts:['The ions share electrons with their neighbors','Na⁺ ions are too small to touch each other','Cl⁻ ions are heavier, so they settle between the Na⁺ ions','Opposite charges attract and like charges repel, so alternating + and − ions has the lowest energy'],ans:3,
-  why:'Each ion is pulled toward opposite charges and pushed away from like charges, which makes the checkerboard pattern of the lattice.'}];
+  hint:'Look at the force arrows when you drag an ion: which charges pull and which push?',why:'Each ion is pulled toward opposite charges and pushed away from like charges, which makes the checkerboard pattern of the lattice.'}];
 const Q_A6=[
   {q:'Oxygen has 6 valence electrons. Why does it bond to exactly two hydrogen atoms in H₂O?',
    opts:['It gives one electron to each hydrogen','It needs two more electrons for a full shell of 8, and each hydrogen shares one','Hydrogen can only bond to oxygen twice','Oxygen wants to lose all 6 of its valence electrons'],ans:1,
-   why:'Two shared pairs (one with each H) give oxygen 6 + 2 = 8 electrons, and each hydrogen gets 2.'},
+   hint:'Count how many electrons oxygen still needs to reach 8, and how many electrons each hydrogen shares.',why:'Two shared pairs (one with each H) give oxygen 6 + 2 = 8 electrons, and each hydrogen gets 2.'},
   {q:'Carbon needs 4 more electrons and each oxygen needs 2 more. How does CO₂ satisfy all three atoms?',
    opts:['Carbon shares one pair with each oxygen','Carbon transfers 2 electrons to each oxygen','Each oxygen shares four pairs with carbon','Carbon shares two pairs with each oxygen (two double bonds)'],ans:3,
-   why:'Two pairs with each O gives carbon 4 shared pairs (8 electrons) and each oxygen 2 shared pairs.'},
+   hint:'Carbon needs 4 more electrons in total, shared between two oxygen atoms. How many pairs go to each?',why:'Two pairs with each O gives carbon 4 shared pairs (8 electrons) and each oxygen 2 shared pairs.'},
   {q:'When a molecule is stable, how many electrons does each hydrogen atom “count” around itself, shared ones included?',
    opts:['8','1','4','2'],ans:3,
-   why:'Hydrogen only has the first shell, which holds just 2 electrons, so one shared pair fills it.'}];
+   hint:'Hydrogen only has the first electron shell. How many electrons fit in it?',why:'Hydrogen only has the first shell, which holds just 2 electrons, so one shared pair fills it.'}];
 const Q_A7=[
   {q:'IONIC vs. COVALENT: What is the main difference in how the two kinds of bond form?',
    opts:['Ionic bonds share electron pairs; covalent bonds transfer electrons','In ionic bonds electrons transfer from a metal to a nonmetal making ions; in covalent bonds nonmetals share electron pairs','Ionic bonds form between two nonmetals; covalent bonds form between two metals','Ionic bonds involve protons moving; covalent bonds involve electrons moving'],ans:1,
-   why:'Ionic: metal gives electrons, nonmetal takes them, and the oppositely charged ions attract. Covalent: nonmetals share pairs so each atom gets a full outer shell.'},
+   hint:'Compare Ionic 1 with Covalent 1: did the electron move to the other atom, or stay between the two?',why:'Ionic: metal gives electrons, nonmetal takes them, and the oppositely charged ions attract. Covalent: nonmetals share pairs so each atom gets a full outer shell.'},
   {q:'IONIC vs. METALLIC: Both are positive particles held together by electrostatic attraction. What is the key difference in what the positive particles are attracted to?',
    opts:['Ionic: negative ions that stay in fixed positions. Metallic: a shared sea of electrons that is free to move.','Ionic: a shared sea of electrons. Metallic: negative ions in fixed positions.','Ionic: neutral atoms. Metallic: other positive ions.','There is no difference; both use a sea of electrons.'],ans:0,
-   why:'In ionic crystals each cation is attracted to specific neighboring anions. In metals the cores are attracted to delocalized electrons that belong to the whole lattice.'},
+   hint:'Think about the Crystal Lattice and Electron Sea activities: what was each positive particle attracted to?',why:'In ionic crystals each cation is attracted to specific neighboring anions. In metals the cores are attracted to delocalized electrons that belong to the whole lattice.'},
   {q:'METALLIC vs. COVALENT: Both involve shared electrons. How are the shared electrons different?',
    opts:['In metals the shared electrons stay between two specific atoms; in covalent bonds they are free to move through the whole solid','In covalent bonds the electrons are delocalized across many atoms; in metals they are fixed','In covalent bonds each shared pair stays between two particular atoms; in metals the electrons are delocalized across the whole lattice','There is no difference; both have a sea of electrons'],ans:2,
-   why:'A covalent pair is localized between two nuclei. Metallic electrons are delocalized, which is why metals conduct electricity and bend without breaking.'}];
+   hint:'Compare the shared pair in Covalent 1 with the electron sea in Metallic. Which electrons stay between two atoms?',why:'A covalent pair is localized between two nuclei. Metallic electrons are delocalized, which is why metals conduct electricity and bend without breaking.'}];
 
 /* =====================================================================
    Bohr-model atom drawing (used by activities 1 and 3)
@@ -703,11 +715,11 @@ function makeBondLab(id,opts){ return {
   load(){ const m=BL[this.mol],c=COV[m.sym]; this.A=mkCov(m.sym,170,300,0,BLSC); this.B=mkCov(m.sym,540,300,1,BLSC); this.A.Rv=this.B.Rv=m.d0*.8; this.B.col=ECOL[1]; this.A.dir=1; this.B.dir=-1; this.steady=0; this.s=0;
     document.querySelectorAll('#blm .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===this.mol)); this.led(); this.checks(); },
   led(){ const m=BL[this.mol]; $('#blled').innerHTML=`<span>Bond</span><b>${m.sym}${m.order===1?'–':m.order===2?'=':'≡'}${m.sym} (${m.bond})</b><span>Electrons shared</span><b>${m.order*2}</b><span>Real bond length</span><b>${m.pm} pm</b><span>Energy to break 1 mol</span><b>${m.kJ} kJ</b>`; },
-  checks(){ const o=this.opts; const n=Object.keys(this.formed).length; const el=$('#blck'); if(!el) return;
+  checks(){ const o=this.opts; this.quizOk=mqDone(this.id,1); const el=$('#blck'); if(!el) return;
     el.innerHTML=o.checks(this).map(c=>`<li class="${c.ok?'ok':''}">${c.t}</li>`).join('');
     if(o.complete(this)) award(this.id); },
-  renderQuiz(){ const q=this.opts.quiz; if(!Object.keys(this.formed).length){ $('#blq').innerHTML=''; this.quizShown=false; return; } if(this.quizShown) return; this.quizShown=true;
-    $('#blq').innerHTML=quizHTML(q); if(this.quizOk){ document.querySelectorAll('.quiz .opt')[q.ans].classList.add('right'); $('#qfb').innerHTML='✓ '+q.why; } else wireQuiz(q,()=>{ this.quizOk=true; this.checks(); }); },
+  renderQuiz(){ const q=this.opts.quiz; if(!Object.keys(this.formed).length&&!mqDone(this.id,1)){ $('#blq').innerHTML=''; this.quizShown=false; return; } if(this.quizShown) return; this.quizShown=true;
+    $('#blq').innerHTML=mqHTML([q],this.id); mqWire($('#blq'),[q],this.id,()=>this.checks()); },
   down(p){ for(const X of [this.A,this.B]){ if(Math.hypot(X.x-p.x,X.y-p.y)<X.Rv+8){ this.drag={X,dx:X.x-p.x,dy:X.y-p.y}; X.drag=true; cv.classList.add('grabbing'); return; } } },
   move(p){ if(this.drag){ const X=this.drag.X; X.x=clamp(p.x+this.drag.dx,X.Rv,700-X.Rv); X.y=clamp(p.y+this.drag.dy,X.Rv+30,H-X.Rv-6); } },
   up(){ if(this.drag){ this.drag.X.drag=false; this.drag=null; cv.classList.remove('grabbing'); } },
@@ -753,7 +765,7 @@ const A4=makeBondLab('a4',{
   hint:'Each dot is an electron, colored by the atom it started with. Dashed rings mark the valence shell. Watch the colors mix in the middle!',
   checks:L=>[{t:'Form a bond in H₂',ok:!!L.formed.H2},{t:'Form a bond in F₂ or Cl₂',ok:!!(L.formed.F2||L.formed.Cl2)},{t:'Answer the check question',ok:L.quizOk}],
   complete:L=>!!L.formed.H2&&!!(L.formed.F2||L.formed.Cl2)&&L.quizOk,
-  quiz:{q:'Why do the two atoms stay together in the bond?',opts:['One atom gave its electron to the other','Each nucleus attracts the shared electrons','The two positive nuclei attract each other','The electrons leave the atoms'],ans:1,why:'The shared electrons sit between the nuclei, and both positive nuclei attract them. That attraction holds the atoms together.'}
+  quiz:{q:'Why do the two atoms stay together in the bond?',opts:['One atom gave its electron to the other','Each nucleus attracts the shared electrons','The two positive nuclei attract each other','The electrons leave the atoms'],ans:1,hint:'Look at the overlap region: where are the shared electrons, and what are they attracted to?',why:'The shared electrons sit between the nuclei, and both positive nuclei attract them. That attraction holds the atoms together.'}
 });
 const A5=makeBondLab('a5',{
   mols:['O2','N2'],
@@ -761,7 +773,7 @@ const A5=makeBondLab('a5',{
   hint:'Compare the bond length and energy to a single bond. More shared pairs pull the nuclei closer and make the bond harder to break.',
   checks:L=>[{t:'Form the O=O double bond',ok:!!L.formed.O2},{t:'Answer the check question',ok:L.quizOk},{t:'Bonus: form the N≡N triple bond',ok:!!L.formed.N2}],
   complete:L=>!!L.formed.O2&&L.quizOk,
-  quiz:{q:'How many electrons are shared in the O=O double bond?',opts:['2','4','6','8'],ans:1,why:'A double bond is two shared pairs: 2 pairs × 2 electrons = 4 shared electrons.'}
+  quiz:{q:'How many electrons are shared in the O=O double bond?',opts:['2','4','6','8'],ans:1,hint:'A double bond is two pairs. How many electrons are in each pair?',why:'A double bond is two shared pairs: 2 pairs × 2 electrons = 4 shared electrons.'}
 });
 
 /* =====================================================================
