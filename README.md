@@ -16,7 +16,7 @@ Six hands-on simulations (plus a comparison summary) that show high school chemi
 | 6 | **Covalent: Build a Molecule** | Add H, C, N, O, F, Cl, S, P atoms and drag them together. Atoms share until every atom has a full outer shell, then the molecule is named. | Build H₂O, NH₃, CH₄, CO₂ (bonus: HCN, C₂H₄), answer 3 questions |
 | 7 | **Summary: Compare the Bonds** | A side-by-side picture of the three bond types and three comparison questions (ionic vs. covalent, ionic vs. metallic, metallic vs. covalent). | Answer all 3 correctly |
 
-Finishing all seven gives a **completion code**, which only appears once every question in the lab has been answered correctly. **Turn it in** opens the class Google Form with the name and code already filled in (the form has just two questions, Name and Code). Wrong answers get a hint and the student must pick the right answer before the next question unlocks. Progress and answered questions are saved on the device.
+Finishing all seven gives a **completion code**, which only appears once every question in the lab has been answered correctly. **Turn it in** opens the class Google Form with the name and code already filled in (the form has just two questions, Name and Code). Wrong answers get a hint and freeze the question for one minute (with a countdown, saved across reloads); the student must then pick the right answer before the next question unlocks. Progress and answered questions are saved on the device.
 
 To point it at a different form, change `FORM_BASE` and `FORM_ENTRY` in `index.html`.
 

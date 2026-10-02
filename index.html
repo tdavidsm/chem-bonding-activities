@@ -96,6 +96,7 @@
   .quiz .opt.right{border-color:var(--good);background:#153b28;color:#8ff0b6}
   .quiz .opt.wrong{border-color:var(--bad);background:#3a1620;color:#ff9aa9}
   .quiz.locked{opacity:.45}
+  .quiz .cd{margin-top:5px;font-size:13px;color:var(--accent)} .quiz .cd b{font-variant-numeric:tabular-nums;font-size:15px}
   .quiz .opt:disabled{cursor:default}
   .quiz .opt.wrong:disabled{opacity:.8}
   .quiz .fb{font-size:13px;margin-top:6px;line-height:1.45}
@@ -231,7 +232,7 @@ const ACTS=[
   {id:'a6',g:'cov',n:'Covalent 3',nm:'Build a Molecule'},
   {id:'a7',g:'sum',n:'Summary',nm:'Compare the Bonds'}
 ];
-let state={done:{},a1:[],a6:[],q:{},code:'',name:''};
+let state={done:{},a1:[],a6:[],q:{},lock:{},code:'',name:''};
 try{ const d=JSON.parse(localStorage.getItem(KEY)||'null'); if(d) state=Object.assign(state,d); }catch(e){}
 function sanitize(){ [['a1','a1',1],['a2','a2',1],['a4','a4',1],['a5','a5',1],['a6','a6',3],['a7','a7',3]].forEach(([id,k,n])=>{ if(state.done[id]&&!mqDone(k,n)) state.done[id]=false; }); }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
@@ -282,12 +283,19 @@ function mqHTML(qs,key,off){ off=off||0; const got=(state.q&&state.q[key])||[];
   return qs.map((q,qi)=>{ const g=qi+off, locked=g>0&&!got[g-1]&&!got[g];
     return `<div class="quiz ${locked?'locked':''}" data-key="${key}" data-qi="${g}"><div class="q">${qs.length>1||off?(g+1)+'. ':''}${q.q}</div>${q.opts.map((o,i)=>`<button class="opt ${got[g]&&i===q.ans?'right':''}" data-i="${i}" ${locked||got[g]?'disabled':''}>${o}</button>`).join('')}<div class="fb">${got[g]?'✓ '+q.why:locked?'🔒 Answer the question above first.':''}</div></div>`; }).join(''); }
 function mqDone(key,n){ const got=(state.q&&state.q[key])||[]; for(let i=0;i<n;i++) if(!got[i]) return false; return true; }
-function mqWire(root,qs,key,onChange,off){ off=off||0; root.querySelectorAll('.quiz').forEach(box=>{ const qi=+box.dataset.qi,q=qs[qi-off],fb=box.querySelector('.fb');
-  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i; if(box.classList.contains('locked')) return;
+const WRONG_LOCK_MS=60000; // after a wrong answer the question is frozen for one minute
+function mqWire(root,qs,key,onChange,off){ off=off||0; root.querySelectorAll('.quiz').forEach(box=>{ const qi=+box.dataset.qi,q=qs[qi-off],fb=box.querySelector('.fb'),lk=key+':'+qi,opts=[...box.querySelectorAll('.opt')];
+  const hintHTML=()=>'<b>Not quite.</b> Hint: '+q.hint;
+  function cool(){ if(!box.isConnected||(state.q[key]||[])[qi]) return; const left=Math.ceil((((state.lock||{})[lk]||0)-Date.now())/1000);
+    if(left>0){ box.classList.add('cooling'); opts.forEach(o=>o.disabled=true);
+      fb.innerHTML=hintHTML()+`<div class="cd">⏳ Think it over. You can answer again in <b>${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}</b></div>`; setTimeout(cool,250); }
+    else if(box.classList.contains('cooling')){ box.classList.remove('cooling'); opts.forEach(o=>{ if(!o.classList.contains('wrong')) o.disabled=false; }); fb.innerHTML=hintHTML()+'<div class="cd">✅ Ready. Pick another answer.</div>'; } }
+  opts.forEach(b=>b.onclick=()=>{ const i=+b.dataset.i; if(box.classList.contains('locked')||box.classList.contains('cooling')) return;
     if(i===q.ans){ box.querySelectorAll('.opt').forEach(o=>{ o.disabled=true; if(o!==b) o.classList.remove('wrong'); }); b.classList.add('right'); fb.innerHTML='✓ '+q.why; (state.q[key]=state.q[key]||[])[qi]=true; save();
       const nx=document.querySelector(`.quiz[data-key="${key}"][data-qi="${qi+1}"]`); if(nx&&nx.classList.contains('locked')){ nx.classList.remove('locked'); nx.querySelectorAll('.opt').forEach(o=>o.disabled=false); nx.querySelector('.fb').textContent=''; }
       onChange&&onChange(); }
-    else{ b.classList.add('wrong'); b.disabled=true; fb.innerHTML='<b>Not quite.</b> Hint: '+q.hint+' Pick another answer.'; } }); }); }
+    else{ b.classList.add('wrong'); (state.lock=state.lock||{})[lk]=Date.now()+WRONG_LOCK_MS; save(); cool(); } });
+  if(((state.lock||{})[lk]||0)>Date.now()&&!(state.q[key]||[])[qi]){ box.classList.add('cooling'); cool(); } }); }
 // every question in the lab, with the progress key that records it
 const ALL_Q=[['a1',1],['a2',1],['a4',1],['a5',1],['a6',3],['a7',3]];
 const allQuestionsRight=()=>ALL_Q.every(([k,n])=>mqDone(k,n));
