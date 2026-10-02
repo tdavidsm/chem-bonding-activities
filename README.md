@@ -1,21 +1,24 @@
 # ⚛️ Chemical Bonding Lab
 
-Six hands-on simulations that show high school chemistry students how **ionic**, **metallic**, and **covalent** bonds form. Everything runs in the browser, with no install and no accounts.
+Six hands-on simulations (plus a comparison summary) that show high school chemistry students how **ionic**, **metallic**, and **covalent** bonds form. Everything runs in the browser, with no install and no accounts.
 
 **▶ Open it:** https://tdavidsm.github.io/chem-bonding-activities/
 
-## The six activities
+## The activities
 
 | # | Tab | The big idea | To earn the ⭐ |
 |---|-----|--------------|----------------|
-| 1 | **Ionic: Electron Transfer** | Metal atoms (Bohr models) give valence electrons to nonmetal atoms. Keep adding atoms until every atom is a stable ion, then read off the formula. | Make 4 different compounds |
-| 2 | **Ionic: Crystal Lattice** | Cooling a melt of Na⁺ and Cl⁻ grows a checkerboard crystal from a seed. Then drag ions toward the crystal and watch them get pulled and pushed into place. | Grow a crystal, then add 6 ions that settle |
+| 1 | **Ionic: Electron Transfer** | Metal atoms (Bohr models) give valence electrons to nonmetal atoms. Keep adding atoms until every atom is a stable ion, then read off the formula. | Make 4 different compounds, answer 1 question |
+| 2 | **Ionic: Crystal Lattice** | Cooling a melt of Na⁺ and Cl⁻ grows a checkerboard crystal from a seed. Then drag ions toward the crystal and watch them get pulled and pushed into place. | Grow a crystal, add 6 ions that settle, answer 1 question |
 | 3 | **Metallic: Electron Sea** | Atoms dropped onto a metal lattice give their valence electrons to the shared sea. A voltage makes the sea flow. | Add 6 atoms (2 different metals) and turn on the voltage |
 | 4 | **Covalent: Sharing a Pair** | Two nonmetal atoms (H₂, F₂, Cl₂) approach. Electrons orbiting each atom shift into the space between the nuclei. A live energy curve shows the bond length. | Bond H₂ and F₂/Cl₂, answer the check question |
 | 5 | **Covalent: Double Bond** | O₂ shares two pairs (bonus: N₂ triple bond). Compare bond length and energy to single bonds. | Bond O₂, answer the check question |
-| 6 | **Covalent: Build a Molecule** | Add H, C, N, O, F, Cl, S, P atoms and drag them together. Atoms share until every atom has a full outer shell, then the molecule is named. | Build H₂O, NH₃, CH₄, CO₂ (bonus: HCN, C₂H₄) |
+| 6 | **Covalent: Build a Molecule** | Add H, C, N, O, F, Cl, S, P atoms and drag them together. Atoms share until every atom has a full outer shell, then the molecule is named. | Build H₂O, NH₃, CH₄, CO₂ (bonus: HCN, C₂H₄), answer 3 questions |
+| 7 | **Summary: Compare the Bonds** | A side-by-side picture of the three bond types and three comparison questions (ionic vs. covalent, ionic vs. metallic, metallic vs. covalent). | Answer all 3 correctly |
 
-Finishing all six gives a **completion code** with the student's initials in the **3rd and 6th** spots. Progress is saved on the device.
+Finishing all seven gives a **completion code** with the student's initials in the **3rd and 6th** spots. **Turn it in** opens the class Google Form with the name and code already filled in (the form has just two questions, Name and Code). Progress and answered questions are saved on the device.
+
+To point it at a different form, change `FORM_BASE` and `FORM_ENTRY` in `index.html`.
 
 ## Modeling notes (for teachers)
 - **Activity 1:** a nonmetal is stable at 8 valence electrons; a metal is stable once its valence shell is empty. Electrons that came from the metal stay gold so students can track them. The formula uses the simplest ratio (2 Na + 2 Cl is still NaCl).

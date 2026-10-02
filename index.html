@@ -32,16 +32,17 @@
 
   .wrap{max-width:1400px;margin:0 auto;padding:12px 14px 30px}
 
-  .tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:10px}
+  .tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:10px}
+  a.btn{text-decoration:none;display:inline-block}
   .tab{text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:12px;
     padding:7px 11px;cursor:pointer;transition:.12s;touch-action:manipulation;color:var(--ink);font:inherit;min-width:0}
   .tab:hover{border-color:#3a4d7d}
   .tab.sel{border-color:var(--accent);background:#20315c}
   .tab .n{font-size:11px;text-transform:uppercase;letter-spacing:.6px;font-weight:700}
-  .tab[data-g="ionic"] .n{color:var(--ionic)} .tab[data-g="metal"] .n{color:var(--metal)} .tab[data-g="cov"] .n{color:var(--cov)}
+  .tab[data-g="ionic"] .n{color:var(--ionic)} .tab[data-g="metal"] .n{color:var(--metal)} .tab[data-g="cov"] .n{color:var(--cov)} .tab[data-g="sum"] .n{color:var(--accent)}
   .tab .nm{font-weight:700;font-size:14px;margin-top:2px}
   .tab .badge{float:right;font-size:12px}
-  @media (max-width:980px){ .tabs{grid-template-columns:repeat(3,1fr)} }
+  @media (max-width:1100px){ .tabs{grid-template-columns:repeat(4,1fr)} }
   @media (max-width:560px){ .tabs{grid-template-columns:repeat(2,1fr)} .tab .nm{font-size:13px} }
 
   .stagewrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#0a1024}
@@ -140,7 +141,7 @@
 
 <div class="modal" id="helpModal"><div class="modalbox">
   <h2>Three ways atoms stick together</h2>
-  <p>Work through all six activities (click the tabs). Each one earns a ⭐, and finishing all six gives you a completion code.</p>
+  <p>Work through the six activities and the summary (click the tabs). Each one earns a ⭐, and finishing all seven gives you a completion code you can turn in.</p>
   <div class="tri">
     <div style="border-color:var(--ionic)"><b style="color:var(--ionic)">Ionic</b>Metal atoms <i>give</i> valence electrons to nonmetal atoms. Opposite charges attract and pack into a crystal lattice.</div>
     <div style="border-color:var(--metal)"><b style="color:var(--metal)">Metallic</b>Metal atoms release valence electrons into a shared “sea” that flows around a lattice of positive cores.</div>
@@ -151,7 +152,7 @@
 </div></div>
 
 <div class="modal" id="nameModal"><div class="modalbox" style="max-width:440px">
-  <h2>🎉 All six activities done!</h2>
+  <h2>🎉 Everything is done!</h2>
   <p>Type your first and last name to get your completion code.</p>
   <input class="field" id="nameField" type="text" autocomplete="off" placeholder="First and last name">
   <div id="nameErr" style="color:#ff8b9b;font-size:13px;min-height:1.2em;margin-top:6px"></div>
@@ -162,8 +163,8 @@
   <h2>Nice work, <span id="winName"></span>!</h2>
   <p>Your completion code:</p>
   <div class="code" id="codeOut"></div>
-  <p class="muted" style="font-size:13px">Your initials are in the <b>3rd</b> and <b>6th</b> spots. Take a screenshot (or copy it) and turn it in.</p>
-  <div class="row2" style="justify-content:center"><button class="btn secondary" id="copyBtn">Copy code</button><button class="btn" id="winClose">Close</button></div>
+  <p class="muted" style="font-size:13px">Your initials are in the <b>3rd</b> and <b>6th</b> spots. Press <b>Turn it in</b> to open the class form with your name and code already filled in, then press Submit there. (Form won't open? Screenshot this page or copy the code.)</p>
+  <div class="row2" style="justify-content:center;flex-wrap:wrap"><a class="btn" id="turnIn" target="_blank" rel="noopener">Turn it in →</a><button class="btn secondary" id="copyBtn">Copy code</button><button class="btn secondary" id="winClose">Close</button></div>
 </div></div>
 
 <script>
@@ -224,22 +225,23 @@ const ACTS=[
   {id:'a3',g:'metal',n:'Metallic',nm:'Electron Sea'},
   {id:'a4',g:'cov',n:'Covalent 1',nm:'Sharing a Pair'},
   {id:'a5',g:'cov',n:'Covalent 2',nm:'Double Bond'},
-  {id:'a6',g:'cov',n:'Covalent 3',nm:'Build a Molecule'}
+  {id:'a6',g:'cov',n:'Covalent 3',nm:'Build a Molecule'},
+  {id:'a7',g:'sum',n:'Summary',nm:'Compare the Bonds'}
 ];
-let state={done:{},a1:[],a6:[],code:'',name:''};
+let state={done:{},a1:[],a6:[],q:{},code:'',name:''};
 try{ const d=JSON.parse(localStorage.getItem(KEY)||'null'); if(d) state=Object.assign(state,d); }catch(e){}
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
 let toastT=0;
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3600); }
 function doneCount(){ return ACTS.filter(a=>state.done[a.id]).length; }
 function award(id){ if(state.done[id]) return; state.done[id]=true; save(); renderChrome();
-  toast(`⭐ Activity complete! (${doneCount()}/6)`);
-  if(doneCount()===6) setTimeout(()=>{ if(!state.code) openName(); },1800); }
+  toast(`⭐ Activity complete! (${doneCount()}/${ACTS.length})`);
+  if(doneCount()===ACTS.length) setTimeout(()=>{ if(!state.code) openName(); },1800); }
 function renderChrome(){
   $('#medals').innerHTML=ACTS.map(a=>`<div class="medal ${state.done[a.id]?'won':''}" title="${a.nm}">${state.done[a.id]?'★':ACTS.indexOf(a)+1}</div>`).join('');
   $('#tabs').innerHTML=ACTS.map((a,i)=>`<button class="tab ${i===cur_i?'sel':''}" data-i="${i}" data-g="${a.g}"><span class="badge">${state.done[a.id]?'⭐':''}</span><div class="n">${a.n}</div><div class="nm">${a.nm}</div></button>`).join('');
   document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchTo(+b.dataset.i));
-  $('#codeBtn').style.display=doneCount()===6?'':'none';
+  $('#codeBtn').style.display=doneCount()===ACTS.length?'':'none';
 }
 
 /* ---------------- completion code (same scheme as the other classroom apps) ---------------- */
@@ -249,7 +251,10 @@ function initials(name){ const p=name.trim().split(/\s+/).filter(Boolean);
 function makeCode(name){ const [i1,i2]=initials(name); const cs='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; const r=()=>cs[Math.floor(Math.random()*cs.length)];
   return [r(),r(),i1,r(),r(),i2,r(),r()].join(''); }
 function openName(){ if(state.code){ showCode(); return; } $('#nameField').value=''; $('#nameErr').textContent=''; $('#nameModal').classList.add('show'); setTimeout(()=>$('#nameField').focus(),50); }
-function showCode(){ $('#winName').textContent=(state.name||'').split(/\s+/)[0]; $('#codeOut').textContent=state.code; $('#nameModal').classList.remove('show'); $('#winModal').classList.add('show'); }
+const FORM_BASE='https://docs.google.com/forms/d/e/1FAIpQLSdWMUSHB0cym2_ke-mQ-wd1abj46G8BVvWsJmk9aQac5r-7AA/viewform';
+const FORM_ENTRY={name:'entry.2072631698',code:'entry.1611661514'}; // "Name" and "Code" questions on the class form
+function turnInURL(){ const q=new URLSearchParams({usp:'pp_url'}); q.append(FORM_ENTRY.name,state.name||''); q.append(FORM_ENTRY.code,state.code||''); return FORM_BASE+'?'+q.toString(); }
+function showCode(){ $('#turnIn').href=turnInURL(); $('#winName').textContent=(state.name||'').split(/\s+/)[0]; $('#codeOut').textContent=state.code; $('#nameModal').classList.remove('show'); $('#winModal').classList.add('show'); }
 $('#nameGo').onclick=()=>{ const name=$('#nameField').value.trim();
   if(name.replace(/[^A-Za-z]/g,'').length<2){ $('#nameErr').textContent='Please enter your first and last name.'; return; }
   state.name=name; state.code=makeCode(name); save(); showCode(); };
@@ -266,6 +271,41 @@ function quizHTML(q){ return `<div class="quiz"><div class="q">${q.q}</div>${q.o
 function wireQuiz(q,onRight){ document.querySelectorAll('.quiz .opt').forEach(b=>b.onclick=()=>{
   const i=+b.dataset.i; if(i===q.ans){ b.classList.add('right'); $('#qfb').innerHTML='✓ '+q.why; onRight(); }
   else{ b.classList.add('wrong'); $('#qfb').textContent='Not quite — look at the simulation again and think about where the electrons are.'; } }); }
+
+/* several multiple-choice questions, remembered on the device (state.q[key][i] === true when answered correctly) */
+function mqHTML(qs,key,off){ off=off||0; const got=(state.q&&state.q[key])||[];
+  return qs.map((q,qi)=>`<div class="quiz" data-qi="${qi+off}"><div class="q">${qs.length>1||off?(qi+off+1)+'. ':''}${q.q}</div>${q.opts.map((o,i)=>`<button class="opt ${got[qi+off]&&i===q.ans?'right':''}" data-i="${i}">${o}</button>`).join('')}<div class="fb">${got[qi+off]?'✓ '+q.why:''}</div></div>`).join(''); }
+function mqDone(key,n){ const got=(state.q&&state.q[key])||[]; for(let i=0;i<n;i++) if(!got[i]) return false; return true; }
+function mqWire(root,qs,key,onChange,off){ off=off||0; root.querySelectorAll('.quiz').forEach(box=>{ const qi=+box.dataset.qi,q=qs[qi-off],fb=box.querySelector('.fb');
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i;
+    if(i===q.ans){ b.classList.remove('wrong'); b.classList.add('right'); fb.innerHTML='✓ '+q.why; (state.q[key]=state.q[key]||[])[qi]=true; save(); onChange&&onChange(); }
+    else{ b.classList.add('wrong'); fb.textContent='Not quite — look back at the simulation and try again.'; } }); }); }
+const Q_A1=[{q:'Magnesium has 2 valence electrons, and each chlorine atom needs just 1 more. Why is the formula MgCl₂ and not MgCl?',
+  opts:['Chlorine atoms are larger than magnesium atoms','Each Mg gives away 2 electrons but each Cl can accept only 1, so two Cl atoms are needed','Magnesium shares one electron with each chlorine','Chlorine has 2 valence electrons'],ans:1,
+  why:'The electrons given must equal the electrons taken: one Mg gives 2, and each Cl takes 1, so the ratio is 1 Mg : 2 Cl.'}];
+const Q_A2=[{q:'In a NaCl crystal, why does every Na⁺ sit next to Cl⁻ ions instead of other Na⁺ ions?',
+  opts:['The ions share electrons with their neighbors','Na⁺ ions are too small to touch each other','Cl⁻ ions are heavier, so they settle between the Na⁺ ions','Opposite charges attract and like charges repel, so alternating + and − ions has the lowest energy'],ans:3,
+  why:'Each ion is pulled toward opposite charges and pushed away from like charges, which makes the checkerboard pattern of the lattice.'}];
+const Q_A6=[
+  {q:'Oxygen has 6 valence electrons. Why does it bond to exactly two hydrogen atoms in H₂O?',
+   opts:['It gives one electron to each hydrogen','It needs two more electrons for a full shell of 8, and each hydrogen shares one','Hydrogen can only bond to oxygen twice','Oxygen wants to lose all 6 of its valence electrons'],ans:1,
+   why:'Two shared pairs (one with each H) give oxygen 6 + 2 = 8 electrons, and each hydrogen gets 2.'},
+  {q:'Carbon needs 4 more electrons and each oxygen needs 2 more. How does CO₂ satisfy all three atoms?',
+   opts:['Carbon shares one pair with each oxygen','Carbon transfers 2 electrons to each oxygen','Each oxygen shares four pairs with carbon','Carbon shares two pairs with each oxygen (two double bonds)'],ans:3,
+   why:'Two pairs with each O gives carbon 4 shared pairs (8 electrons) and each oxygen 2 shared pairs.'},
+  {q:'When a molecule is stable, how many electrons does each hydrogen atom “count” around itself, shared ones included?',
+   opts:['8','1','4','2'],ans:3,
+   why:'Hydrogen only has the first shell, which holds just 2 electrons, so one shared pair fills it.'}];
+const Q_A7=[
+  {q:'IONIC vs. COVALENT: What is the main difference in how the two kinds of bond form?',
+   opts:['Ionic bonds share electron pairs; covalent bonds transfer electrons','In ionic bonds electrons transfer from a metal to a nonmetal making ions; in covalent bonds nonmetals share electron pairs','Ionic bonds form between two nonmetals; covalent bonds form between two metals','Ionic bonds involve protons moving; covalent bonds involve electrons moving'],ans:1,
+   why:'Ionic: metal gives electrons, nonmetal takes them, and the oppositely charged ions attract. Covalent: nonmetals share pairs so each atom gets a full outer shell.'},
+  {q:'IONIC vs. METALLIC: Both are positive particles held together by electrostatic attraction. What is the key difference in what the positive particles are attracted to?',
+   opts:['Ionic: negative ions that stay in fixed positions. Metallic: a shared sea of electrons that is free to move.','Ionic: a shared sea of electrons. Metallic: negative ions in fixed positions.','Ionic: neutral atoms. Metallic: other positive ions.','There is no difference; both use a sea of electrons.'],ans:0,
+   why:'In ionic crystals each cation is attracted to specific neighboring anions. In metals the cores are attracted to delocalized electrons that belong to the whole lattice.'},
+  {q:'METALLIC vs. COVALENT: Both involve shared electrons. How are the shared electrons different?',
+   opts:['In metals the shared electrons stay between two specific atoms; in covalent bonds they are free to move through the whole solid','In covalent bonds the electrons are delocalized across many atoms; in metals they are fixed','In covalent bonds each shared pair stays between two particular atoms; in metals the electrons are delocalized across the whole lattice','There is no difference; both have a sea of electrons'],ans:2,
+   why:'A covalent pair is localized between two nuclei. Metallic electrons are delocalized, which is why metals conduct electricity and bend without breaking.'}];
 
 /* =====================================================================
    Bohr-model atom drawing (used by activities 1 and 3)
@@ -302,13 +342,15 @@ const A1={
     $('#h1').textContent='Your mission'; $('#h2').textContent='Choose your atoms'; $('#h3').textContent="What's happening";
     $('#c1').innerHTML=`<div class="goal">Pick a <b>metal</b> and a <b>nonmetal</b>. Drag them close together and watch the <b>valence electrons jump</b>. Keep adding atoms until <b>every atom is a stable ion</b> — then you'll get the formula.</div>
       <div class="hintline">A nonmetal is stable with 8 valence electrons. A metal becomes stable when it empties its valence shell and the full shell underneath is exposed.</div>
-      <div class="lab">Compounds you've made (make 4 different ones)</div><div class="chips" id="a1made"></div>`;
+      <ul class="checks"><li id="a1k1">Make 4 different compounds <span class="muted" id="a1cnt"></span></li><li id="a1k2">Answer the check question</li></ul>
+      <div class="lab">Compounds you've made</div><div class="chips" id="a1made"></div>`;
     const mk=(arr,cls)=>arr.map(s=>`<button class="chip ${cls}" data-s="${s}">${s}</button>`).join('');
     $('#c2').innerHTML=`<div class="lab">Metal</div><div class="chips" id="a1m">${mk(['Li','Na','K','Mg','Ca','Al'],'m')}</div>
       <div class="lab">Nonmetal</div><div class="chips" id="a1n">${mk(['N','O','F','P','S','Cl'],'n')}</div>
       <div class="rowbtns"><button class="btn" id="a1addm">+ Metal atom</button><button class="btn" id="a1addn">+ Nonmetal atom</button></div>
       <div class="rowbtns"><button class="btn secondary" id="a1undo">Remove last</button><button class="btn secondary" id="a1reset">Start over</button></div>`;
-    $('#c3').innerHTML=`<div class="ledger"><span>Electrons the metal atoms can still give</span><b id="a1give">0</b><span>Electrons the nonmetal atoms still need</span><b id="a1need">0</b></div><div class="status" id="a1stat"></div><div class="hintline" id="a1ions"></div>`;
+    $('#c3').innerHTML=`<div class="ledger"><span>Electrons the metal atoms can still give</span><b id="a1give">0</b><span>Electrons the nonmetal atoms still need</span><b id="a1need">0</b></div><div class="status" id="a1stat"></div><div class="hintline" id="a1ions"></div><div id="a1q"></div>`;
+    $('#a1q').innerHTML=mqHTML(Q_A1,'a1'); mqWire($('#a1q'),Q_A1,'a1',()=>this.tryAward()); this.tryAward();
     const sel=()=>{ document.querySelectorAll('#a1m .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===this.mSym));
       document.querySelectorAll('#a1n .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===this.nSym)); }; this.sel=sel; sel();
     document.querySelectorAll('#a1m .chip').forEach(c=>c.onclick=()=>{ this.mSym=c.dataset.s; this.reset(); sel(); });
@@ -364,7 +406,9 @@ const A1={
     this.result={disp,name,m:ms.length,n:ns.length,g,fm,fn,z,q}; this.flash=1;
     if(!state.a1.some(f=>f.disp===disp)){ state.a1.push({disp,name}); save(); this.renderMade(); }
     toast(`✓ Stable! ${disp} — ${name.toLowerCase()}`);
-    if(state.a1.length>=4) award('a1'); },
+    this.tryAward(); },
+  tryAward(){ const k=$('#a1k1'); if(k){ k.classList.toggle('ok',state.a1.length>=4); $('#a1cnt').textContent=`(${Math.min(4,state.a1.length)}/4)`; $('#a1k2').classList.toggle('ok',mqDone('a1',1)); }
+    if(state.a1.length>=4&&mqDone('a1',1)) award('a1'); },
   ui(){ const ms=this.atoms.filter(a=>a.metal),ns=this.atoms.filter(a=>!a.metal);
     const give=ms.reduce((s,a)=>s+a.give,0), need=ns.reduce((s,a)=>s+Math.max(0,this.need(a)),0);
     const g=$('#a1give'); if(!g) return; g.textContent=give; $('#a1need').textContent=need;
@@ -409,14 +453,15 @@ const A2={
   mode:'form', ions:[], T:.9, anneal:null, t:0, drag:null, ordered:0, tick:0, occ:{}, placed:0, formed:false, sources:[{x:110,y:190,q:1},{x:110,y:370,q:-1}],
   mount(){ $('#h1').textContent='Your mission'; $('#h2').textContent='Controls'; $('#h3').textContent="What's happening";
     $('#c1').innerHTML=`<div class="goal"><b>Part 1 — Watch it form.</b> Free Na⁺ and Cl⁻ ions zip around. Cool them slowly and they lock into a repeating <b>crystal lattice</b>.<br><br><b>Part 2 — Build it yourself.</b> Drag an ion toward the crystal. Opposite charges <b>pull</b> it in; like charges <b>push</b> it away until it settles in the right spot.</div>
-      <ul class="checks"><li id="a2c1">Grow a crystal: cool the melt until most ions are in the lattice</li><li id="a2c2">Add 6 ions to the crystal so they settle into place <span class="muted" id="a2cnt"></span></li></ul>`;
+      <ul class="checks"><li id="a2c1">Grow a crystal: cool the melt until most ions are in the lattice</li><li id="a2c2">Add 6 ions to the crystal so they settle into place <span class="muted" id="a2cnt"></span></li><li id="a2c3">Answer the check question</li></ul>`;
     $('#c2').innerHTML=`<div class="rowbtns" style="margin-top:0"><button class="btn on" id="a2f">1 · Watch it form</button><button class="btn secondary" id="a2a">2 · Add ions yourself</button></div>
       <div class="slider"><span>❄ Cold</span><input type="range" id="a2T" min="0" max="100" value="90"><span>Hot 🔥</span></div>
       <div class="rowbtns" id="a2b1"><button class="btn" id="a2cool">❄ Cool slowly</button><button class="btn secondary" id="a2heat">🔥 Heat it up</button><button class="btn secondary" id="a2new">Reset ions</button></div>
       <div class="rowbtns" id="a2b2" style="display:none"><button class="btn" id="a2na">+ Na⁺</button><button class="btn" id="a2cl">+ Cl⁻</button><button class="btn secondary" id="a2new2">Reset crystal</button></div>
       <div class="hintline" id="a2hint"></div>`;
     $('#c3').innerHTML=`<div class="ledger"><span>Ions locked in lattice positions</span><b id="a2ord">0%</b><span id="a2lab2">Temperature</span><b id="a2tmp"></b></div><div class="status" id="a2stat"></div>
-      <div class="hintline"><b style="color:#ff9f43">●</b> Na⁺ cation (smaller) &nbsp; <b style="color:#3fd0a5">●</b> Cl⁻ anion (larger). Each ion is surrounded by ions of the <i>opposite</i> charge — that's why a salt crystal is a checkerboard.</div>`;
+      <div class="hintline"><b style="color:#ff9f43">●</b> Na⁺ cation (smaller) &nbsp; <b style="color:#3fd0a5">●</b> Cl⁻ anion (larger). Each ion is surrounded by ions of the <i>opposite</i> charge — that's why a salt crystal is a checkerboard.</div><div id="a2q"></div>`;
+    $('#a2q').innerHTML=mqHTML(Q_A2,'a2'); mqWire($('#a2q'),Q_A2,'a2',()=>this.checks());
     $('#a2T').oninput=e=>{ this.T=e.target.value/100; this.anneal=null; };
     $('#a2f').onclick=()=>this.setMode('form'); $('#a2a').onclick=()=>this.setMode('add');
     $('#a2cool').onclick=()=>{ this.anneal={t:0,from:Math.max(.5,this.T)}; this.T=Math.max(.5,this.T); };
@@ -478,7 +523,8 @@ const A2={
     let st; if(this.mode==='form'){ st=this.ordered>=.6&&T<=.3?'❄ A crystal lattice has formed! Notice the alternating + and − pattern.':T>.6?'The ions have lots of energy — they move freely like a liquid or gas. Cool them down.':'Cooling… ions are drifting toward opposite charges. Keep cooling slowly.'; }
     else{ st=this.drag?(this.drag.site?`Pulled toward the glowing spot: it has ${this.drag.site.nb} opposite-charge neighbour${this.drag.site.nb>1?'s':''}.`:'Move it closer to the crystal.'):`Added ions settled into place: ${this.maxPlaced||0}. Drag more ions to the crystal.`; }
     $('#a2stat').textContent=st;
-    if(this.formedEver&&(this.maxPlaced||0)>=6) award('a2'); },
+    $('#a2c3').classList.toggle('ok',mqDone('a2',1));
+    if(this.formedEver&&(this.maxPlaced||0)>=6&&mqDone('a2',1)) award('a2'); },
   draw(){ const t=this.t;
     if(this.mode==='form'){ ctx.strokeStyle='rgba(160,190,255,.35)'; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect?ctx.roundRect(FLASK.x0,FLASK.y0,FLASK.x1-FLASK.x0,FLASK.y1-FLASK.y0,16):ctx.rect(FLASK.x0,FLASK.y0,FLASK.x1-FLASK.x0,FLASK.y1-FLASK.y0); ctx.stroke(); txt('a tiny sample of ionic compound (greatly magnified)',W/2,FLASK.y1+22,12,'rgba(200,215,245,.55)','center',600); }
     if(this.mode==='add'){ for(const s of this.sources){ dashCirc(s.x,s.y,30,s.q>0?'#ff9f43':'#3fd0a5',2,[6,5]); txt(s.q>0?'Na⁺':'Cl⁻',s.x,s.y,16,s.q>0?'#ff9f43':'#3fd0a5'); txt('drag me out',s.x,s.y+46,11,'rgba(200,215,245,.6)','center',600); }
@@ -735,12 +781,13 @@ const A6SC=1.3;
 const A6={
   atoms:[], bonds:[], t:0, drag:null, comps:[], msg:'', ci:0,
   mount(){ $('#h1').textContent='Your mission'; $('#h2').textContent='Add atoms'; $('#h3').textContent="What's happening";
-    $('#c1').innerHTML=`<div class="goal">Atoms share electrons until every atom has a <b>full outer shell</b> (8 electrons, or 2 for hydrogen). Add atoms, then drag them next to each other. If both atoms still have <b>unpaired electrons</b>, they bond. Build each molecule below — tap one to get its atoms.</div>
+    $('#c1').innerHTML=`<div class="goal">Atoms share electrons until every atom has a <b>full outer shell</b> (8 electrons, or 2 for hydrogen). Add atoms, then drag them next to each other. If both atoms still have <b>unpaired electrons</b>, they bond. Build each molecule below — tap one to get its atoms, then answer the three questions.</div>
       <div class="lab">Required</div><div class="chips" id="a6req"></div><div class="lab">Bonus</div><div class="chips" id="a6bon"></div>`;
     $('#c2').innerHTML=`<div class="chips" id="a6add">${Object.keys(COV).map(s=>`<button class="chip" data-s="${s}">${s}<small>${COV[s].cap} bond${COV[s].cap>1?'s':''}</small></button>`).join('')}</div>
       <div class="rowbtns"><button class="btn secondary" id="a6undo">Remove last atom</button><button class="btn secondary" id="a6clear">Clear all</button></div>
       <div class="hintline">“bonds” = how many electrons the atom can still share (its unpaired valence electrons). Pull a bonded atom far away to break the bond.</div>`;
-    $('#c3').innerHTML=`<div class="status" id="a6st"></div><div class="ledger" id="a6led"></div><div class="hintline">Shown flat (2-D) to keep it simple. Real molecules like CH₄ and H₂O are 3-D: methane is a tetrahedron and water is bent at about 105°.</div>`;
+    $('#c3').innerHTML=`<div class="status" id="a6st"></div><div class="ledger" id="a6led"></div><div class="hintline">Shown flat (2-D) to keep it simple. Real molecules like CH₄ and H₂O are 3-D: methane is a tetrahedron and water is bent at about 105°.</div><div id="a6q"></div>`;
+    $('#a6q').innerHTML=mqHTML(Q_A6,'a6'); mqWire($('#a6q'),Q_A6,'a6',()=>this.analyse());
     document.querySelectorAll('#a6add .chip').forEach(c=>c.onclick=()=>this.addAtom(c.dataset.s)); $('#a6undo').onclick=()=>this.removeLast(); $('#a6clear').onclick=()=>this.clear();
     this.renderChall(); if(!this.atoms.length) this.setup(CHALL[0].atoms); },
   renderChall(){ const mk=c=>{ const n=NAMES[c.key]; const done=state.a6.includes(c.key); return `<button class="chip ${done?'ok':''}" data-k="${c.key}">${done?'✓ ':''}${n[0]}<small>${n[1]}</small></button>`; };
@@ -791,7 +838,7 @@ const A6={
       const cx=m.reduce((s,i)=>s+at[i].x,0)/m.length,top=Math.min(...m.map(i=>at[i].y-at[i].Rv)); return {m,done,key,cx,top}; });
     for(const c of this.comps){ if(!c.done) continue; if(!c.announced){ c.announced=true; }
       if(!state.a6.includes(c.key)&&CHALL.some(x=>x.key===c.key)){ state.a6.push(c.key); save(); this.renderChall(); toast(`✓ You built ${(NAMES[c.key]||[c.key])[0]} — ${(NAMES[c.key]||['',''])[1]}!`); } }
-    if(CHALL.filter(c=>c.req).every(c=>state.a6.includes(c.key))) award('a6');
+    if(CHALL.filter(c=>c.req).every(c=>state.a6.includes(c.key))&&mqDone('a6',3)) award('a6');
     const nDone=this.comps.filter(c=>c.done).length; const free=this.atoms.filter((a,i)=>this.cap(i)>0).length;
     const st=$('#a6st'); if(!st) return; let msg;
     if(!N) msg='Add some atoms to begin.';
@@ -810,9 +857,44 @@ const A6={
 };
 
 /* =====================================================================
+   SUMMARY — compare the three bonding types
+   ===================================================================== */
+const A7={
+  t:0,
+  mount(){ $('#h1').textContent='Your mission'; $('#h2').textContent='Compare: ionic vs. covalent, ionic vs. metallic'; $('#h3').textContent='Compare: metallic vs. covalent';
+    $('#c1').innerHTML=`<div class="goal">Look at the three bonding types side by side, then answer <b>three comparison questions</b>. When all three are right, you'll get your <b>completion code</b> to turn in.</div>
+      <ul class="checks"><li id="a7k0">Ionic vs. covalent</li><li id="a7k1">Ionic vs. metallic</li><li id="a7k2">Metallic vs. covalent</li></ul>
+      <div class="hintline" id="a7hint"></div>`;
+    $('#c2').innerHTML=`<div id="a7qa">${mqHTML(Q_A7.slice(0,2),'a7')}</div>`;
+    $('#c3').innerHTML=`<div id="a7qb"></div><div class="rowbtns" id="a7code" style="display:none"><button class="btn" id="a7codeBtn">🏅 Get my code</button></div>`;
+    $('#a7qb').innerHTML=mqHTML([Q_A7[2]],'a7',2);
+    mqWire($('#a7qa'),Q_A7,'a7',()=>this.refresh()); mqWire($('#a7qb'),Q_A7,'a7',()=>this.refresh(),0);
+    this.refresh(); },
+  refresh(){ const got=state.q.a7||[]; for(let i=0;i<3;i++) $('#a7k'+i).classList.toggle('ok',!!got[i]);
+    const all=mqDone('a7',3); $('#a7hint').textContent=all?'🎉 All three correct!':'Answer all three to finish. You can retry a question as many times as you need.';
+    if(all){ award('a7'); $('#a7code').style.display=''; $('#a7codeBtn').onclick=openName; } },
+  down(){}, move(){}, up(){},
+  update(dt){ this.t+=dt; },
+  draw(){ const t=this.t; const cols=[{x:170,c:'#ff9f43',n:'IONIC',rows:['Metal + nonmetal','Electrons are transferred','Cations and anions in a lattice','Opposite charges attract','NaCl']},
+      {x:500,c:'#7fb8ff',n:'METALLIC',rows:['Metal + metal','Valence electrons are delocalized','Positive cores in an electron sea','Cores attract the shared sea','Na, Cu, Al']},
+      {x:830,c:'#5be0a0',n:'COVALENT',rows:['Nonmetal + nonmetal','Electron pairs are shared','Molecules with shared pairs','Nuclei attract the shared pair','H₂O, CO₂']}];
+    cols.forEach((c,ci)=>{ ctx.fillStyle='rgba(22,33,62,.8)'; ctx.strokeStyle=c.c; ctx.lineWidth=1.5; ctx.beginPath(); ctx.roundRect?ctx.roundRect(c.x-150,22,300,H-44,16):ctx.rect(c.x-150,22,300,H-44); ctx.fill(); ctx.stroke();
+      txt(c.n,c.x,50,20,c.c);
+      const cy=150;
+      if(ci===0){ const k=(Math.sin(t*1.4)+1)/2; circ(c.x-60,cy,26,'rgba(255,159,67,.2)','#ff9f43',2); txt('Na',c.x-60,cy,15,'#ffc27a'); circ(c.x+60,cy,32,'rgba(63,208,165,.2)','#3fd0a5',2); txt('Cl',c.x+60,cy,15,'#7df0cc');
+        const ex=c.x-34+k*68,ey=cy-34*Math.sin(k*Math.PI); circ(ex,ey,5,'#ffd166'); txt(k>.5?'Na⁺   Cl⁻':'Na   Cl',c.x,cy+58,13,'#cfdcf7','center',600); }
+      else if(ci===1){ for(let r=0;r<2;r++)for(let q=0;q<4;q++){ const x=c.x-66+q*44+(r?22:0),y=cy-24+r*38; circ(x,y,13,'#d9731c','rgba(0,0,0,.3)',1); txt('+',x,y,13,'#2a1604'); }
+        for(let e=0;e<9;e++){ const a=t*1.1+e*1.9; circ(c.x-70+((e*37+t*26*(1+e%3*.3))%140),cy-8+Math.sin(a*1.3+e)*34,3.6,'#7fd0ff'); } txt('+ cores in a sea of e⁻',c.x,cy+58,13,'#cfdcf7','center',600); }
+      else{ circ(c.x-30,cy,38,'rgba(91,224,160,.12)','rgba(255,255,255,.3)',1.5); circ(c.x+30,cy,38,'rgba(91,224,160,.12)','rgba(255,255,255,.3)',1.5); circ(c.x-30,cy,9,'#dfe6f7'); circ(c.x+30,cy,9,'#dfe6f7');
+        ctx.save(); ctx.beginPath(); ctx.arc(c.x-30,cy,38,0,TAU); ctx.clip(); ctx.beginPath(); ctx.arc(c.x+30,cy,38,0,TAU); ctx.fillStyle='rgba(255,226,130,.3)'; ctx.fill(); ctx.restore();
+        for(let e=0;e<2;e++){ const a=t*2.3+e*Math.PI; circ(c.x+Math.cos(a)*5,cy+Math.sin(a)*22,4.4,e?'#ffcf6b':'#7fd4ff','rgba(0,0,0,.4)',1); } txt('shared pair',c.x,cy+58,13,'#cfdcf7','center',600); }
+      ['Between','Electrons','Result','Held together by','Example'].forEach((lab,i)=>{ const y=250+i*52; txt(lab.toUpperCase(),c.x,y,10,'rgba(200,215,245,.55)'); txt(c.rows[i],c.x,y+19,13.5,'#eaf0ff','center',600); }); }); }
+};
+
+/* =====================================================================
    Stage plumbing
    ===================================================================== */
-const ACT_OBJ=[A1,A2,A3,A4,A5,A6];
+const ACT_OBJ=[A1,A2,A3,A4,A5,A6,A7];
 let cur_i=0, cur=A1, lastT=performance.now();
 function switchTo(i){ if(cur&&cur.up) cur.up(); cur_i=i; cur=ACT_OBJ[i]; $('#toast').classList.remove('show'); renderChrome(); cur.mount(); try{localStorage.setItem(KEY+'.tab',String(i));}catch(e){} }
 function pt(e){ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}; }
@@ -827,10 +909,10 @@ function frame(now){ const dt=Math.min(.033,(now-lastT)/1000||0); lastT=now;
   cur.draw(); requestAnimationFrame(frame); }
 resize(); renderChrome();
 let startTab=0; try{ startTab=+(localStorage.getItem(KEY+'.tab')||0)||0; }catch(e){}
-switchTo(Math.min(5,Math.max(0,startTab)));
+switchTo(Math.min(ACT_OBJ.length-1,Math.max(0,startTab)));
 try{ if(!localStorage.getItem(KEY+'.seen')) $('#helpModal').classList.add('show'); }catch(e){}
 requestAnimationFrame(frame);
-window.__chem={A1,A2,A3,A4,A5,A6,switchTo,state};
+window.__chem={A1,A2,A3,A4,A5,A6,A7,switchTo,state};
 </script>
 </body>
 </html>
