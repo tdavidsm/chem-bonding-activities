@@ -41,7 +41,7 @@ A walk-through of the *Determine the Ratio of Calcium to Chlorine in Calcium Chl
 | Step 7 | 7 | pH paper again |
 | Steps 8–9 | 8, 9 | Build the ring stand / mesh / clamp / Bunsen burner, light it, boil dry; **atom view:** water and extra HCl leave, ions lock into a solid |
 | Steps 10–12 | 10–12 | Cool, mass flask + CaCl₂, wash, return to the center table |
-| Analysis | Data Analysis Table 2, Questions 1–4 | Masses → Cl:Ca mass ratio, then pie charts (ion count → mass, side by side with the student's own pie) to pick the formula |
+| Analysis | Data Analysis Table 2, Questions 1–4 | Masses → Cl:Ca mass ratio. Then, for each possible formula, students **build it on a balance** (drag the right number of Ca and Cl atoms onto the pans), see the totals, the division and a pie chart made for them, and **compare** it with the pie from their own data (✓ matches / ✗ not a match). At least 3 formulas must be built |
 
 Electron colors in the atom views: **gold** = from calcium, **blue** = a water molecule's own, **violet** = from the H of HCl.
 

@@ -623,7 +623,7 @@ function makeStep(def){ const s={ id:def.id, def, view:'bench', zt:0, qt:0,
     $('#h1').textContent='Procedure'; $('#h2').textContent='Controls'; $('#h3').textContent='Your data table';
     $('#c1').innerHTML=def.proc+`<ul class="checks" id="goals">${def.goals.map((g,i)=>`<li id="g${i}">${g.t}</li>`).join('')}</ul>`;
     $('#c2').innerHTML=`<div id="zoomrow"></div><div id="ctl">${def.controls?def.controls(this):''}</div><div class="status" id="stat"></div>`;
-    renderData(); for(const k of ['recalc','sel_','q4box']) if(def[k]) this[k]=def[k]; def.init(this); this.zoomUI(); this.check(true); },
+    renderData(); for(const k of ['recalc','chips','setTgt','say_','judge','q4box']) if(def[k]) this[k]=def[k]; def.init(this); this.zoomUI(); this.check(true); },
   leave(){ ATOMCTL.paused=false; },
   say(m){ const e=$('#stat'); if(e) e.innerHTML=m; },
   zoomIn(){ if(!def.zoomOK(this)){ toast(def.zoomHint,true); return; } this.view='atoms'; if(!this.atomStarted||def.atom.done){ ATOMCTL.paused=false; ATOMCTL.spd=1; def.atom.reset(); this.atomStarted=true; } this.zoomUI(); },
@@ -969,57 +969,94 @@ function pie(cx,cy,r,fr,cols,labels,opt){ opt=opt||{}; let a=-Math.PI/2; const t
     if(labels&&da>.35){ const m=a+da/2; txt(labels[i],cx+Math.cos(m)*r*.58,cy+Math.sin(m)*r*.58,opt.fs||13,'#10213a','center',800); } a+=da; }); }
 const AN={fm:null,ca:null,pr:null};
 const candRatio=f=>(f.cl*CL_M)/(f.ca*CA_M);
+function pieSweep(cx,cy,r,fr,cols,labels,p,opt){ if(p<=0) return; ctx.save(); ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r+3,-Math.PI/2,-Math.PI/2+Math.min(1,p)*TAU+.001); ctx.closePath(); ctx.clip(); pie(cx,cy,r,fr,cols,labels,opt); ctx.restore(); }
+const BAL={cx:305,cy:140,L:190,drop:125,maxAtoms:5}, PANEL={x:618,y:14,w:372,h:380};
+const SUP={Ca:{x:80,y:478},Cl:{x:340,y:478}};
+const panelPos=(side,tilt)=>{ const k=side==='Ca'?-1:1; return {x:BAL.cx+k*BAL.L*Math.cos(tilt),y:BAL.cy+k*BAL.L*Math.sin(tilt)+BAL.drop}; };
+function drawAtomTok(x,y,el,r){ r=r||17; const ca=el==='Ca'; circ(x,y,r,rg(x-r*.35,y-r*.4,1,r,ca?[[0,'#ffc27a'],[1,'#e07a1a']]:[[0,'#7df0cc'],[1,'#1f9e7b']]),'rgba(0,0,0,.4)',1.3); txt(el,x,y+.5,r>20?16:13,'#10213a'); }
 const S8=makeStep({id:'s8',g:'an',n:'Analysis',nm:'Pie charts',
-  proc:`<div class="proc"><p><b>Goal:</b> find the whole-number ratio of calcium ions to chloride ions in CaₓClᵧ, using only your masses.</p><p class="muted" style="font-size:12.5px">1. Your three masses give the mass of chloride that combined with your calcium.<br>2. Each possible formula predicts a different split of <b>mass</b> between Ca and Cl.<br>3. Pick the formula whose pie matches your pie.</p></div>`,
-  goals:[{t:'Your masses give a Cl : Ca mass ratio (type in your real lab numbers if you like)',ok:s=>s.ok},{t:'Try at least three of the possible formulas',ok:s=>s.tried.size>=3,live:s=>`Try at least three of the possible formulas <span class="muted">(${Math.min(3,s.tried.size)}/3)</span>`},{t:'Choose the formula you think is correct',ok:s=>s.chosen!=null},{t:'Answer the last question about your error',ok:s=>s.q4}],
+  proc:`<div class="proc"><p><b>Goal:</b> find the whole-number ratio of calcium ions to chloride ions in CaₓClᵧ, using only your masses.</p><p class="muted" style="font-size:12.5px">1. Your masses give the mass of chlorine that combined with your calcium.<br>2. Pick a possible formula and <b>build it on the balance</b>: drag the right number of Ca and Cl atoms onto the pans.<br>3. The totals, the division, and a pie chart for that formula appear.<br>4. <b>Compare</b> that pie with the pie made from your own data. Repeat until one matches.</p></div>`,
+  goals:[{t:'Your masses give a Cl : Ca mass ratio (type in your real lab numbers if you like)',ok:s=>s.ok},{t:'Build at least three formulas on the balance',ok:s=>Object.keys(s.built).length>=3,live:s=>`Build at least three formulas on the balance <span class="muted">(${Math.min(3,Object.keys(s.built).length)}/3)</span>`},{t:'Compare each pie with your data pie and find the one that matches',ok:s=>s.chosen!=null},{t:'Answer the last question about your error',ok:s=>s.q4}],
   controls(s){ return `<div class="numin"><label>Mass of flask (step 1)</label><input id="anF" type="number" step="0.01"><span class="u">g</span></div><div class="numin"><label>Mass of calcium (step 2)</label><input id="anC" type="number" step="0.01"><span class="u">g</span></div><div class="numin"><label>Mass of flask + CaCl₂ (step 11)</label><input id="anP" type="number" step="0.01"><span class="u">g</span></div>
-    <div class="info" id="anQ"></div><div class="lab">Possible formula</div><div class="chips" id="anChips">${FORMULAS.map((f,i)=>`<button class="chip" data-i="${i}">${f.f}</button>`).join('')}</div>
-    <div class="slider"><span>number of ions</span><input type="range" id="anMorph" min="0" max="100" value="0"><span>mass</span></div><div class="hintline" id="anHint"></div><div id="anQ4"></div>`; },
-  init(s){ const d=D(); s.vis=false; s.tried=new Set(); s.chosen=null; s.sel=1; s.m=0; s.q4=!!state.q4; s.best=0;
+    <div class="info" id="anQ"></div><div class="lab">Formula to build</div><div class="chips" id="anChips">${FORMULAS.map((f,i)=>`<button class="chip" data-i="${i}">${f.f}</button>`).join('')}</div>
+    <div class="rowbtns"><button class="btn secondary" id="anHintBtn">💡 Hint</button><button class="btn secondary" id="anClear">Clear the pans</button></div>
+    <div class="lab">Does it match your data pie?</div><div class="rowbtns" style="margin-top:2px"><button class="btn" id="anYes" disabled>✓ It matches</button><button class="btn secondary" id="anNo" disabled>✗ Not a match</button></div><div class="hintline" id="anHint"></div><div id="anQ4"></div>`; },
+  init(s){ const d=D(); s.vis=false; s.built={}; s.chosen=null; s.tgt=0; s.q4=!!state.q4; s.tilt=0; s.pan={Ca:[],Cl:[]}; s.hold=null; s.correct=false; s.rev=-1; s.ok=false;
     const F=d.flask??flaskMass(), C=d.ca??1.0, P=d.final??(F+productMass()); $('#anF').value=f2(F); $('#anC').value=f2(C); $('#anP').value=f2(P);
-    const upd=()=>{ AN.fm=+$('#anF').value; AN.ca=+$('#anC').value; AN.pr=+$('#anP').value; s.vis=true; s.recalc(); };
+    const upd=()=>{ AN.fm=+$('#anF').value; AN.ca=+$('#anC').value; AN.pr=+$('#anP').value; s.recalc(); };
     ['anF','anC','anP'].forEach(id=>$('#'+id).oninput=upd);
-    document.querySelectorAll('#anChips .chip').forEach(c=>c.onclick=()=>{ s.sel=+c.dataset.i; s.tried.add(s.sel); s.sel_(); });
-    $('#anMorph').oninput=e=>{ s.m=e.target.value/100; };
-    s.b.add({id:'pies',x:0,y:0,hit:()=>false,drag:false,draw(){}});
-    for(let i=0;i<7;i++) s.b.add({id:'mini'+i,x:70+i*134,y:470,hit:circHit(46),click(){ s.sel=i; s.tried.add(i); s.sel_(); },draw(){}});
-    upd(); s.sel_(); },
-  recalc(){ const C=AN.ca, cl=AN.pr-AN.fm-C; this.cl=cl; this.ratio=cl/C; this.ok=C>0&&cl>0; let best=0,bd=1e9; FORMULAS.forEach((f,i)=>{ const dd=Math.abs(candRatio(f)-this.ratio); if(dd<bd){bd=dd;best=i;} }); this.best=best;
-    $('#anQ').innerHTML=this.ok?`<b>Q1.</b> Mass of chloride that combined with your calcium:<br>${f2(AN.pr)} − ${f2(AN.fm)} − ${f2(C)} = <b>${f2(cl)} g Cl</b><br><b>Q2.</b> Ratio of the mass of Cl to the mass of Ca:<br>${f2(cl)} ÷ ${f2(C)} = <b>${this.ratio.toFixed(2)} g Cl per 1 g Ca</b>`:'<span style="color:#ff9aa9">Those masses do not make sense (the chlorine mass must be positive). Check the numbers.</span>'; this.sel_(); },
-  sel_(){ document.querySelectorAll('#anChips .chip').forEach((c,i)=>{ c.classList.toggle('on',i===this.sel); c.classList.toggle('ok',this.chosen===i); });
-    if(!this.ok) return; const f=FORMULAS[this.sel], cr=candRatio(f), diff=Math.abs(cr-this.ratio)/cr*100;
-    $('#anHint').innerHTML=`<b>${f.f}</b> predicts <b>${cr.toFixed(2)}</b> g Cl per g Ca: (${f.cl} × ${CL_M}) ÷ (${f.ca} × ${CA_M}). Yours is <b>${this.ratio.toFixed(2)}</b>, a difference of ${diff.toFixed(0)}%.`+(diff<8?` <button class="btn" id="anPick" style="padding:6px 10px;margin-left:4px">This one!</button>`:` Pies do not match yet.`);
-    const pk=$('#anPick'); if(pk) pk.onclick=()=>{ this.chosen=this.sel; this.sel_(); this.q4box(); this.check(); };
-    this.check(); },
+    document.querySelectorAll('#anChips .chip').forEach(c=>c.onclick=()=>s.setTgt(+c.dataset.i));
+    $('#anClear').onclick=()=>s.setTgt(s.tgt,true);
+    $('#anHintBtn').onclick=()=>{ const f=FORMULAS[s.tgt]; toast(`In ${f.f}, a number after an element tells how many atoms. No number means 1. So: ${f.ca} Ca and ${f.cl} Cl.`); };
+    $('#anYes').onclick=()=>s.judge(true); $('#anNo').onclick=()=>s.judge(false);
+    FORMULAS.forEach((q,i)=>s.b.add({id:'g'+i,x:655+i*50,y:490,hit:circHit(24),click(){ s.setTgt(i); },draw(){}}));
+    upd(); s.setTgt(0,true); },
+  recalc(){ const C=AN.ca, cl=AN.pr-AN.fm-C; this.cl=cl; this.ratio=cl/C; this.ok=C>0&&cl>0;
+    $('#anQ').innerHTML=this.ok?`<b>Q1.</b> Mass of chloride that combined with your calcium:<br>${f2(AN.pr)} − ${f2(AN.fm)} − ${f2(C)} = <b>${f2(cl)} g Cl</b><br><b>Q2.</b> Ratio of the mass of Cl to the mass of Ca:<br>${f2(cl)} ÷ ${f2(C)} = <b>${this.ratio.toFixed(2)} g Cl per 1 g Ca</b>`:'<span style="color:#ff9aa9">Those masses do not make sense (the chlorine mass must be positive). Check the numbers.</span>'; this.chips(); },
+  chips(){ document.querySelectorAll('#anChips .chip').forEach((c,i)=>{ c.classList.toggle('on',i===this.tgt); c.classList.toggle('ok',this.chosen===i); }); },
+  setTgt(i,force){ if(i===this.tgt&&!force) return; this.tgt=i; this.hold=null; this.pan={Ca:[],Cl:[]}; this.correct=false; this.rev=-1;
+    if(this.built[i]){ const f=FORMULAS[i]; for(let k=0;k<f.ca;k++) this.pan.Ca.push({el:'Ca',x:SUP.Ca.x,y:SUP.Ca.y}); for(let k=0;k<f.cl;k++) this.pan.Cl.push({el:'Cl',x:SUP.Cl.x,y:SUP.Cl.y}); this.rev=99; }
+    this.chips(); this.say_(); },
+  say_(){ const e=$('#anHint'); if(e) e.innerHTML=this.built[this.tgt]&&this.built[this.tgt].j?(this.built[this.tgt].j==='match'?'✓ You matched this one.':'You decided this one does not match.'):`Build <b>${FORMULAS[this.tgt].f}</b>: drag atoms from the supply onto the pans.`; },
+  judge(yes){ const f=FORMULAS[this.tgt], cr=candRatio(f), diff=Math.abs(cr-this.ratio)/cr, truth=diff<.08, b=this.built[this.tgt]; if(!b) return;
+    const e=$('#anHint');
+    if(yes===truth){ b.j=truth?'match':'no'; if(truth){ this.chosen=this.tgt; e.innerHTML=`✓ Yes! The pie from <b>${f.f}</b> matches your data: your Cl : Ca mass ratio is ${this.ratio.toFixed(2)} and ${f.f} predicts ${cr.toFixed(2)}.`; this.q4box(); } else e.innerHTML=`✓ Right, not a match. ${f.f} predicts ${cr.toFixed(2)} g Cl per g Ca, but yours is ${this.ratio.toFixed(2)}. Try another formula.`; this.chips(); this.check(); }
+    else e.innerHTML=truth?`Look again: the dashed white line (your data) lands almost exactly on the boundary of this pie. ${f.f} predicts ${cr.toFixed(2)} and yours is ${this.ratio.toFixed(2)}.`:`Not quite: ${f.f} predicts ${cr.toFixed(2)} g Cl per g Ca, but yours is ${this.ratio.toFixed(2)}, a ${Math.round(diff*100)}% difference. Compare the dashed line with the Ca|Cl boundary.`; },
   q4box(){ const f=FORMULAS[this.chosen]; if(!f) return; const theo=candRatio(FORMULAS[1]), ours=this.ratio, right=this.chosen===1;
     let msg=right?`✓ <b>CaCl₂</b>: for every 1 Ca ion there are 2 Cl⁻ ions. The correct formula is CaCl₂, with a predicted ${theo.toFixed(2)} g Cl per g Ca.`:`Your pie matches <b>${f.f}</b>, but the handout says the correct formula is <b>CaCl₂</b> (${theo.toFixed(2)} g Cl per 1 g Ca). Re-check your masses!`;
-    const over=ours>theo; $('#anQ4').innerHTML=`<div class="qa"><div class="fb" style="margin:0">${msg}</div><div class="q" style="margin-top:8px">Question 4: compared with CaCl₂ (${theo.toFixed(2)}), your ratio is ${ours.toFixed(2)}. Did you overestimate the Ca or the Cl?</div><button class="opt" data-a="ca">Overestimated the calcium</button><button class="opt" data-a="cl">Overestimated the chloride</button><div class="fb" id="q4fb"></div></div>`;
+    $('#anQ4').innerHTML=`<div class="qa"><div class="fb" style="margin:0">${msg}</div><div class="q" style="margin-top:8px">Question 4: compared with CaCl₂ (${theo.toFixed(2)}), your ratio is ${ours.toFixed(2)}. Did you overestimate the Ca or the Cl?</div><button class="opt" data-a="ca">Overestimated the calcium</button><button class="opt" data-a="cl">Overestimated the chloride</button><div class="fb" id="q4fb"></div></div>`;
     document.querySelectorAll('#anQ4 .opt').forEach(b=>b.onclick=()=>{ const ans=ours<theo?'ca':'cl'; if(Math.abs(ours-theo)<.04){ $('#q4fb').innerHTML='✓ Your ratio is almost exactly the theory. Great lab work! (A tiny difference can be either one.)'; state.q4=true; save(); this.q4=true; this.check(); return; }
-      if(b.dataset.a===ans){ b.classList.add('right'); $('#q4fb').innerHTML=`✓ ${ans==='ca'?'Your ratio is LOWER than 1.77, so there was less Cl per Ca than expected. Equivalent: you counted too much Ca (or the flask was not fully dry of acid / lost some CaCl₂).':'Your ratio is HIGHER than 1.77: more Cl mass than expected, for example because the solid still held water (CaCl₂ absorbs moisture) or the acid had not all boiled off.'}`; state.q4=true; save(); this.q4=true; this.check(); } else { b.classList.add('wrong'); $('#q4fb').textContent='Not quite. Compare your number with the theoretical one: is yours bigger or smaller?'; } }); },
-  upd(dt,s){ },
+      if(b.dataset.a===ans){ b.classList.add('right'); $('#q4fb').innerHTML=`✓ ${ans==='ca'?'Your ratio is LOWER than 1.77, so there was less Cl per Ca than expected. Equivalent: you counted too much Ca (or you lost some CaCl₂).':'Your ratio is HIGHER than 1.77: more Cl mass than expected, for example because the solid still held water (CaCl₂ absorbs moisture) or the acid had not all boiled off.'}`; state.q4=true; save(); this.q4=true; this.check(); } else { b.classList.add('wrong'); $('#q4fb').textContent='Not quite. Compare your number with the theoretical one: is yours bigger or smaller?'; } }); },
+  down(p,s){ const pans=['Ca','Cl']; for(const el of pans){ const a=s.pan[el]; for(let i=a.length-1;i>=0;i--){ if(Math.hypot(a[i].x-p.x,a[i].y-p.y)<22){ s.hold=a.splice(i,1)[0]; s.hold.x=p.x; s.hold.y=p.y; return; } } }
+    for(const el of pans){ if(Math.hypot(SUP[el].x-p.x,SUP[el].y-p.y)<38){ s.hold={el,x:p.x,y:p.y}; return; } } },
+  move(p,s){ if(s.hold){ s.hold.x=p.x; s.hold.y=p.y; } },
+  up(p,s){ const h=s.hold; if(!h) return; s.hold=null; const pp=panelPos(h.el,s.tilt);
+    if(Math.abs(p.x-pp.x)<115&&Math.abs(p.y-pp.y)<100){ if(s.pan[h.el].length>=BAL.maxAtoms){ toast('That pan is full.',true); return; } s.pan[h.el].push(h); }
+    else { const other=panelPos(h.el==='Ca'?'Cl':'Ca',s.tilt); if(Math.abs(p.x-other.x)<115&&Math.abs(p.y-other.y)<100) toast(`${h.el} atoms go on the ${h.el==='Ca'?'left':'right'} pan.`,true); } },
+  upd(dt,s){ const f=FORMULAS[s.tgt], nCa=s.pan.Ca.length, nCl=s.pan.Cl.length;
+    const target=clamp((nCl*CL_M-nCa*CA_M)/100,-1,1)*.22; s.tilt+=(target-s.tilt)*Math.min(1,dt*5);
+    for(const el of ['Ca','Cl']){ const pp=panelPos(el,s.tilt); s.pan[el].forEach((a,i)=>{ const tx=pp.x-76+i*38, ty=pp.y-19; a.x+=(tx-a.x)*Math.min(1,dt*16); a.y+=(ty-a.y)*Math.min(1,dt*16); }); }
+    const ok=!s.hold&&nCa===f.ca&&nCl===f.cl;
+    if(ok&&!s.correct){ s.correct=true; if(s.rev<0) s.rev=0; } if(!ok){ s.correct=false; s.rev=-1; }
+    if(s.correct&&s.rev<99) s.rev+=dt; if(s.correct&&s.rev>=3.6&&!s.built[s.tgt]){ s.built[s.tgt]={}; s.check(); s.say_(); }
+    const can=s.correct&&s.rev>=6.4; const y=$('#anYes'),n=$('#anNo'); if(y){ y.disabled=!can; n.disabled=!can; } },
   drawBench(s){ ctx.fillStyle=lg(0,0,0,H,[[0,'#0f1a3a'],[1,'#0b1330']]); ctx.fillRect(0,0,W,H);
     if(!s.ok){ txt('Enter masses that make sense in the boxes below the stage.',W/2,H/2,16,'#ff9aa9'); return; }
-    const C=AN.ca, cl=s.cl; fillRR(14,12,300,380,14,'rgba(22,33,62,.8)','rgba(255,159,67,.5)',1.5); txt('YOUR EXPERIMENT',164,36,13,'#ffd166'); txt('(by mass)',164,54,11,'rgba(200,215,245,.6)','center',600);
-    pie(164,170,98,[C,cl],[PCA,PCL],['Ca','Cl']); const pc=C/(C+cl)*100;
-    txt(`Ca ${f2(C)} g  (${pc.toFixed(0)}%)`,164,290,14,PCA); txt(`Cl ${f2(cl)} g  (${(100-pc).toFixed(0)}%)`,164,312,14,PCL); txt(`Cl : Ca = ${s.ratio.toFixed(2)} : 1  (by mass)`,164,348,14,'#eaf0ff');
-    const f=FORMULAS[s.sel], fx=330; fillRR(fx,12,656,380,14,'rgba(22,33,62,.8)','rgba(127,184,255,.5)',1.5); txt(`IF THE FORMULA IS  ${f.f}`,fx+328,36,15,'#7fb8ff');
-    const cn=[f.ca,f.cl], ms=[f.ca*CA_M,f.cl*CL_M], mt=ms[0]+ms[1], cnt=cn[0]+cn[1];
-    // morph between the two pies: slice = (1-m)·(share of ions) + m·(share of mass)
-    const mix=[0,1].map(i=>(1-s.m)*cn[i]/cnt+s.m*ms[i]/mt);
-    txt('1) Count the ions',fx+130,64,12,'rgba(200,215,245,.8)'); 
-    pie(fx+120,170,86,[cn[0],cn[1]],[PCA,PCL],[`${cn[0]} Ca`,`${cn[1]} Cl`],{fs:14}); txt(`${cn[0]} Ca : ${cn[1]} Cl  ions`,fx+120,274,13,'#eaf0ff');
-    arrow(fx+224,170,fx+262,170,'#ffd166',3); txt('× atomic mass',fx+243,148,10,'#ffd166'); txt('Ca 40.1  Cl 35.5',fx+243,194,10,'rgba(255,209,102,.9)','center',600);
-    pie(fx+380,170,86,[ms[0],ms[1]],[PCA,PCL],[`Ca ${(ms[0]/mt*100).toFixed(0)}%`,`Cl ${(ms[1]/mt*100).toFixed(0)}%`],{fs:13}); txt('by mass',fx+380,274,13,'#eaf0ff');
-    // your experiment's boundary drawn on the formula's mass pie
-    const ang=-Math.PI/2+C/(C+cl)*TAU; ctx.save(); ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.setLineDash([6,5]); ctx.beginPath(); ctx.moveTo(fx+380,170); ctx.lineTo(fx+380+Math.cos(ang)*100,170+Math.sin(ang)*100); ctx.stroke(); ctx.restore(); txt('your Ca|Cl boundary',fx+380+Math.cos(ang)*120,170+Math.sin(ang)*112,10,'#fff');
-    // match meter
-    const cr=candRatio(f), diff=Math.abs(cr-s.ratio)/cr; const mt2=clamp(1-diff*3,0,1);
-    txt('Match to your pie',fx+590,64,12,'rgba(200,215,245,.8)'); fillRR(fx+560,86,60,230,10,'rgba(255,255,255,.08)','rgba(255,255,255,.3)',1.5); ctx.fillStyle=mt2>.8?'#2fbf57':mt2>.4?'#ffd166':'#e6294b'; fillRR(fx+564,86+226-226*mt2,52,226*mt2,8,ctx.fillStyle); txt(Math.round(mt2*100)+'%',fx+590,336,16,'#eaf0ff'); txt('match',fx+590,356,11,'rgba(200,215,245,.6)');
-    if(s.chosen!=null) txt(`★ your pick: ${FORMULAS[s.chosen].f}`,fx+328,364,15,'#8ff0b6');
-    // all candidates by mass
-    txt('All the possible formulas, as pies of mass (white line = your Ca|Cl boundary)',W/2,412,12,'rgba(200,215,245,.75)');
-    FORMULAS.forEach((q,i)=>{ const x=70+i*134, y=474, m0=q.ca*CA_M, m1=q.cl*CL_M; ctx.save(); if(i===s.sel){ circ(x,y,46,'rgba(255,209,102,.15)','#ffd166',2.5); } pie(x,y,36,[m0,m1],[PCA,PCL],null); const a2=-Math.PI/2+C/(C+cl)*TAU; ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(a2)*40,y+Math.sin(a2)*40); ctx.stroke(); ctx.restore();
-      txt(q.f,x,y+58,14,i===s.chosen?'#8ff0b6':'#eaf0ff'); if(i===s.chosen) txt('★',x+40,y-34,16,'#8ff0b6'); }); },
+    const f=FORMULAS[s.tgt], t=s.tilt, nCa=s.pan.Ca.length, nCl=s.pan.Cl.length;
+    // ----- the balance -----
+    ctx.fillStyle='#8e99b3'; ctx.beginPath(); ctx.moveTo(BAL.cx-9,BAL.cy+6); ctx.lineTo(BAL.cx+9,BAL.cy+6); ctx.lineTo(BAL.cx+14,392); ctx.lineTo(BAL.cx-14,392); ctx.closePath(); ctx.fill();
+    fillRR(BAL.cx-80,384,160,16,6,lg(0,384,0,400,[[0,'#59627c'],[1,'#2e3550']]),'rgba(0,0,0,.5)',1.5);
+    ctx.save(); ctx.translate(BAL.cx,BAL.cy); ctx.rotate(t); fillRR(-BAL.L-8,-6,2*BAL.L+16,12,6,lg(0,-6,0,6,[[0,'#dfe5f3'],[1,'#8e99b3']]),'rgba(0,0,0,.45)',1.5); ctx.restore();
+    circ(BAL.cx,BAL.cy,10,'#ffd166','rgba(0,0,0,.5)',2);
+    for(const el of ['Ca','Cl']){ const k=el==='Ca'?-1:1, ex=BAL.cx+k*BAL.L*Math.cos(t), ey=BAL.cy+k*BAL.L*Math.sin(t), pp=panelPos(el,t);
+      ctx.strokeStyle='rgba(200,215,245,.7)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(pp.x-92,pp.y); ctx.moveTo(ex,ey); ctx.lineTo(pp.x+92,pp.y); ctx.stroke();
+      fillRR(pp.x-96,pp.y,192,10,5,lg(0,pp.y,0,pp.y+10,[[0,'#dfe5f3'],[1,'#8e99b3']]),'rgba(0,0,0,.45)',1.5);
+      const n=el==='Ca'?nCa:nCl, m=n*(el==='Ca'?CA_M:CL_M); txt(el==='Ca'?'CALCIUM PAN':'CHLORINE PAN',pp.x,pp.y+26,11,el==='Ca'?'#ffb066':'#5be0a0','center',800); txt(n?`${n} × ${el==='Ca'?'40.08':'35.45'} = ${f2(m)} amu`:'empty',pp.x,pp.y+44,13,'#eaf0ff');
+      if(!n&&!s.hold){ dashCirc(pp.x,pp.y-19,17,'rgba(255,255,255,.35)',1.5,[4,4]); } }
+    for(const el of ['Ca','Cl']) for(const a of s.pan[el]) drawAtomTok(a.x,a.y,el);
+    if(s.correct&&s.rev<1.2){ const k=1-s.rev/1.2; ctx.strokeStyle=`rgba(47,191,87,${k})`; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(BAL.cx,BAL.cy+60,200+(1-k)*60,0,TAU); ctx.stroke(); }
+    txt(`BUILD  ${f.f}`,BAL.cx,30,22,'#ffd166','center',900); txt('drag atoms from the supply onto the pans',BAL.cx,54,12,'rgba(200,215,245,.7)','center',600);
+    // ----- supply -----
+    for(const el of ['Ca','Cl']){ const q=SUP[el]; for(let i=0;i<3;i++) drawAtomTok(q.x+(2-i)*3,q.y-(2-i)*3,el,28); txt(el==='Ca'?'Calcium atoms':'Chlorine atoms',q.x+105,q.y-14,13,'rgba(220,230,250,.9)','center',700); txt(el==='Ca'?'40.08 amu each':'35.45 amu each',q.x+105,q.y+4,12,'rgba(200,215,245,.7)','center',600); txt('drag one out',q.x+105,q.y+22,11,'rgba(200,215,245,.5)','center',600); }
+    if(s.hold) drawAtomTok(s.hold.x,s.hold.y,s.hold.el,20);
+    // ----- the math panel -----
+    fillRR(PANEL.x,PANEL.y,PANEL.w,PANEL.h,14,'rgba(22,33,62,.85)','rgba(127,184,255,.5)',1.5); const px=PANEL.x+18;
+    txt('THE MATH',PANEL.x+PANEL.w/2,34,13,'#7fb8ff','center',800);
+    const m0=f.ca*CA_M, m1=f.cl*CL_M, mt=m0+m1, r=s.rev, line=(i,str,col)=>{ if(r>=.3+i*.7){ ctx.globalAlpha=clamp((r-(.3+i*.7))*3,0,1); txt(str,px,64+i*24,14,col||'#eaf0ff','left',700); ctx.globalAlpha=1; } };
+    if(!s.correct){ txt(`Ca pan: ${nCa} atom${nCa===1?'':'s'}   Cl pan: ${nCl} atom${nCl===1?'':'s'}`,px,70,14,'#eaf0ff','left',700);
+      wrap(nCa||nCl?`Does that make ${f.f}? Read the subscripts: a number after an element says how many atoms of it. The balance tips toward the heavier pan.`:`Read the formula ${f.f}. How many Ca atoms and how many Cl atoms does it have? Drag them onto the pans.`,px,108,PANEL.w-36,19,13,'rgba(200,215,245,.85)'); }
+    else { line(0,`Ca: ${f.ca} × 40.08 = ${f2(m0)} amu`,'#ffb066'); line(1,`Cl: ${f.cl} × 35.45 = ${f2(m1)} amu`,'#5be0a0'); line(2,`Total mass = ${f2(mt)} amu`); line(3,`Cl ÷ Ca = ${f2(m1)} ÷ ${f2(m0)} = ${(m1/m0).toFixed(2)}`,'#ffd166'); line(4,`Ca share: ${f2(m0)} ÷ ${f2(mt)} = ${Math.round(m0/mt*100)}%`,'#ffb066'); line(5,`Cl share: ${f2(m1)} ÷ ${f2(mt)} = ${Math.round(m1/mt*100)}%`,'#5be0a0');
+      const C=AN.ca, cl=s.cl, ang=-Math.PI/2+C/(C+cl)*TAU, py=268, bx=PANEL.x+98, dx=PANEL.x+PANEL.w-98;
+      const sw=clamp((r-3.6)/1.2,0,1); if(sw>0){ pieSweep(bx,py,62,[m0,m1],[PCA,PCL],[`Ca ${Math.round(m0/mt*100)}%`,`Cl ${Math.round(m1/mt*100)}%`],sw,{fs:12}); txt(`${f.f} pie`,bx,py+80,12,'#eaf0ff'); }
+      const dp=clamp((r-5.4)/1,0,1); if(dp>0){ txt('vs.',PANEL.x+PANEL.w/2,py,16,'rgba(200,215,245,.7)'); pieSweep(dx,py,62,[C,cl],[PCA,PCL],['Ca','Cl'],dp,{fs:12}); txt('your data pie',dx,py+80,12,'#ffd166');
+        if(dp>=1){ ctx.save(); ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.setLineDash([6,5]); ctx.beginPath(); ctx.moveTo(bx,py); ctx.lineTo(bx+Math.cos(ang)*72,py+Math.sin(ang)*72); ctx.stroke(); ctx.restore(); txt('your data',bx+Math.cos(ang)*82+14,py+Math.sin(ang)*80-6,10,'#fff'); } }
+      if(r>=6.4&&r<99) txt('Press ✓ or ✗ below the stage',PANEL.x+PANEL.w/2,PANEL.y+PANEL.h-12,11,'#ffd166'); }
+    // ----- gallery of built pies -----
+    txt('Formulas you have built (tap one to look again)',800,432,11,'rgba(200,215,245,.7)');
+    FORMULAS.forEach((q,i)=>{ const x=655+i*50,y=490,b=s.built[i], m0=q.ca*CA_M, m1=q.cl*CL_M;
+      if(i===s.tgt) circ(x,y,28,'rgba(255,209,102,.18)','#ffd166',2.5);
+      if(b){ pie(x,y,22,[m0,m1],[PCA,PCL],null); if(b.j==='match') circ(x,y,25,null,'#2fbf57',3); else if(b.j==='no') circ(x,y,25,null,'rgba(230,41,75,.8)',2); } else dashCirc(x,y,22,'rgba(255,255,255,.3)',1.5,[3,4]);
+      txt(q.f,x,y+38,11,i===s.chosen?'#8ff0b6':'#eaf0ff'); if(i===s.chosen) txt('★',x+22,y-22,15,'#8ff0b6'); }); },
   zoomOK:()=>false });
 
 /* =====================================================================
