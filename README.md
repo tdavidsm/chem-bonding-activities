@@ -10,7 +10,7 @@ Six hands-on simulations (plus a comparison summary) that show high school chemi
 |---|-----|--------------|----------------|
 | 1 | **Ionic: Electron Transfer** | Metal atoms (Bohr models) give valence electrons to nonmetal atoms. Keep adding atoms until every atom is a stable ion, then read off the formula. | Make 4 different compounds, answer 1 question |
 | 2 | **Ionic: Crystal Lattice** | Cooling a melt of Na⁺ and Cl⁻ grows a checkerboard crystal from a seed. Then drag ions toward the crystal and watch them get pulled and pushed into place. | Grow a crystal, add 6 ions that settle, answer 1 question |
-| 3 | **Metallic: Electron Sea** | Atoms dropped onto a metal lattice give their valence electrons to the shared sea. A voltage makes the sea flow. | Add 6 atoms (2 different metals) and turn on the voltage |
+| 3 | **Metallic: Electron Sea** | Atoms dropped onto a metal lattice give their valence electrons to the shared sea. A voltage makes the sea flow. A second mode, the **Alloy mixer**, lets students pick up to three metals, set their percentages, and dump them together: every atom donates its electrons to one sea, so any mix is stable. | Add 6 atoms (2 different metals), turn on the voltage, and mix an alloy |
 | 4 | **Covalent: Sharing a Pair** | Two nonmetal atoms (H₂, F₂, Cl₂) approach. Electrons orbiting each atom shift into the space between the nuclei. A live energy curve shows the bond length. | Bond H₂ and F₂/Cl₂, answer the check question |
 | 5 | **Covalent: Double Bond** | O₂ shares two pairs (bonus: N₂ triple bond). Compare bond length and energy to single bonds. | Bond O₂, answer the check question |
 | 6 | **Covalent: Build a Molecule** | Add H, C, N, O, F, Cl, S, P atoms and drag them together. Atoms share until every atom has a full outer shell, then the molecule is named. | Build H₂O, NH₃, CH₄, CO₂ (bonus: HCN, C₂H₄), answer 3 questions |
@@ -20,10 +20,15 @@ Finishing all seven gives a **completion code**, which only appears once every q
 
 To point it at a different form, change `FORM_BASE` and `FORM_ENTRY` in `index.html`.
 
+## Display notes
+- Valence shells show **dotted circles for the open spots** where electrons could go. In the covalent activities the open spots fill in as the shared pair forms.
+- On the first tab each atom's electrons have **their own color**, so students can follow an electron from the metal to the nonmetal.
+- In portrait the stage is smaller, the tabs are compact, and a nudge bar points down to the instructions and controls.
+
 ## Modeling notes (for teachers)
 - **Activity 1:** a nonmetal is stable at 8 valence electrons; a metal is stable once its valence shell is empty. Electrons that came from the metal stay gold so students can track them. The formula uses the simplest ratio (2 Na + 2 Cl is still NaCl).
 - **Activity 2:** ions feel real Coulomb attraction/repulsion plus a hard core. A gentle "lattice-site pull" (it fades as temperature rises) stands in for the periodic potential of the rest of the crystal.
-- **Activity 3:** electrons are drawn as dots in a sea around fixed cores. The model does not include electron waves or band theory.
+- **Activity 3:** electrons are drawn as dots in a sea around fixed cores. The model does not include electron waves or band theory. In the alloy mixer each metal donates a fixed number of valence electrons (Cu 1, Zn 2, Sn 2, Al 3, Fe 2, Ni 2, Mg 2, Pb 2) and the atoms have different sizes, which is why alloys can be mixed in any proportion.
 - **Activities 4–6:** electrons are shown as dots, and they blend from orbiting their own atom to the bond region as the atoms approach. Bond lengths and energies shown are textbook values (H–H 74 pm/436 kJ, F–F 143/159, Cl–Cl 199/243, O=O 121/498, N≡N 110/945).
 - Molecules in activity 6 are drawn flat (2-D). Real CH₄ is a tetrahedron and water is bent at about 105°.
 
