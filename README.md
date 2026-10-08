@@ -20,6 +20,31 @@ Finishing all seven gives a **completion code**, which only appears once every q
 
 To point it at a different form, change `FORM_BASE` and `FORM_ENTRY` in `index.html`.
 
+## Virtual lab: ratio of calcium to chlorine (separate page)
+
+**▶ Open it:** https://tdavidsm.github.io/chem-bonding-activities/calcium-chloride-lab.html (also linked from the main page header)
+
+A walk-through of the *Determine the Ratio of Calcium to Chlorine in Calcium Chloride* lab, in the same order as the handout. It is a practice run for the real lab; it has no completion code and does not touch the bonding activities' progress.
+
+| Tab | Handout step | What students do |
+|-----|--------------|------------------|
+| Prep | Safety / equipment | Put on goggles, tap each item, answer 2 safety questions |
+| Step 1 | 1 | Drag the flask onto the balance, record its mass |
+| Step 2 | 2 | TARE, add ~1 g of calcium with forceps (bare hands are refused), record the mass |
+| Steps 3–4 | 3, 4 | Pour 25 mL of water via the cylinder; **atom view:** Ca → Ca ions + OH⁻ + H₂ bubbles; test pH with pH paper |
+| Steps 5–6 | 5, 6 | Hold the flask, add 10 drops then squirts of HCl with the eyedropper, swirl; **atom view:** H⁺ + OH⁻ → H₂O, Ca ions and Cl⁻ dissolved |
+| Step 7 | 7 | pH paper again |
+| Steps 8–9 | 8, 9 | Build the ring stand / mesh / clamp / Bunsen burner, light it, boil dry; **atom view:** water and extra HCl leave, ions lock into a solid |
+| Steps 10–12 | 10–12 | Cool, mass flask + CaCl₂, wash, return to the center table |
+| Analysis | Data Analysis Table 2, Questions 1–4 | Masses → Cl:Ca mass ratio, then pie charts (ion count → mass, side by side with the student's own pie) to pick the formula |
+
+Electron colors in the atom views: **gold** = from calcium, **blue** = a water molecule's own, **violet** = from the H of HCl.
+
+Teacher notes:
+- The atom views never show the final Ca:Cl ratio: the sample is a small window of the flask, the solid is a jumbled cluster, and extra HCl (used to dissolve the last of the white solid) boils away. Day 1 does show calcium giving up electrons (the handout already gives Ca(OH)₂).
+- The practice masses are randomized per student (flask mass and a small weighing error), and the Analysis tab's three mass boxes can be overwritten with the student's **real** lab numbers.
+- Add `#unlock` to the URL to open every tab without finishing the steps. "Start the practice lab over" (under the data table) clears saved progress.
+
 ## Modeling notes (for teachers)
 - **Activity 1:** a nonmetal is stable at 8 valence electrons; a metal is stable once its valence shell is empty. Electrons that came from the metal stay gold so students can track them. The formula uses the simplest ratio (2 Na + 2 Cl is still NaCl).
 - **Activity 2:** ions feel real Coulomb attraction/repulsion plus a hard core. A gentle "lattice-site pull" (it fades as temperature rises) stands in for the periodic potential of the rest of the crystal.
