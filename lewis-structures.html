@@ -1,0 +1,1223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Lewis Structures, Naming and Acids</title>
+<meta name="theme-color" content="#0f1830" />
+<style>
+  :root{
+    --bg:#0f1830; --panel:#16213e; --panel2:#1d2b52; --ink:#eaf0ff;
+    --muted:#9fb0d6; --line:#2c3d6b; --accent:#ffd166;
+    --good:#2fbf57; --bad:#e6294b;
+    --ionic:#ff9f43; --metal:#7fb8ff; --cov:#5be0a0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{background:radial-gradient(1200px 700px at 70% -10%, #1a2a52 0%, var(--bg) 55%);
+    color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+  header{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#1a2748,#131f3c);flex-wrap:wrap}
+  header h1{font-size:19px;margin:0;letter-spacing:.3px}
+  header .tag{font-size:12px;color:var(--muted)}
+  header .spacer{flex:1}
+  .helpbtn{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;
+    padding:7px 12px;font-size:13px;cursor:pointer;touch-action:manipulation}
+  .helpbtn:hover{border-color:var(--accent)}
+  .medals{display:flex;gap:6px}
+  .medal{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:13px;border:2px solid var(--line);background:var(--panel2);color:var(--muted)}
+  .medal.won{border-color:var(--good);background:#153b28;color:#8ff0b6}
+
+  .wrap{max-width:1400px;margin:0 auto;padding:12px 14px 30px}
+
+  .tabs{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:10px}
+  a.btn{text-decoration:none;display:inline-block}
+  .tab{text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:12px;
+    padding:7px 11px;cursor:pointer;transition:.12s;touch-action:manipulation;color:var(--ink);font:inherit;min-width:0}
+  .tab:hover{border-color:#3a4d7d}
+  .tab.sel{border-color:var(--accent);background:#20315c}
+  .tab .n{font-size:11px;text-transform:uppercase;letter-spacing:.6px;font-weight:700}
+  .tab[data-g="ionic"] .n{color:var(--ionic)} .tab[data-g="metal"] .n{color:var(--metal)} .tab[data-g="cov"] .n{color:var(--cov)} .tab[data-g="sum"] .n{color:var(--accent)}
+  .tab .nm{font-weight:700;font-size:14px;margin-top:2px}
+  .tab .badge{float:right;font-size:12px}
+  @media (max-width:1250px){ .tab{padding:6px 8px} .tab .nm{font-size:13px} .tab .n{font-size:10px} }
+  @media (max-width:1000px){ .tabs{grid-template-columns:repeat(4,1fr)} }
+  @media (max-width:560px){ .tabs{grid-template-columns:repeat(2,1fr)} .tab .nm{font-size:13px} }
+
+  #belowHint{display:none;width:100%;margin:8px 0 0;padding:9px 12px;border:1px solid var(--accent);border-radius:12px;background:rgba(255,209,102,.1);color:var(--accent);font:inherit;font-size:14px;font-weight:800;cursor:pointer;touch-action:manipulation;align-items:center;justify-content:center;gap:8px;animation:nudge 1.8s ease-in-out infinite;transition:opacity .3s}
+  #belowHint.gone{opacity:0;pointer-events:none;animation:none}
+  @keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+  .alsl{display:flex;align-items:center;gap:8px;margin:6px 0}
+  .alsl input{flex:1;height:34px;accent-color:var(--accent);min-width:0}
+  .alsl .dot{width:14px;height:14px;border-radius:50%;flex:none;border:1.5px solid rgba(0,0,0,.4)}
+  .alsl b{width:26px;flex:none}
+  .alsl .pc{width:46px;text-align:right;font-variant-numeric:tabular-nums;font-weight:800;flex:none}
+  .alrow{display:grid;grid-template-columns:14px 1fr auto;gap:2px 8px;align-items:center;font-size:13px;margin:5px 0}
+  .alrow i{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(0,0,0,.4)}
+  .alrow small{grid-column:2/4;color:var(--muted);font-size:12px}
+  .stagewrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#0a1024}
+  canvas#stage{display:block;width:100%;height:auto;aspect-ratio:1000/560;touch-action:none;
+    user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
+  canvas#stage.grabbing{cursor:grabbing}
+  /* landscape: the stage is 15% shorter (same shape, centered) so the instructions below stay in view */
+  @media (orientation:landscape) and (min-width:700px){ canvas#stage{width:85%;margin:0 auto} }
+  /* portrait: shorter stage, compact tabs, and a nudge so people notice the instructions below */
+  @media (orientation:portrait){
+    canvas#stage{width:80%;margin:0 auto}
+    #belowHint{display:flex}
+    header{padding:7px 12px}
+    .tabs{grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+    .tab{padding:5px 8px;border-width:1.5px} .tab .n{display:none} .tab .nm{font-size:12.5px;margin-top:0}
+    .wrap{padding-top:8px}
+  }
+  @media (orientation:portrait) and (max-width:560px){ canvas#stage{width:94%} .tabs{grid-template-columns:repeat(3,1fr)} }
+  /* always-visible scroll strip down the right edge (iPad hides its own scrollbar) */
+  #scrollstrip{position:fixed;right:3px;top:8px;bottom:8px;width:18px;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:9px;z-index:20;touch-action:none;display:none}
+  #scrollthumb{position:absolute;left:0;right:0;top:0;min-height:48px;background:var(--accent);opacity:.75;border-radius:9px;touch-action:none}
+  #scrollstrip.drag #scrollthumb{opacity:1}
+  body.hasstrip .wrap,body.hasstrip footer{padding-right:30px}
+  body.hasstrip header{padding-right:30px}
+  .toast{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:rgba(10,17,36,.95);
+    border:1px solid var(--good);color:#bff5d3;border-radius:12px;padding:9px 16px;font-weight:700;font-size:15px;
+    display:none;box-shadow:0 8px 24px #0009;z-index:5;text-align:center;max-width:90%}
+  .toast.show{display:block}
+
+  .dock{display:grid;grid-template-columns:1.1fr 1fr 1.1fr;gap:12px;margin-top:12px}
+  @media (max-width:980px){ .dock{grid-template-columns:1fr 1fr} .dock .card:last-child{grid-column:1 / -1} }
+  @media (max-width:640px){ .dock{grid-template-columns:1fr} }
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
+  .card h2{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:0 0 8px}
+  .goal{font-size:14px;line-height:1.5}
+  .goal b{color:var(--accent)}
+  .muted{color:var(--muted)}
+  .hintline{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.45}
+  .status{font-size:13.5px;margin-top:8px;min-height:2.6em;color:var(--accent);font-weight:600;line-height:1.4}
+  .ledger{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:13px;margin:8px 0}
+  .ledger b{font-variant-numeric:tabular-nums;font-size:15px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+  .chip{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:8px 12px;
+    font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;min-height:40px;font-family:inherit}
+  .chip:hover{border-color:var(--accent)}
+  .chip.on{border-color:var(--accent);background:#2a3d72;color:var(--accent)}
+  .chip.ok{border-color:var(--good);background:#153b28;color:#8ff0b6}
+  .chip small{font-size:11px;font-weight:600;opacity:.8;margin-left:4px}
+  .lab{font-size:12px;color:var(--muted);margin:8px 0 2px;text-transform:uppercase;letter-spacing:.6px}
+  .checks{list-style:none;margin:6px 0 0;padding:0;font-size:13.5px;line-height:1.5}
+  .checks li{padding-left:24px;position:relative;margin:3px 0}
+  .checks li::before{content:"○";position:absolute;left:2px;color:var(--muted)}
+  .checks li.ok{color:#8ff0b6} .checks li.ok::before{content:"✓";color:#8ff0b6;font-weight:800}
+  .btn{border:none;border-radius:12px;padding:11px 15px;font-size:14px;font-weight:800;cursor:pointer;
+    color:#0f1830;background:var(--accent);touch-action:manipulation;user-select:none;-webkit-user-select:none;font-family:inherit}
+  .btn:hover{filter:brightness(1.05)}
+  .btn.secondary{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+  .btn.secondary:hover{border-color:var(--accent)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+  .btn.on{background:#2a3d72;color:var(--accent);border:1px solid var(--accent)}
+  .rowbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .slider{display:flex;align-items:center;gap:10px;margin:10px 0 4px;font-size:12px;color:var(--muted)}
+  .slider input{flex:1;height:34px;accent-color:var(--accent)}
+  .quiz{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
+  .quiz .q{font-size:14px;font-weight:700;margin-bottom:6px;line-height:1.4}
+  .quiz .opt{display:block;width:100%;text-align:left;margin:5px 0;background:var(--panel2);border:1px solid var(--line);
+    color:var(--ink);border-radius:10px;padding:9px 12px;font-size:14px;cursor:pointer;font-family:inherit;touch-action:manipulation}
+  .quiz .opt:hover{border-color:var(--accent)}
+  .quiz .opt.right{border-color:var(--good);background:#153b28;color:#8ff0b6}
+  .quiz .opt.wrong{border-color:var(--bad);background:#3a1620;color:#ff9aa9}
+  .quiz.locked{opacity:.45}
+  .quiz .cd{margin-top:5px;font-size:13px;color:var(--accent)} .quiz .cd b{font-variant-numeric:tabular-nums;font-size:15px}
+  .quiz .opt:disabled{cursor:default}
+  .quiz .opt.wrong:disabled{opacity:.8}
+  .quiz .fb{font-size:13px;margin-top:6px;line-height:1.45}
+
+  .modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:30;padding:18px}
+  .modal.show{display:flex}
+  .modalbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:680px;width:100%;
+    padding:22px 24px;line-height:1.55;max-height:88vh;overflow:auto}
+  .modalbox h2{margin:0 0 6px;font-size:22px}
+  .modalbox h3{margin:14px 0 4px;font-size:15px}
+  .modalbox p{margin:6px 0;font-size:14.5px}
+  .tri{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+  @media (max-width:560px){ .tri{grid-template-columns:1fr} }
+  .tri div{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13.5px}
+  .tri b{display:block;margin-bottom:3px;font-size:15px}
+  .field{width:100%;background:#0c1428;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:12px;font-size:16px;font-family:inherit}
+  .row2{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+  .code{font-size:40px;font-weight:900;letter-spacing:6px;text-align:center;color:var(--accent);margin:12px 0;
+    font-family:ui-monospace,Menlo,Consolas,monospace}
+  footer{max-width:1400px;margin:0 auto;padding:0 14px 26px;color:var(--muted);font-size:12px}
+
+  /* ---- Lewis / naming / acids lab-specific ---- */
+  :root{ --lw:#5be0a0; --nm:#c3a1ff; --ac:#ff8fc7; }
+  .tab[data-g="lw"] .n{color:var(--lw)} .tab[data-g="nm"] .n{color:var(--nm)} .tab[data-g="ac"] .n{color:var(--ac)}
+  .tab.locked{opacity:.5}
+  .tab .nm{line-height:1.2}
+  .backlink{color:var(--muted);font-size:12px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--panel2)}
+  .backlink:hover{border-color:var(--accent);color:var(--ink)}
+  canvas#stage{cursor:default}
+  @media (orientation:portrait){ canvas#stage{width:100%} }
+  .player{display:none;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+  .player.show{display:block}
+  .player .prow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .player .pstep{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700;margin-left:auto}
+  .player .ptext{font-size:16px;line-height:1.5;margin-top:8px;min-height:3em}
+  .player .ptext b{color:var(--accent)}
+  .player .ptext .mono{font-family:ui-monospace,Menlo,Consolas,monospace;background:#0c1428;padding:1px 6px;border-radius:6px}
+  .sbs{display:flex;gap:5px;flex-wrap:wrap}
+  .sb{min-width:36px;height:36px;border-radius:18px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;touch-action:manipulation;padding:0 6px}
+  .sb:hover{border-color:var(--accent)}
+  .sb.on{border-color:var(--accent);background:#2a3d72;color:var(--accent)}
+  .sb.seen{border-color:var(--good);color:#8ff0b6}
+  .sb.on.seen{border-color:var(--accent)}
+  .coach{background:#1d2b52;border:1px solid var(--accent);border-radius:12px;padding:10px 12px;font-size:14.5px;line-height:1.5;margin:8px 0}
+  .coach b{color:var(--accent)}
+  .coach.plain{border-color:var(--line);background:var(--panel2)}
+  .warn{border:1px solid #6b3a14;background:#2a1a10;color:#ffcf9a;border-radius:10px;padding:8px 10px;font-size:13.5px;line-height:1.45;margin:8px 0}
+  .okbox{border:1px solid var(--good);background:#153b28;color:#bff5d3;border-radius:10px;padding:8px 10px;font-size:14px;line-height:1.45;margin:8px 0}
+  .numrow{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:14px;flex-wrap:wrap}
+  .numrow label{color:var(--ink);font-weight:700}
+  .numrow input{width:84px;background:#0c1428;border:2px solid var(--line);color:var(--ink);border-radius:10px;padding:8px 10px;font-size:18px;font-family:inherit;text-align:center;font-weight:800}
+  .numrow input.good{border-color:var(--good);color:#8ff0b6}
+  .numrow input.hl{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,209,102,.25)}
+  .numrow .mk{font-size:18px;min-width:22px}
+  .chip.big{font-size:16px;padding:9px 13px;min-height:44px}
+  .chip:disabled{opacity:.4;cursor:not-allowed}
+  .chip.sel{border-color:var(--accent);background:#2a3d72;color:var(--accent)}
+  .chip.sel.ok{border-color:var(--good);background:#153b28;color:#8ff0b6}
+  .chip.bad{border-color:var(--bad);background:#3a1620;color:#ff9aa9}
+  .stepper{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:15px}
+  .stepper .lbl{flex:1;font-weight:700}
+  .stepper button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-size:22px;font-weight:800;cursor:pointer;font-family:inherit;touch-action:manipulation}
+  .stepper button:hover{border-color:var(--accent)}
+  .stepper .val{width:44px;text-align:center;font-size:22px;font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums}
+  table.cmp{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px}
+  table.cmp th{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:left;padding:4px 4px;border-bottom:1px solid var(--line)}
+  table.cmp td{padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.35}
+  table.cmp tr.empty td{color:var(--muted)}
+  table.cmp tr.got td:first-child{color:#8ff0b6;font-weight:800}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+  @media (max-width:640px){ .opts{grid-template-columns:1fr} }
+  .opts .chip{text-align:left;font-size:15px;white-space:normal}
+  .rule{border-left:4px solid var(--nm);background:var(--panel2);border-radius:0 10px 10px 0;padding:7px 10px;margin:6px 0;font-size:14px;line-height:1.45}
+  .rule b{color:var(--accent)}
+  .rule.ac{border-color:var(--ac)} .rule.lw{border-color:var(--lw)}
+  .kbd{display:inline-block;background:#0c1428;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔬 Lewis Structures, Naming &amp; Acids</h1>
+  <span class="tag">draw it · name it · explain acids</span>
+  <span class="spacer"></span>
+  <div class="medals" id="medals"></div>
+  <a class="backlink" href="index.html">← Bonding activities</a>
+  <button class="helpbtn" id="codeBtn" style="display:none">🏅 Get my code</button>
+  <button class="helpbtn" id="helpBtn">? How it works</button>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs"></div>
+  <div class="stagewrap">
+    <canvas id="stage"></canvas>
+    <div class="toast" id="toast"></div>
+  </div>
+  <div class="player" id="player">
+    <div class="prow">
+      <button class="btn secondary" id="pBack" aria-label="Previous step">◀ Back</button>
+      <button class="btn" id="pPlay">▶ Play</button>
+      <button class="btn secondary" id="pNext" aria-label="Next step">Next ▶</button>
+      <div class="sbs" id="pDots"></div>
+      <span class="pstep" id="pStep"></span>
+    </div>
+    <div class="ptext" id="pText"></div>
+  </div>
+  <button id="belowHint" type="button">⬇ Instructions and controls are below ⬇</button>
+  <div class="dock">
+    <div class="card"><h2 id="h1">Your mission</h2><div id="c1"></div></div>
+    <div class="card"><h2 id="h2">Controls</h2><div id="c2"></div></div>
+    <div class="card"><h2 id="h3">What's happening</h2><div id="c3"></div></div>
+  </div>
+  <div class="navrow" style="display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap"><button class="btn secondary" id="prevBtn">← Back</button><div id="navmid" style="flex:1;min-width:180px;text-align:center;font-size:13.5px;color:var(--muted)"></div><button class="btn" id="nextBtn">Next activity →</button></div>
+</div>
+<div id="scrollstrip"><div id="scrollthumb"></div></div>
+<footer>Models are simplified on purpose: Lewis structures show which atoms are connected and where the electrons are, not the real 3-D shape. Real molecules like H₂O are bent and NO₃⁻ is a flat triangle.</footer>
+
+<div class="modal" id="helpModal"><div class="modalbox">
+  <h2>Draw it, name it, explain it</h2>
+  <p>Work through the eight tabs in order. Each one earns a ⭐ and unlocks the next, and finishing all eight gives you a completion code you can turn in.</p>
+  <div class="tri">
+    <div style="border-color:var(--lw)"><b style="color:var(--lw)">Lewis structures</b>Draw where the valence electrons go: shared pairs (lines) and lone pairs (dots). Practice five, then compare molecules made from the same atoms.</div>
+    <div style="border-color:var(--nm)"><b style="color:var(--nm)">Naming</b>Use the prefix rules (mono-, di-, tri-…) to name two-nonmetal compounds, and to write a formula from a name.</div>
+    <div style="border-color:var(--ac)"><b style="color:var(--ac)">Acids</b>See what really happens when HCl meets water, and why acid names (hydrochloric, nitric, nitrous…) look so strange.</div>
+  </div>
+  <p><b>Controls:</b> press <b>▶ Play</b> under the picture to watch an animation, or step through it with <b>Next</b>. Tap and drag directly on the picture where you are asked to.</p>
+  <p class="muted" style="font-size:13px">Electrons keep the same colors as in the covalent bonding activities: each atom's electrons have their own color, and dotted circles are open spots.</p>
+  <div class="row2"><button class="btn" id="helpClose">Let's go</button></div>
+</div></div>
+
+<div class="modal" id="nameModal"><div class="modalbox" style="max-width:440px">
+  <h2>🎉 Everything is done!</h2>
+  <p>Type your first and last name to get your completion code.</p>
+  <input class="field" id="nameField" type="text" autocomplete="off" placeholder="First and last name">
+  <div id="nameErr" style="color:#ff8b9b;font-size:13px;min-height:1.2em;margin-top:6px"></div>
+  <div class="row2"><button class="btn secondary" id="nameCancel">Later</button><button class="btn" id="nameGo">Get my code</button></div>
+</div></div>
+
+<div class="modal" id="winModal"><div class="modalbox" style="max-width:460px;text-align:center">
+  <h2>Nice work, <span id="winName"></span>!</h2>
+  <p>Your completion code:</p>
+  <div class="code" id="codeOut"></div>
+  <p class="muted" style="font-size:13px">Press <b>Turn it in</b> to open the class form with your name and code already filled in, then press Submit there. (Form won't open? Screenshot this page or copy the code.)</p>
+  <div class="row2" style="justify-content:center;flex-wrap:wrap"><a class="btn" id="turnIn" target="_blank" rel="noopener">Turn it in →</a><button class="btn secondary" id="copyBtn">Copy code</button><button class="btn secondary" id="winClose">Close</button></div>
+</div></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   Lewis Structures, Naming and Acids — one self-contained file.
+   Same look, electron colors and turn-in as the Chemical Bonding Lab.
+   ===================================================================== */
+const W=1000, H=560, TAU=Math.PI*2;
+const $=s=>document.querySelector(s);
+const cv=$('#stage'), ctx=cv.getContext('2d');
+let VS=1;
+function resize(){ const r=cv.getBoundingClientRect(); const dpr=Math.min(window.devicePixelRatio||1,2.5);
+  cv.width=Math.max(10,Math.round(r.width*dpr)); cv.height=Math.round(cv.width*H/W); VS=cv.width/W; }
+window.addEventListener('resize',resize);
+
+const FONT='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
+function txt(s,x,y,size,color,align,weight){ ctx.font=`${weight||700} ${size}px ${FONT}`; ctx.fillStyle=color||'#fff';
+  ctx.textAlign=align||'center'; ctx.textBaseline='middle'; ctx.fillText(s,x,y); }
+function circ(x,y,r,fill,stroke,lw){ ctx.beginPath(); ctx.arc(x,y,r,0,TAU); if(fill){ctx.fillStyle=fill;ctx.fill();} if(stroke){ctx.lineWidth=lw||1;ctx.strokeStyle=stroke;ctx.stroke();} }
+function dashCirc(x,y,r,stroke,lw,dash){ ctx.save(); ctx.setLineDash(dash||[5,5]); circ(x,y,r,null,stroke,lw); ctx.restore(); }
+function rr(x,y,w,h,r){ ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(x,y,w,h,r); else ctx.rect(x,y,w,h); }
+function fillRR(x,y,w,h,r,fill,stroke,lw){ rr(x,y,w,h,r); if(fill){ctx.fillStyle=fill;ctx.fill();} if(stroke){ctx.lineWidth=lw||1;ctx.strokeStyle=stroke;ctx.stroke();} }
+function arrow(x0,y0,x1,y1,color,lw){ const a=Math.atan2(y1-y0,x1-x0), h=Math.min(12,Math.hypot(x1-x0,y1-y0)*.5);
+  ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=lw||2; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x1-h*Math.cos(a-.45),y1-h*Math.sin(a-.45)); ctx.lineTo(x1-h*Math.cos(a+.45),y1-h*Math.sin(a+.45)); ctx.closePath(); ctx.fill(); }
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=s=>{ s=clamp(s,0,1); return s*s*(3-2*s); };
+const SUPD={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const SUBD='₀₁₂₃₄₅₆₇₈₉';
+const sub=n=>String(n).replace(/\d/g,d=>SUBD[+d]);
+const hexRGB=h=>{ const n=parseInt(h.slice(1),16); return [n>>16,(n>>8)&255,n&255]; };
+const rgba=(h,a)=>{ const c=hexRGB(h); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; };
+function mixCol(a,b,t){ const A=hexRGB(a),B=hexRGB(b); return `rgb(${Math.round(lerp(A[0],B[0],t))},${Math.round(lerp(A[1],B[1],t))},${Math.round(lerp(A[2],B[2],t))})`; }
+
+/* ---------------- element data (same colors as the covalent activities) ---------------- */
+const ECOL=['#7fd4ff','#ffcf6b','#ff8fc7','#a6f58a','#c3a1ff','#ff9f6b','#6bf0e0','#f5f08a'];   // each atom's electrons get their own color
+const ELM={
+  H :{v:1,Z:1 ,sh:[1]    ,rk:11,col:'#dfe6f7',tx:'#1b2440',name:'hydrogen'  ,ide:'hydride'  ,en:2.20},
+  C :{v:4,Z:6 ,sh:[2,4]  ,rk:18,col:'#6b7280',tx:'#fff'   ,name:'carbon'    ,ide:'carbide'   ,en:2.55},
+  N :{v:5,Z:7 ,sh:[2,5]  ,rk:18,col:'#5c86ff',tx:'#fff'   ,name:'nitrogen'  ,ide:'nitride'   ,en:3.04},
+  O :{v:6,Z:8 ,sh:[2,6]  ,rk:18,col:'#ff6b6b',tx:'#fff'   ,name:'oxygen'    ,ide:'oxide'     ,en:3.44},
+  F :{v:7,Z:9 ,sh:[2,7]  ,rk:18,col:'#4fd18b',tx:'#0a2a18',name:'fluorine'  ,ide:'fluoride'  ,en:3.98},
+  Cl:{v:7,Z:17,sh:[2,8,7],rk:21,col:'#38c26b',tx:'#0a2a18',name:'chlorine'  ,ide:'chloride'  ,en:3.16},
+  S :{v:6,Z:16,sh:[2,8,6],rk:21,col:'#e6c84a',tx:'#2a2204',name:'sulfur'    ,ide:'sulfide'   ,en:2.58},
+  P :{v:5,Z:15,sh:[2,8,5],rk:21,col:'#ff9a3c',tx:'#2a1604',name:'phosphorus',ide:'phosphide' ,en:2.19},
+  Br:{v:7,Z:35,sh:[2,8,18,7],rk:23,col:'#c0623a',tx:'#fff',name:'bromine'   ,ide:'bromide'   ,en:2.96}
+};
+const CS=1.55;      // how big the colored cores are drawn (same style as the covalent activities, a bit larger)
+
+/* ---------------- saved progress ---------------- */
+const KEY='lewislab.v1';
+const ACTS=[
+  {id:'l1',g:'lw',n:'Lewis 1',nm:'Dot Pictures'},
+  {id:'l2',g:'lw',n:'Lewis 2',nm:'Practice Five'},
+  {id:'l3',g:'lw',n:'Lewis 3',nm:'Same Atoms'},
+  {id:'n1',g:'nm',n:'Naming 1',nm:'Prefix Rules'},
+  {id:'n2',g:'nm',n:'Naming 2',nm:'Name It'},
+  {id:'ac1',g:'ac',n:'Acids 1',nm:'Why So Odd?'},
+  {id:'ac2',g:'ac',n:'Acids 2',nm:'Name Acids'},
+  {id:'sm',g:'sum',n:'Summary',nm:'Put It Together'}
+];
+let state={done:{},q:{},lock:{},seen:{},p:{},n:{},a:{},code:'',name:''};
+try{ const d=JSON.parse(localStorage.getItem(KEY)||'null'); if(d) state=Object.assign(state,d); }catch(e){}
+const UNLOCK=/unlock/.test(location.hash);
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+let toastT=0;
+function toast(msg,bad){ const t=$('#toast'); t.textContent=msg; t.style.borderColor=bad?'#e6294b':''; t.style.color=bad?'#ffb4c0':''; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3600); }
+const doneCount=()=>ACTS.filter(a=>state.done[a.id]).length;
+const ALL_Q=[['l1',2],['l3',3],['n1',2],['ac1',2],['sm',3]];
+function mqDone(key,n){ const got=(state.q&&state.q[key])||[]; for(let i=0;i<n;i++) if(!got[i]) return false; return true; }
+const allQuestionsRight=()=>ALL_Q.every(([k,n])=>mqDone(k,n));
+const canGetCode=()=>ACTS.every(a=>state.done[a.id])&&allQuestionsRight();
+(function sanitize(){ ALL_Q.forEach(([k,n])=>{ if(state.done[k]&&!mqDone(k,n)) state.done[k]=false; }); })();
+function award(id){ if(state.done[id]) return; state.done[id]=true; save(); renderChrome(); updateNav();
+  toast(`⭐ Activity complete! (${doneCount()}/${ACTS.length})`);
+  if(canGetCode()) setTimeout(()=>{ if(!state.code) openName(); },1800); }
+const unlocked=i=>UNLOCK||i===0||!!state.done[ACTS[i-1].id];
+function renderChrome(){
+  $('#medals').innerHTML=ACTS.map(a=>`<div class="medal ${state.done[a.id]?'won':''}" title="${a.nm}">${state.done[a.id]?'★':ACTS.indexOf(a)+1}</div>`).join('');
+  $('#tabs').innerHTML=ACTS.map((a,i)=>`<button class="tab ${i===cur_i?'sel':''} ${unlocked(i)?'':'locked'}" data-i="${i}" data-g="${a.g}"><span class="badge">${state.done[a.id]?'⭐':unlocked(i)?'':'🔒'}</span><div class="n">${a.n}</div><div class="nm">${a.nm}</div></button>`).join('');
+  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchTo(+b.dataset.i));
+  $('#codeBtn').style.display=canGetCode()?'':'none';
+}
+function updateNav(){ const ok=!!state.done[ACTS[cur_i].id], last=cur_i===ACTS.length-1;
+  $('#prevBtn').style.visibility=cur_i>0?'visible':'hidden'; $('#nextBtn').style.display=last?'none':''; $('#nextBtn').disabled=!ok; $('#nextBtn').style.opacity=ok?1:.45;
+  $('#navmid').textContent=ok?(last?'':'✓ Done! Move on to the next activity.'):'Finish everything in this activity to unlock the next one.'; }
+
+/* ---------------- completion code + Google Form turn-in (same scheme as the Chemical Bonding Lab) ---------------- */
+function letter(c){ c=(c||'').toUpperCase(); return /[A-Z]/.test(c)?c:'X'; }
+function initials(name){ const p=name.trim().split(/\s+/).filter(Boolean);
+  const a=letter((p[0]||'')[0]); const b=letter(p.length>1?(p[p.length-1]||'')[0]:((p[0]||'')[1]||(p[0]||'')[0])); return [a,b]; }
+function makeCode(name){ const [i1,i2]=initials(name); const cs='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; const r=()=>cs[Math.floor(Math.random()*cs.length)];
+  return [r(),r(),i1,r(),r(),i2,r(),r()].join(''); }
+function openName(){ if(!canGetCode()) return; if(state.code){ showCode(); return; } $('#nameField').value=''; $('#nameErr').textContent=''; $('#nameModal').classList.add('show'); setTimeout(()=>$('#nameField').focus(),50); }
+const FORM_BASE='https://docs.google.com/forms/d/e/1FAIpQLSdWMUSHB0cym2_ke-mQ-wd1abj46G8BVvWsJmk9aQac5r-7AA/viewform';
+const FORM_ENTRY={name:'entry.2072631698',code:'entry.1611661514'}; // "Name" and "Code" questions on the class form
+function turnInURL(){ const q=new URLSearchParams({usp:'pp_url'}); q.append(FORM_ENTRY.name,state.name||''); q.append(FORM_ENTRY.code,state.code||''); return FORM_BASE+'?'+q.toString(); }
+function showCode(){ $('#turnIn').href=turnInURL(); $('#winName').textContent=(state.name||'').split(/\s+/)[0]; $('#codeOut').textContent=state.code; $('#nameModal').classList.remove('show'); $('#winModal').classList.add('show'); }
+$('#nameGo').onclick=()=>{ const name=$('#nameField').value.trim();
+  if(name.replace(/[^A-Za-z]/g,'').length<2){ $('#nameErr').textContent='Please enter your first and last name.'; return; }
+  state.name=name; state.code=makeCode(name); save(); showCode(); };
+$('#nameField').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#nameGo').click(); });
+$('#nameCancel').onclick=()=>$('#nameModal').classList.remove('show');
+$('#winClose').onclick=()=>$('#winModal').classList.remove('show');
+$('#copyBtn').onclick=()=>{ try{ navigator.clipboard.writeText(state.code); $('#copyBtn').textContent='Copied ✓'; }catch(e){} };
+$('#codeBtn').onclick=openName;
+$('#helpBtn').onclick=()=>$('#helpModal').classList.add('show');
+$('#helpClose').onclick=()=>{ $('#helpModal').classList.remove('show'); try{localStorage.setItem(KEY+'.seen','1');}catch(e){} };
+
+/* ---------------- multiple-choice questions (same behavior as the other activities: hint + one-minute freeze) ---------------- */
+function mqHTML(qs,key,off){ off=off||0; const got=(state.q&&state.q[key])||[];
+  return qs.map((q,qi)=>{ const g=qi+off, locked=g>0&&!got[g-1]&&!got[g];
+    return `<div class="quiz ${locked?'locked':''}" data-key="${key}" data-qi="${g}"><div class="q">${qs.length>1||off?(g+1)+'. ':''}${q.q}</div>${q.opts.map((o,i)=>`<button class="opt ${got[g]&&i===q.ans?'right':''}" data-i="${i}" ${locked||got[g]?'disabled':''}>${o}</button>`).join('')}<div class="fb">${got[g]?'✓ '+q.why:locked?'🔒 Answer the question above first.':''}</div></div>`; }).join(''); }
+const WRONG_LOCK_MS=60000; // after a wrong answer the question is frozen for one minute
+function mqWire(root,qs,key,onChange,off){ off=off||0; root.querySelectorAll('.quiz').forEach(box=>{ const qi=+box.dataset.qi,q=qs[qi-off],fb=box.querySelector('.fb'),lk=key+':'+qi,opts=[...box.querySelectorAll('.opt')];
+  const hintHTML=()=>'<b>Not quite.</b> Hint: '+q.hint;
+  function cool(){ if(!box.isConnected||(state.q[key]||[])[qi]) return; const left=Math.ceil((((state.lock||{})[lk]||0)-Date.now())/1000);
+    if(left>0){ box.classList.add('cooling'); opts.forEach(o=>o.disabled=true);
+      fb.innerHTML=hintHTML()+`<div class="cd">⏳ Think it over. You can answer again in <b>${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}</b></div>`; setTimeout(cool,250); }
+    else if(box.classList.contains('cooling')){ box.classList.remove('cooling'); opts.forEach(o=>{ if(!o.classList.contains('wrong')) o.disabled=false; }); fb.innerHTML=hintHTML()+'<div class="cd">✅ Ready. Pick another answer.</div>'; } }
+  opts.forEach(b=>b.onclick=()=>{ const i=+b.dataset.i; if(box.classList.contains('locked')||box.classList.contains('cooling')) return;
+    if(i===q.ans){ box.querySelectorAll('.opt').forEach(o=>{ o.disabled=true; if(o!==b) o.classList.remove('wrong'); }); b.classList.add('right'); fb.innerHTML='✓ '+q.why; (state.q[key]=state.q[key]||[])[qi]=true; save();
+      const nx=document.querySelector(`.quiz[data-key="${key}"][data-qi="${qi+1}"]`); if(nx&&nx.classList.contains('locked')){ nx.classList.remove('locked'); nx.querySelectorAll('.opt').forEach(o=>o.disabled=false); nx.querySelector('.fb').textContent=''; }
+      onChange&&onChange(); }
+    else{ b.classList.add('wrong'); (state.lock=state.lock||{})[lk]=Date.now()+WRONG_LOCK_MS; save(); cool(); } });
+  if(((state.lock||{})[lk]||0)>Date.now()&&!(state.q[key]||[])[qi]){ box.classList.add('cooling'); cool(); } }); }
+
+/* ---------------- shared drawing: cores, electrons, pills (same style as the covalent activities) ---------------- */
+function core(x,y,sym,sc,a){ const d=ELM[sym], r=d.rk*sc, big=d.rk>14; ctx.save(); if(a!==undefined) ctx.globalAlpha*=a;
+  const g=ctx.createRadialGradient(x-r*.3,y-r*.35,1,x,y,r); g.addColorStop(0,'#ffffff55'); g.addColorStop(1,'#00000000');
+  circ(x,y,r,d.col,'rgba(0,0,0,.4)',1.3); circ(x,y,r,g); txt(sym,x,big?y-3*sc:y,(big?17:14)*sc,d.tx);
+  if(big) txt(d.v+'+',x,y+11*sc,9.5*sc,d.tx,'center',600); ctx.restore(); }
+const ER=6;
+function elec(x,y,col,a,glow,r){ r=r||ER; ctx.save(); if(a!==undefined) ctx.globalAlpha*=a; if(glow) circ(x,y,r*2,'rgba(255,233,168,.24)'); circ(x,y,r,col,'rgba(0,0,0,.5)',1); ctx.restore(); }
+function pill(x,y,text,ok,a){ ctx.save(); if(a!==undefined) ctx.globalAlpha*=a; fillRR(x-45,y-14,90,28,14,ok?'rgba(20,70,45,.95)':'rgba(30,40,70,.95)',ok?'#5be0a0':'rgba(255,255,255,.35)',1.5); txt(text,x,y+.5,16,ok?'#8ff0b6':'#cfdcf7'); ctx.restore(); }
+function glowAround(x,y,r,a){ ctx.save(); ctx.globalAlpha*=a; const g=ctx.createRadialGradient(x,y,r*.45,x,y,r); g.addColorStop(0,'rgba(91,224,160,0)'); g.addColorStop(1,'rgba(91,224,160,.28)'); circ(x,y,r,g); ctx.restore(); }
+
+/* =====================================================================
+   Lewis engine: lays a molecule out on a grid and tweens every electron
+   from stage to stage (count → bonds → outer atoms → center → multiple bonds).
+   ===================================================================== */
+const GX=165, GY=140, RP=50, EO=8, BO=18;
+const SD=[[0,-1],[1,0],[0,1],[-1,0]];   // sides: N, E, S, W
+const sideOf=(dx,dy)=>dx>0?1:dx<0?3:dy>0?2:0;
+function dotPos(x,y,side,off,rad){ const d=SD[side]; return [x+d[0]*rad-d[1]*off, y+d[1]*rad+d[0]*off]; }
+
+// where the dots of a free atom sit: one on each side first, then pair up (pairs go on sides that don't face a neighbor)
+function freeDotList(face,v){ const all=[0,1,2,3], nf=all.filter(s=>!face.includes(s)); const o1=[...new Set([...face,...nf])];
+  const np=Math.max(0,v-4), pairSides=np?[...nf,...face].slice(0,np):[]; const occ=np?all:o1.slice(0,Math.min(v,4)); const ps=new Set(pairSides);
+  const out=[]; let ord=0; occ.forEach(s=>out.push({side:s,off:ps.has(s)?-EO:0,ord:++ord})); pairSides.forEach(s=>out.push({side:s,off:EO,ord:++ord})); return out; }
+// sides used for c lone pairs on an atom
+function loneSides(A,c){ if(c<=0) return []; const free=[0,1,2,3].filter(s=>!A.face.includes(s));
+  if(A.deg===1){ const out=(A.face[0]+2)%4, perp=free.filter(s=>s!==out); if(c>=3) return [...perp,out]; if(c===2) return perp; return [out]; }
+  return free.slice(0,c); }
+
+function buildMol(spec,opts){ opts=opts||{};
+  const at=spec.atoms.map(([sym,gx,gy],i)=>({i,sym,gx,gy,col:ECOL[i%ECOL.length],face:[],deg:0,v:ELM[sym].v}));
+  const bd=spec.bonds.map(([a,b,k],bi)=>{ const A=at[a],B=at[b], sa=sideOf(B.gx-A.gx,B.gy-A.gy); A.face.push(sa); B.face.push((sa+2)%4); A.deg++; B.deg++; return {bi,a,b,k}; });
+  const gxs=at.map(a=>a.gx), gys=at.map(a=>a.gy), gcx=(Math.min(...gxs)+Math.max(...gxs))/2, gcy=(Math.min(...gys)+Math.max(...gys))/2;
+  const cx=opts.cx!==undefined?opts.cx:500, cy=opts.cy!==undefined?opts.cy:250, charge=spec.charge||0, extra=Math.max(0,-charge);
+  const total=at.reduce((s,a)=>s+a.v,0)+extra;
+  const spanX=(Math.max(...gxs)-Math.min(...gxs))*GX*1.35, spanY=(Math.max(...gys)-Math.min(...gys))*GY*1.35;
+  const z=opts.z||clamp(Math.min(840/(spanX+170),(opts.hav||330)/(spanY+170)),.85,1.5);   // zoom so every molecule fills the stage
+  const M={at,bd,charge,extra,total,spec,cx,cy,stages:[],ele:[],gcx,gcy,z};
+  const P=(i,spread)=>({x:cx+(at[i].gx-gcx)*GX*spread, y:cy+(at[i].gy-gcy)*GY*spread});
+  M.pos=P;
+  const fin=bd.map(b=>b.k), finLone=spec.lone.slice();
+  // the step-by-step recipe, worked out for this molecule
+  let pool=total-2*bd.length; const l2=at.map(()=>0);
+  at.filter(a=>a.deg===1&&a.sym!=='H').sort((p,q)=>(ELM[q.sym].en-ELM[p.sym].en)||(p.i-q.i)).forEach(a=>{ const c=Math.min(Math.floor(pool/2),3); l2[a.i]=c; pool-=2*c; });
+  M.pool2=pool; const l3=l2.slice();
+  at.filter(a=>a.sym!=='H'&&a.deg!==1).forEach(a=>{ const need=(8-2*a.deg)/2, c=Math.min(Math.floor(pool/2),Math.max(0,need)); l3[a.i]+=c; pool-=2*c; });
+  M.pool3=pool; M.l2=l2; M.l3=l3;
+  const mk=o=>Object.assign({spread:1,k:bd.map(()=>0),lone:at.map(()=>0),free:false,decor:0},o);
+  const k1=bd.map(()=>1);
+  if(opts.simple) M.stages=[mk({free:true,spread:1.22}),mk({k:fin,lone:finLone}),mk({k:fin,lone:finLone,decor:1})];
+  else{ M.stages=[mk({free:true,spread:1.35}),mk({k:k1}),mk({k:k1,lone:l2}),mk({k:k1,lone:l3}),mk({k:fin,lone:finLone}),mk({k:fin,lone:finLone,decor:1})];
+    (spec.variants||[]).forEach(v=>M.stages.push(mk({k:v.k,lone:v.lone,decor:1}))); }
+  function bondPt(b,j,kk,w,spread){ const A=P(b.a,spread),B=P(b.b,spread); let dx=B.x-A.x,dy=B.y-A.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d; const off=(j-(kk-1)/2)*BO;
+    return {x:(A.x+B.x)/2-dy*off+dx*(w?10:-10), y:(A.y+B.y)/2+dx*off+dy*(w?10:-10)}; }
+  M.bondPt=bondPt;
+  function stageSlots(st){ const sl=[];
+    if(st.free){ at.forEach(a=>{ const c=P(a.i,st.spread); freeDotList(a.face,a.v).forEach((d,j)=>{ const p=dotPos(c.x,c.y,d.side,d.off,RP); sl.push({key:'f'+a.i+'_'+j,x:p[0],y:p[1],col:a.col}); }); });
+      for(let n=0;n<extra;n++) sl.push({key:'x'+n,x:cx+(890+n*30-cx)/z,y:cy+(120-cy)/z,col:'#ffffff'}); return sl; }
+    bd.forEach(b=>{ const kk=st.k[b.bi]; for(let j=0;j<kk;j++) for(let w=0;w<2;w++){ const p=bondPt(b,j,kk,w,st.spread); sl.push({key:'b'+b.bi+'_'+j+'_'+w,x:p.x,y:p.y,col:w?at[b.b].col:at[b.a].col}); } });
+    at.forEach(a=>{ const c=P(a.i,st.spread); loneSides(a,st.lone[a.i]).forEach(s=>[-EO,EO].forEach(off=>{ const p=dotPos(c.x,c.y,s,off,RP); sl.push({key:'l'+a.i+'_'+s+'_'+off,x:p[0],y:p[1],col:a.col}); })); });
+    const np=total-sl.length; for(let n=0;n<np;n++) sl.push({key:'p'+n,x:cx+(130+n*27-cx)/z,y:cy+(496-cy)/z,col:null}); return sl; }
+  M.stageSlots=stageSlots;
+  // every electron keeps its identity from stage to stage: same slot key stays put, the rest move to the nearest open slot
+  M.stages.forEach((st,s)=>{ const sl=stageSlots(st); st.slots=sl; st.poolN=sl.filter(q=>q.key[0]==='p').length;
+    if(s===0){ sl.forEach(q=>M.ele.push({pts:[{x:q.x,y:q.y,col:q.col,key:q.key}]})); return; }
+    const prev=M.ele.map(e=>e.pts[s-1]), res=new Array(prev.length).fill(-1), taken=new Array(sl.length).fill(false), ki=new Map(sl.map((q,i)=>[q.key,i]));
+    prev.forEach((p,e)=>{ const i=ki.get(p.key); if(i!==undefined){ res[e]=i; taken[i]=true; } });
+    const pairs=[]; prev.forEach((p,e)=>{ if(res[e]>=0) return; sl.forEach((q,i)=>{ if(!taken[i]) pairs.push([Math.hypot(p.x-q.x,p.y-q.y),e,i]); }); });
+    pairs.sort((a,b)=>a[0]-b[0]); pairs.forEach(([d,e,i])=>{ if(res[e]<0&&!taken[i]){ res[e]=i; taken[i]=true; } });
+    M.ele.forEach((e,i)=>{ const q=sl[res[i]]; e.pts.push({x:q.x,y:q.y,col:q.col||e.pts[s-1].col,key:q.key}); }); });
+  M.finCount=at.map(a=>{ let n=2*finLone[a.i]; bd.forEach(b=>{ if(b.a===a.i||b.b===a.i) n+=2*fin[b.bi]; }); return n; });
+  return M; }
+
+function drawMolAt(M,u,t,opt){ opt=opt||{}; const last=M.stages.length-1; u=clamp(u,0,last); const s0=Math.min(Math.floor(u),last-1), p=ease(u-s0), S0=M.stages[s0], S1=M.stages[s0+1];
+  const spread=lerp(S0.spread,S1.spread,p), P=i=>M.pos(i,spread), at=M.at, bd=M.bd, A=opt.alpha===undefined?1:opt.alpha, decor=lerp(S0.decor,S1.decor,p);
+  ctx.save(); ctx.globalAlpha*=A;
+  // electron pool tray (the electrons that are counted but not placed yet)
+  const pn=lerp(S0.poolN||0,S1.poolN||0,p), pa=Math.max(S0.poolN>0?1-p:0,S1.poolN>0?p:0);
+  if(pa>0.01&&M.total>0){ ctx.save(); ctx.globalAlpha*=pa; const wd=Math.max(S0.poolN,S1.poolN,4)*27+34; fillRR(100,472,wd,48,12,'rgba(16,26,52,.85)','rgba(255,255,255,.28)',1.5); txt('Electron pool: '+Math.round(pn)+' left to place',104,456,18,'#cfdcf7','left'); ctx.restore(); }
+  if(s0===0&&M.extra>0){ const a=1-p; ctx.save(); ctx.globalAlpha*=Math.max(a,0); txt('+'+M.extra+' extra e⁻',895,70,18,'#ffffff','center'); txt('from the '+M.extra+'− charge',895,92,17,'#cfdcf7','center',600); ctx.restore(); }
+  ctx.save(); ctx.translate(M.cx,M.cy); ctx.scale(M.z,M.z); ctx.translate(-M.cx,-M.cy);
+  if(decor>0.01) at.forEach(a=>{ const c=P(a.i); glowAround(c.x,c.y,72,decor); });
+  // bond lines
+  ctx.lineCap='round';
+  bd.forEach(b=>{ const k0=S0.k[b.bi],k1=S1.k[b.bi],a=P(b.a),c=P(b.b); let dx=c.x-a.x,dy=c.y-a.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
+    for(let j=0;j<Math.max(k0,k1);j++){ const in0=j<k0,in1=j<k1, al=in0&&in1?1:in1?p:1-p; const o0=in0?(j-(k0-1)/2)*BO:null,o1=in1?(j-(k1-1)/2)*BO:null; const off=lerp(o0===null?o1:o0,o1===null?o0:o1,p);
+      ctx.strokeStyle=`rgba(235,242,255,${.85*al})`; ctx.lineWidth=3.6; ctx.beginPath(); ctx.moveTo(a.x-dy*off,a.y+dx*off); ctx.lineTo(c.x-dy*off,c.y+dx*off); ctx.stroke(); } });
+  at.forEach(a=>{ const c=P(a.i); core(c.x,c.y,a.sym,CS); });
+  M.ele.forEach((e,i)=>{ const a=e.pts[s0],b=e.pts[s0+1]; const wob=a.key[0]==='p'&&b.key[0]==='p'?3:1.3; const x=lerp(a.x,b.x,p)+Math.cos(t*2.1+i*1.7)*wob, y=lerp(a.y,b.y,p)+Math.sin(t*1.8+i*2.3)*wob;
+    elec(x,y,mixCol(a.col||'#ffffff',b.col||'#ffffff',p),1,(p>0.05&&p<0.95)); });
+  if(decor>0.01) at.forEach(a=>{ const c=P(a.i), tg=a.sym==='H'?2:8, n=M.finCount[a.i]; pill(c.x+56,c.y+62,n+' e⁻ '+(n===tg?'✓':''),n===tg,decor); });
+  if(M.charge!==0&&decor>0.01){ const xs=at.map(a=>P(a.i).x), ys=at.map(a=>P(a.i).y); const x0=Math.min(...xs)-88,x1=Math.max(...xs)+88,y0=Math.min(...ys)-92,y1=Math.max(...ys)+92;
+    ctx.save(); ctx.globalAlpha*=decor; ctx.strokeStyle='#ffd166'; ctx.lineWidth=4; ctx.lineCap='butt'; [[x0,1],[x1,-1]].forEach(([x,sg])=>{ ctx.beginPath(); ctx.moveTo(x+sg*22,y0); ctx.lineTo(x,y0); ctx.lineTo(x,y1); ctx.lineTo(x+sg*22,y1); ctx.stroke(); });
+    txt(Math.abs(M.charge)+(M.charge>0?'+':'−'),x1+34,y0+2,38,'#ffd166'); ctx.restore(); }
+  ctx.restore(); ctx.restore(); }
+
+/* =====================================================================
+   Step player: ◀ Back  ▶ Play  Next ▶ under the stage (explanation animations)
+   ===================================================================== */
+const Player={ n:1,k:0,u:0,playing:false,hold:0,getText:null,onSeen:null,
+  setup(n,getText,onSeen,start){ this.n=n; this.k=start||0; this.u=start||0; this.playing=false; this.hold=0; this.getText=getText; this.onSeen=onSeen||null; this.seen={}; $('#player').classList.add('show'); this.build(); this.render(); },
+  hide(){ $('#player').classList.remove('show'); this.getText=null; },
+  build(){ $('#pDots').innerHTML=Array.from({length:this.n},(_,i)=>`<button class="sb" data-i="${i}" aria-label="Go to step ${i+1}">${i+1}</button>`).join('');
+    document.querySelectorAll('#pDots .sb').forEach(b=>b.onclick=()=>this.go(+b.dataset.i));
+    $('#pBack').onclick=()=>this.go(this.k-1); $('#pNext').onclick=()=>this.go(this.k+1); $('#pPlay').onclick=()=>this.toggle(); },
+  go(k){ this.k=clamp(k,0,this.n-1); this.playing=false; this.hold=0; this.render(); },
+  toggle(){ if(this.playing){ this.playing=false; } else { if(this.k>=this.n-1&&this.u>=this.n-1-.01){ this.k=0; this.u=0; } this.playing=true; this.hold=0; } this.render(); },
+  render(){ if(!this.getText) return; $('#pText').innerHTML=this.getText(this.k); $('#pStep').textContent='Step '+(this.k+1)+' of '+this.n;
+    $('#pPlay').textContent=this.playing?'⏸ Pause':(this.k>=this.n-1&&this.u>=this.n-1-.01?'↺ Replay':'▶ Play');
+    $('#pBack').disabled=this.k<=0; $('#pNext').disabled=this.k>=this.n-1;
+    document.querySelectorAll('#pDots .sb').forEach((b,i)=>{ b.classList.toggle('on',i===this.k); b.classList.toggle('seen',!!this.seen[i]); }); },
+  update(dt){ if(!this.getText) return; const sp=.75;
+    if(this.u<this.k) this.u=Math.min(this.k,this.u+dt*sp); else if(this.u>this.k) this.u=Math.max(this.k,this.u-dt*sp*1.8);
+    if(Math.abs(this.u-this.k)<.001){ this.u=this.k; if(!this.seen[this.k]){ this.seen[this.k]=true; this.render(); this.onSeen&&this.onSeen(this.k); }
+      if(this.playing){ this.hold+=dt; if(this.hold>3.4){ this.hold=0; if(this.k<this.n-1){ this.k++; this.render(); } else { this.playing=false; this.render(); } } } } } };
+
+/* ---------------- molecules used by the animations ---------------- */
+const SPEC={
+  H2 :{f:'H₂' ,name:'hydrogen',atoms:[['H',0,0],['H',1,0]],bonds:[[0,1,1]],lone:[0,0]},
+  F2 :{f:'F₂' ,name:'fluorine',atoms:[['F',0,0],['F',1,0]],bonds:[[0,1,1]],lone:[3,3]},
+  Cl2:{f:'Cl₂',name:'chlorine',atoms:[['Cl',0,0],['Cl',1,0]],bonds:[[0,1,1]],lone:[3,3]},
+  O2 :{f:'O₂' ,name:'oxygen',atoms:[['O',0,0],['O',1,0]],bonds:[[0,1,2]],lone:[2,2]},
+  N2 :{f:'N₂' ,name:'nitrogen',atoms:[['N',0,0],['N',1,0]],bonds:[[0,1,3]],lone:[1,1]},
+  CH4:{f:'CH₄',name:'methane',atoms:[['C',0,0],['H',-1,0],['H',1,0],['H',0,-1],['H',0,1]],bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1]],lone:[0,0,0,0,0]},
+  CO :{f:'CO' ,name:'carbon monoxide',atoms:[['C',0,0],['O',1,0]],bonds:[[0,1,3]],lone:[1,1],
+       diff:'one C≡O triple bond',note:'Both atoms only reach 8 electrons with a triple bond.'},
+  CO2:{f:'CO₂',name:'carbon dioxide',atoms:[['O',0,0],['C',1,0],['O',2,0]],bonds:[[0,1,2],[1,2,2]],lone:[2,0,2],diff:'two C=O double bonds'},
+  NO2:{f:'NO₂⁻',name:'nitrite ion',charge:-1,atoms:[['O',0,0],['N',1,0],['O',2,0]],bonds:[[0,1,2],[1,2,1]],lone:[2,1,3],
+       variants:[{k:[1,2],lone:[3,1,2]}],diff:'one N=O and one N–O, flipping (resonance)',resAvg:'1½'},
+  NO3:{f:'NO₃⁻',name:'nitrate ion',charge:-1,atoms:[['N',0,0],['O',0,-1],['O',-1,0],['O',1,0]],bonds:[[0,1,2],[0,2,1],[0,3,1]],lone:[0,2,3,3],
+       variants:[{k:[1,2,1],lone:[0,3,2,3]},{k:[1,1,2],lone:[0,3,3,2]}],diff:'one N=O and two N–O, flipping (resonance)',resAvg:'1⅓'},
+  H2O:{f:'H₂O',name:'water',atoms:[['H',0,0],['O',1,0],['H',2,0]],bonds:[[0,1,1],[1,2,1]],lone:[0,2,0],diff:'two O–H single bonds'},
+  H2O2:{f:'H₂O₂',name:'hydrogen peroxide',atoms:[['H',0,0],['O',1,0],['O',2,0],['H',3,0]],bonds:[[0,1,1],[1,2,1],[2,3,1]],lone:[0,2,2,0],diff:'an O–O single bond in the middle'}
+};
+const TOT=sp=>sp.atoms.reduce((s,a)=>s+ELM[a[0]].v,0)+Math.max(0,-(sp.charge||0));
+
+/* the same story told for any molecule */
+function molText(M,k,sp){ const at=M.at, nb=M.bd.length, nm=at.map(a=>a.sym), extra=M.extra, lastRes=M.stages.length-1;
+  const parts=at.map(a=>`<b>${a.sym}</b> ${a.v}`).join(' + ');
+  if(k===0) return `<b>Count the valence electrons.</b> ${parts}${extra?` + ${extra} extra for the ${extra}− charge`:''} = <b>${M.total}</b>. A correct Lewis structure uses <b>exactly ${M.total}</b> electrons, no more and no fewer.`;
+  if(k===1) return `<b>Connect the atoms with single bonds.</b> Each bond is a shared pair (2 electrons). ${nb} bond${nb>1?'s':''} use ${2*nb} electrons, so <b>${M.total-2*nb}</b> are left in the pool.`;
+  const s2=M.l2.reduce((s,x)=>s+x,0), s3=M.l3.reduce((s,x)=>s+x,0)-s2;
+  if(k===2) return s2?`<b>Outer atoms first.</b> Give each outer atom lone pairs until it has 8 electrons (shared electrons count for it too). That uses ${2*s2} more, leaving <b>${M.pool2}</b>.`
+    :`<b>Outer atoms first.</b> The outer atoms here are hydrogen, and each is already full with its 2 shared electrons, so nothing is added yet. <b>${M.pool2}</b> electrons remain.`;
+  if(k===3) return s3?`<b>Leftovers go on the central atom${at.filter(a=>a.sym!=='H'&&a.deg!==1).length>1?'s':''}.</b> Add lone pairs until it has 8. That uses ${2*s3} electrons and leaves <b>${M.pool3}</b>.`
+    :`<b>Nothing is left over.</b> The pool is empty. Now check the central atom: does it have 8 yet?`;
+  const short=at.filter(a=>{ const n=2*a.deg+2*M.l3[a.i]; return n<(a.sym==='H'?2:8); }).map(a=>`${a.sym} has only ${2*a.deg+2*M.l3[a.i]}`);
+  const extraPairs=M.bd.reduce((s,b)=>s+b.k-1,0);
+  if(k===4) return extraPairs?`<b>Something is short of 8, so share more.</b> ${[...new Set(short)].join('; ')||'The central atom is short'}. Slide a lone pair from a neighbor into the bond between them: single → ${M.bd.some(b=>b.k===3)?'triple':'double'}. The total number of electrons doesn't change.`
+    :`<b>Nothing is short.</b> Every atom already has 8 electrons (hydrogen 2), so no double or triple bonds are needed.`;
+  if(k===5) return `<b>Check every atom.</b> Shared pairs count for both atoms. Every atom is full ✓.${M.charge?` Because this is an ion, put the structure in <b>brackets</b> and write the <b>charge</b> outside.`:''}${sp.note?' '+sp.note:''}${sp.variants?' Look closely: the double bond could have been placed on a different oxygen. Press Next.':''}`;
+  const kk=k-5, n=sp.variants.length+1;
+  return `<b>Resonance: structure ${kk+1} of ${n}.</b> The double bond can sit on <b>any</b> oxygen, and nothing tells us which one. ${k===lastRes?`Real experiments show <b>all the N–O bonds are identical</b>, about ${sp.resAvg} bonds each. The real ion is a blend (an average) of these structures, which we draw as separate pictures.`:'Watch the shared pair slide over to the next oxygen.'}`; }
+
+/* =====================================================================
+   TAB 1 — Dot pictures: Bohr model → Lewis dot symbol → sharing
+   ===================================================================== */
+const A1_MOL={H:'H2',C:'CH4',N:'N2',O:'O2',F:'F2',Cl:'Cl2'};
+const A1_TITLES=['Bohr model','Valence electrons','Core + symbol','Lewis dot symbol','Unpaired dots = bonds','Atoms meet','Sharing pairs','Count the electrons'];
+const SLOT_ORD={8:[0,2,4,6,1,3,5,7],2:[0,1]};
+const Q_L1=[
+  {q:'Sulfur has 6 valence electrons. How do you draw its Lewis dot symbol?',
+   opts:['Two lone pairs and two unpaired dots','Three lone pairs and no unpaired dots','Six unpaired dots, one in each of six spots','One lone pair and four unpaired dots'],ans:0,
+   hint:'Put one dot on each of the four sides first. Then pair up the extra dots. How many extras are left over after the first four?',why:'The first four dots go one per side, and the remaining 2 dots pair up with two of them: 2 lone pairs + 2 unpaired dots.'},
+  {q:'In a Lewis structure, what does a line between two atoms stand for?',
+   opts:['One shared pair of electrons (2 electrons)','One electron given from one atom to the other','One proton shared by the two nuclei','A lone pair on one of the atoms'],ans:0,
+   hint:'Think about the Covalent Sharing a Pair activity: what sat between the two nuclei?',why:'A line is a shared pair: two electrons, one from each atom, held between the two nuclei.'}];
+const A1={ el:'Cl', t:0, M:null,
+  mount(){ this.t=0; Player.hide();
+    $('#h1').textContent='Your mission'; $('#h2').textContent='Choose an element'; $('#h3').textContent='Check your understanding';
+    $('#c1').innerHTML=`<div class="goal">A Bohr model shows every electron, but only the <b>valence electrons</b> do the bonding. A <b>Lewis dot symbol</b> keeps just those. Watch the animation (▶ Play, or step with Next), then try other elements.</div>
+      <ul class="checks"><li id="l1a">Watch every step for 2 different elements <span class="muted" id="l1cnt"></span></li><li id="l1b">Answer the 2 check questions</li></ul>`;
+    $('#c2').innerHTML=`<div class="lab">Element</div><div class="chips" id="l1els">${Object.keys(A1_MOL).map(s=>`<button class="chip big" data-s="${s}">${s}<small>${ELM[s].v} valence e⁻</small></button>`).join('')}</div>
+      <div class="hintline">Hydrogen and the first-shell elements follow the same story. Each dot is an electron, colored the same way as in the covalent activities. Dotted circles in the other activities were the <b>open spots</b>: here, an unpaired dot is a spot that can bond.</div>`;
+    $('#c3').innerHTML=`<div id="l1q">${mqHTML(Q_L1,'l1')}</div>`; mqWire($('#l1q'),Q_L1,'l1',()=>this.check());
+    document.querySelectorAll('#l1els .chip').forEach(c=>c.onclick=()=>{ this.pick(c.dataset.s); });
+    this.pick(this.el); this.check(); },
+  pick(el){ this.el=el; const sp=SPEC[A1_MOL[el]]; this.M=buildMol(sp,{simple:true,cx:500,cy:262,hav:430});
+    document.querySelectorAll('#l1els .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===el));
+    Player.setup(8,k=>this.text(k),k=>{ if(k===7){ (state.seen.l1=state.seen.l1||{})[el]=true; save(); this.check(); } }); },
+  text(k){ const el=this.el,d=ELM[el],sp=SPEC[A1_MOL[el]],v=d.v,n=d.sh.length, un=v<=4?v:8-v, tg=el==='H'?2:8;
+    switch(k){
+      case 0: return `<b>A Bohr model.</b> This is ${d.name}: ${d.Z} protons in the nucleus and ${d.Z} electrons in ${n} shell${n>1?'s':''}. You drew atoms like this in the ionic and metallic activities.`;
+      case 1: return `<b>Only the outer (valence) electrons take part in bonding.</b> ${d.name[0].toUpperCase()+d.name.slice(1)} has <b>${v} valence electron${v>1?'s':''}</b>${n>1?'. The inner electrons stay close to the nucleus and never bond':', and that single electron is its valence electron'}.`;
+      case 2: return `<b>Core + symbol.</b> ${n>1?'The nucleus and the inner electrons act like one lump, the <b>core</b>, so we replace them with the element symbol. ':'We replace the nucleus with the element symbol. '}The small number (${v}+) is the charge of the core, which attracts the valence electrons.`;
+      case 3: return `<b>Lewis dot symbol.</b> Place the ${v} valence electrons as dots. Put <b>one dot on each of the four sides first</b> (top, right, bottom, left), then pair up any extras.${v<=4?` With ${v} dot${v>1?'s':''}, none need to pair.`:''}`;
+      case 4: return `<b>Unpaired dots are bonding spots.</b> ${d.name[0].toUpperCase()+d.name.slice(1)} has <b>${un}</b> unpaired dot${un===1?'':'s'}, so it usually makes <b>${un} bond${un===1?'':'s'}</b>.${v>4?` The ${v-4} paired dot${v-4===1?'':'s'}${v-4===1?' is a':' are'} <b>lone pair${v-4===1?'':'s'}</b> that stay on the atom.`:' None of its dots are paired yet.'}`;
+      case 5: return `<b>Two atoms meet.</b> ${el==='C'?'One carbon atom meets four hydrogen atoms':'Two '+d.name+' atoms approach'}. Their <b>unpaired dots point toward each other</b>. Remember how the covalent atoms drifted together in <i>Sharing a Pair</i>.`;
+      case 6: return `<b>Sharing.</b> Unpaired dots pair up between the atoms. Each <b>shared pair</b> is drawn as a <b>line</b>. The electron colors show which atom each one came from.`;
+      default: return `<b>Count around each atom.</b> A shared pair counts for <b>both</b> atoms. Every atom now has <b>${tg}</b> ${el==='H'?'(hydrogen only needs 2: the first shell holds just 2)':'(a full octet)'}: ${sp.f} is stable.`; } },
+  check(){ const s=state.seen.l1||{}, n=Object.keys(s).length; const a=$('#l1a'); if(!a) return; $('#l1cnt').textContent='('+Math.min(n,2)+'/2)';
+    a.classList.toggle('ok',n>=2); $('#l1b').classList.toggle('ok',mqDone('l1',2)); if(n>=2&&mqDone('l1',2)) award('l1'); },
+  down(){}, move(){}, up(){},
+  update(dt){ this.t+=dt; Player.update(dt); },
+  draw(){ const u=Player.u, t=this.t, d=ELM[this.el], sp=SPEC[A1_MOL[this.el]];
+    txt(A1_TITLES[Math.min(7,Math.round(u))],26,34,23,'#ffd166','left');
+    if(u>=4.5) txt(sp.f+'  ·  '+sp.name,26,66,19,'#cfdcf7','left',600);
+    else txt(d.name[0].toUpperCase()+d.name.slice(1)+' (Z = '+d.Z+')',26,66,19,'#cfdcf7','left',600);
+    const aAtom=u<4?1:1-ease(u-4); if(aAtom>0.01) this.drawAtom(u,t,aAtom);
+    if(u>4){ drawMolAt(this.M,clamp(u-5,0,2),t,{alpha:u<5?ease(u-4):1}); if(u>=5.5&&this.el==='C') txt('4 unpaired dots → 4 bonds',500,512,20,'#ffd166'); } },
+  drawAtom(u,t,alpha){ const sym=this.el, d=ELM[sym], n=d.sh.length, v=d.v, cx=500, cy=270, ZB=2.0, LR=74, K=0; const SH=k=>(20+16*k)*ZB, Rv=SH(n-1);
+    const ia=u<1?lerp(1,.3,ease(u)):u<2?lerp(.3,0,ease(u-1)):0, c=ease(clamp(u-1,0,1)), cap=n===1?2:8;
+    ctx.save(); ctx.globalAlpha*=alpha;
+    for(let k=0;k<n-1;k++){ circ(cx,cy,SH(k),null,`rgba(255,255,255,${.25*ia})`,1.4);
+      for(let i=0;i<d.sh[k];i++){ const a=t*(k%2?-1:1)*(1.3-.25*k)+k*.9+i*TAU/d.sh[k]; elec(cx+SH(k)*Math.cos(a),cy+SH(k)*Math.sin(a),ECOL[0],ia,false,6.4); } }
+    const R=lerp(Rv,LR,c); ctx.save(); if(u>=1.5) ctx.setLineDash([5,6]); circ(cx,cy,R,null,u>=2?'rgba(255,255,255,.22)':'rgba(255,255,255,.5)',u>=2?1.2:1.6); ctx.restore();
+    const ng=ctx.createRadialGradient(cx-8,cy-8,2,cx,cy,12*ZB); ng.addColorStop(0,'#ff8fa0'); ng.addColorStop(1,'#c4304d');
+    ctx.save(); ctx.globalAlpha*=1-c; circ(cx,cy,12*ZB,ng); txt(d.Z+'+',cx,cy+1,15,'#fff'); ctx.restore();
+    if(c>0.01) core(cx,cy,sym,CS*1.4,c);
+    const dots=freeDotList([],v), hl=u>0.25&&u<2.4;
+    const rot=t*1.1;
+    for(let i=0;i<v;i++){ const ang=rot+SLOT_ORD[cap][i%cap]*TAU/cap; const bx=cx+R*Math.cos(ang), by=cy+R*Math.sin(ang);
+      const dt=dots[i], lp=dotPos(cx,cy,dt.side,dt.off*10/EO,LR); const m=u<=2?0:ease(clamp(((u-2)-i*.09)/.35,0,1));
+      const x=lerp(bx,lp[0],m), y=lerp(by,lp[1],m); const un=dt.off===0;
+      if(u>=3&&un){ const pu=(u>=3&&u<4.4)?clamp(u-3,0,1):0; if(pu>0){ ctx.save(); ctx.globalAlpha*=pu; circ(x,y,15+2*Math.sin(t*5),null,'#ffd166',3); ctx.restore(); } }
+      elec(x,y,ECOL[0],1,hl,7);
+      if(u>2.3&&u<3.6&&m>.9){ const nd=SD[dt.side]; ctx.save(); ctx.globalAlpha*=clamp((u-2.3)*2,0,1)*(u<3.3?1:clamp((3.6-u)/.3,0,1)); txt(String(dt.ord),x+nd[0]*18+(dt.off?-nd[1]*dt.off/Math.abs(dt.off)*8:0),y+nd[1]*18,17,'#ffd166'); ctx.restore(); } }
+    // labels
+    if(u>.5&&u<2.2){ const la=clamp((u-.5)*2,0,1)*clamp((2.2-u)*3,0,1); ctx.save(); ctx.globalAlpha*=la; const ax=cx+Rv*Math.cos(-.75), ay=cy+Rv*Math.sin(-.75); arrow(790,150,ax+10,ay-6,'#ffd166',2.5);
+      txt(v+' valence electron'+(v>1?'s':''),795,126,21,'#ffd166','left'); txt('(outer shell)',795,152,18,'#cfdcf7','left',600); ctx.restore(); }
+    if(n>1&&u>.2&&u<2.0){ const la=clamp((u-.2)*2,0,1)*clamp((2-u)*2,0,1); ctx.save(); ctx.globalAlpha*=la; arrow(210,420,cx-SH(0)*.7,cy+SH(0)*.7+6,'#9fb0d6',2.2); txt('inner electrons',215,442,19,'#cfdcf7','left',600); txt('stay with the nucleus',215,466,18,'#cfdcf7','left',600); ctx.restore(); }
+    if(u>1.2&&u<3){ ctx.save(); ctx.globalAlpha*=clamp((u-1.2)*2,0,1)*clamp((3-u)*3,0,1); txt('core = nucleus + inner electrons',cx,cy+LR+44,19,'#cfdcf7','center',600); ctx.restore(); }
+    if(u>=3){ const un=v<=4?v:8-v, a=clamp(u-3,0,1)*(u<4.6?1:clamp(5-u,0,1)); ctx.save(); ctx.globalAlpha*=a; txt(un+' unpaired dot'+(un===1?'':'s')+' → '+un+' bond'+(un===1?'':'s'),800,200,24,'#ffd166');
+      if(v>4){ const lp=freeDotList([],v).find(x=>x.off<0), p=dotPos(cx,cy,lp.side,0,LR+14); arrow(820,300,p[0]+16,p[1]+4,'#cfdcf7',2); txt('lone pair',830,322,20,'#cfdcf7','center',600); txt('(stays on the atom)',830,346,18,'#cfdcf7','center',600); }
+      ctx.restore(); }
+    ctx.restore(); }
+};
+
+/* =====================================================================
+   TAB 3 — Same atoms, different molecules
+   ===================================================================== */
+const Q_L3=[
+  {q:'CO and CO₂ are both made of only carbon and oxygen. What is different about their Lewis structures?',
+   opts:['CO has a triple bond and 10 valence electrons; CO₂ has two double bonds and 16','They have the same bonds; CO just has one fewer oxygen atom drawn','CO₂ has a C≡O triple bond; CO has a C=O double bond','CO has more lone pairs on carbon than CO₂ has bonds'],ans:0,
+   hint:'Compare the two animations: first count the valence electrons, then look at the bonds in the last picture.',why:'Different numbers of atoms means a different electron total (C 4 + O 6 = 10 for CO, 16 for CO₂), and each structure has to use all of them.'},
+  {q:'Nitrate, NO₃⁻, has one N (5) and three O (6 each) = 23 valence electrons, but you draw 24. Why?',
+   opts:['The 1− charge means the ion has one extra electron','Nitrogen counts as 6 when it is the central atom','Every double bond adds an electron','The pool always includes one spare electron'],ans:0,
+   hint:'Look at step 1 of the animation. What does the “−” in NO₃⁻ tell you about the electrons?',why:'A negative charge is extra electrons. For each unit of negative charge you add one electron to the total.'},
+  {q:'Nitrate can be drawn with the double bond on any of its three oxygens. What does this resonance tell us about the real ion?',
+   opts:['The ion flips between three different molecules','All three N–O bonds are identical, a blend of the drawings','One N–O bond is a double bond and the others are single','Resonance means the ion is unstable and falls apart'],ans:1,
+   hint:'Think about what experiments measure: are the three N–O bonds different lengths, or all the same?',why:'All three N–O bonds measure the same length. No single drawing is correct, so the real ion is an average (blend) of the resonance structures.'}];
+const A3_SETS=[{t:'Carbon + oxygen',ids:['CO','CO2'],req:true},{t:'Nitrogen + oxygen (ions)',ids:['NO2','NO3'],req:true},{t:'Hydrogen + oxygen (bonus)',ids:['H2O','H2O2'],req:false}];
+const A3={ id:'CO2', t:0, M:null,
+  mount(){ this.t=0;
+    $('#h1').textContent='Your mission'; $('#h2').textContent='Choose a compound'; $('#h3').textContent='Check your understanding';
+    $('#c1').innerHTML=`<div class="goal">The <b>same elements</b> can combine in different ways. Each way is a different compound with a different Lewis structure. Watch how each one is built, one step at a time, and compare.</div>
+      <ul class="checks"><li id="l3a">Finish the animation for CO, CO₂, NO₂⁻ and NO₃⁻ <span class="muted" id="l3cnt"></span></li><li id="l3b">Answer the 3 check questions</li></ul>
+      <div class="hintline">Ions follow the same recipe. Add one electron for each unit of negative charge.</div>`;
+    $('#c2').innerHTML=A3_SETS.map(s=>`<div class="lab">${s.t}</div><div class="chips">${s.ids.map(i=>`<button class="chip big" data-id="${i}">${SPEC[i].f}<small>${SPEC[i].name}</small></button>`).join('')}</div>`).join('')+
+      `<table class="cmp"><tr><th>Compound</th><th>Valence e⁻</th><th>Bonds in the picture</th></tr>${A3_SETS.flatMap(s=>s.ids).map(i=>`<tr id="l3r_${i}" class="empty"><td>${SPEC[i].f}</td><td>${TOT(SPEC[i])}</td><td class="df">watch the animation to fill this in</td></tr>`).join('')}</table>`;
+    $('#c3').innerHTML=`<div id="l3q">${mqHTML(Q_L3,'l3')}</div>`; mqWire($('#l3q'),Q_L3,'l3',()=>this.check());
+    document.querySelectorAll('#c2 .chip').forEach(c=>c.onclick=()=>this.pick(c.dataset.id));
+    this.pick(this.id); this.check(); },
+  pick(id){ this.id=id; const sp=SPEC[id]; this.M=buildMol(sp,{cx:500,cy:250}); const M=this.M;
+    document.querySelectorAll('#c2 .chip').forEach(c=>{ c.classList.toggle('on',c.dataset.id===id); c.classList.toggle('ok',!!(state.seen.l3||{})[c.dataset.id]); });
+    Player.setup(M.stages.length,k=>molText(M,k,sp),k=>{ if(k===M.stages.length-1){ (state.seen.l3=state.seen.l3||{})[id]=true; save(); this.check(); } }); },
+  check(){ const s=state.seen.l3||{}, need=['CO','CO2','NO2','NO3']; const n=need.filter(i=>s[i]).length; const a=$('#l3a'); if(!a) return; $('#l3cnt').textContent='('+n+'/4)'; a.classList.toggle('ok',n===4);
+    document.querySelectorAll('#c2 .chip').forEach(c=>{ c.classList.toggle('ok',!!s[c.dataset.id]); });
+    Object.keys(SPEC).forEach(i=>{ const r=$('#l3r_'+i); if(r){ r.classList.toggle('empty',!s[i]); r.classList.toggle('got',!!s[i]); r.querySelector('.df').textContent=s[i]?SPEC[i].diff:'watch the animation to fill this in'; } });
+    $('#l3b').classList.toggle('ok',mqDone('l3',3)); if(n===4&&mqDone('l3',3)) award('l3'); },
+  down(){}, move(){}, up(){},
+  update(dt){ this.t+=dt; Player.update(dt); },
+  draw(){ const sp=SPEC[this.id], u=Player.u, M=this.M;
+    txt(sp.f,26,38,34,'#ffffff','left'); txt(sp.name,26,74,20,'#cfdcf7','left',600); txt(M.total+' valence electrons',974,36,19,'#ffd166','right');
+    drawMolAt(M,u,this.t);
+    if(u>5.05){ const n=M.stages.length-5; txt('Resonance structure '+(Math.min(n,Math.round(u)-4))+' of '+n,500,512,22,'#ffd166'); } }
+};
+
+/* =====================================================================
+   TAB 2 — Practice five Lewis structures (guidance fades from structure to structure)
+   ===================================================================== */
+const PRAC=[
+  {key:'H2O' ,f:'H₂O' ,name:'water'           ,lvl:4,atoms:[['O',0,0],['H',-1,0],['H',1,0]],bonds:[[0,1],[0,2]]},
+  {key:'NH3' ,f:'NH₃' ,name:'ammonia'         ,lvl:3,atoms:[['N',0,0],['H',-1,0],['H',1,0],['H',0,1]],bonds:[[0,1],[0,2],[0,3]]},
+  {key:'CO2' ,f:'CO₂' ,name:'carbon dioxide'  ,lvl:2,atoms:[['O',-1,0],['C',0,0],['O',1,0]],bonds:[[0,1],[1,2]]},
+  {key:'HCN' ,f:'HCN' ,name:'hydrogen cyanide',lvl:1,atoms:[['H',-1,0],['C',0,0],['N',1,0]],bonds:[[0,1],[1,2]]},
+  {key:'CH2O',f:'CH₂O',name:'formaldehyde'    ,lvl:0,atoms:[['C',0,0],['H',-1,0],['H',1,0],['O',0,-1]],bonds:[[0,1],[0,2],[0,3]]}
+];
+const HELP_LBL=['No hints','Recipe on request','Checklist only','Short coaching','Step-by-step coaching'];
+const BGX=190, BGY=155, BCX=350, BCY=285;
+const A2={ i:0, t:0, P:null, G:null, B:null, pulse:0, shown:{},
+  mount(){ Player.hide();
+    $('#h1').textContent='Your mission'; $('#h2').textContent='Controls'; $('#h3').textContent="What's happening";
+    $('#c1').innerHTML=`<div class="goal" id="l2goal"></div><div id="l2coach"></div><ul class="checks" id="l2list"></ul>`;
+    $('#c2').innerHTML=`<div class="lab">Practice structures</div><div class="chips" id="l2chips"></div>
+      <div class="numrow" id="l2totrow"><label for="l2tot">Total valence electrons:</label><input id="l2tot" type="text" inputmode="numeric" maxlength="3" autocomplete="off"><span class="mk" id="l2mk"></span></div>
+      <div class="rowbtns"><button class="btn" id="l2check">Check my structure</button><button class="btn secondary" id="l2hint">💡 Hint</button><button class="btn secondary" id="l2reset">Clear the board</button></div>
+      <div class="rowbtns"><button class="btn" id="l2next" style="display:none">Next structure →</button></div>
+      <div class="hintline"><b>Tap</b> a dashed line to make a bond (tap again for double, triple). <b>Tap</b> a dotted circle to add or remove a lone pair.</div>`;
+    $('#c3').innerHTML=`<div class="status" id="l2stat"></div><div class="ledger" id="l2led"></div>`;
+    $('#l2tot').oninput=()=>{ const B=this.B; B.totText=$('#l2tot').value.trim(); B.totOK=(+B.totText===this.G.total); this.after(); };
+    $('#l2check').onclick=()=>this.checkBtn(); $('#l2reset').onclick=()=>this.load(this.i,true); $('#l2hint').onclick=()=>{ this.B.hintOn=!this.B.hintOn; this.after(); };
+    $('#l2next').onclick=()=>{ if(this.i<PRAC.length-1) this.load(this.i+1); };
+    const first=PRAC.findIndex(p=>!state.p[p.key]); this.load(first<0?this.i:first); },
+  unlockedP(i){ return UNLOCK||i===0||!!state.p[PRAC[i-1].key]; },
+  load(i,keepFails){ this.i=i; const P=this.P=PRAC[i]; const at=P.atoms.map(([sym,gx,gy],j)=>({i:j,sym,gx,gy,v:ELM[sym].v,col:ECOL[j%ECOL.length],face:[],deg:0}));
+    const bd=P.bonds.map(([a,b])=>{ const A=at[a],B=at[b],sa=sideOf(B.gx-A.gx,B.gy-A.gy); A.face.push(sa); B.face.push((sa+2)%4); A.deg++; B.deg++; return {a,b,sa}; });
+    const gxs=at.map(a=>a.gx), gys=at.map(a=>a.gy), gcx=(Math.min(...gxs)+Math.max(...gxs))/2, gcy=(Math.min(...gys)+Math.max(...gys))/2;
+    at.forEach(a=>{ a.x=BCX+(a.gx-gcx)*BGX; a.y=BCY+(a.gy-gcy)*BGY; });
+    this.G={at,bd,total:at.reduce((s,a)=>s+a.v,0)};
+    const old=this.B; this.B={k:bd.map(()=>0),lone:at.map(()=>[0,0,0,0]),totText:'',totOK:false,fails:keepFails&&old?old.fails:0,hintOn:false,solved:!!state.p[P.key],msg:''};
+    if(this.B.solved) this.fillAnswer();
+    $('#l2tot').value=this.B.solved?String(this.G.total):''; this.B.totOK=this.B.solved; this.B.totText=$('#l2tot').value;
+    document.querySelectorAll('#l2chips .chip').forEach(()=>{}); this.chips(); this.after(); },
+  chips(){ $('#l2chips').innerHTML=PRAC.map((p,i)=>`<button class="chip big ${i===this.i?'on':''} ${state.p[p.key]?'ok':''}" data-i="${i}" ${this.unlockedP(i)?'':'disabled'}>${state.p[p.key]?'✓ ':''}${p.f}<small>${p.name}</small></button>`).join('');
+    document.querySelectorAll('#l2chips .chip').forEach(c=>c.onclick=()=>this.load(+c.dataset.i)); },
+  fillAnswer(){ /* an already-solved structure is shown completed */ const G=this.G,B=this.B; const sol=this.solve(); B.k=sol.k; B.lone=sol.lone; },
+  solve(){ const G=this.G, n=G.at.length; const key=this.P.key;
+    const ANS={H2O:{k:[1,1],l:[2,0,0]},NH3:{k:[1,1,1],l:[1,0,0,0]},CO2:{k:[2,2],l:[2,0,2]},HCN:{k:[1,3],l:[0,0,1]},CH2O:{k:[1,1,2],l:[0,0,0,2]}}[key];
+    const lone=G.at.map((a,i)=>{ const L=[0,0,0,0], free=[0,1,2,3].filter(s=>!a.face.includes(s)); let c=ANS.l[i];
+      if(c>0&&a.deg===1&&c<3){ const out=(a.face[0]+2)%4, perp=free.filter(s=>s!==out); (c===2?perp:[out]).forEach(s=>L[s]=1); c=0; }
+      free.slice(0,c).forEach(s=>L[s]=1); return L; });
+    return {k:ANS.k.slice(),lone}; },
+  ev(){ const G=this.G,B=this.B; const around=G.at.map(()=>0), kin=G.at.map(()=>0), lc=G.at.map((a,i)=>B.lone[i].reduce((s,x)=>s+x,0));
+    G.bd.forEach((b,bi)=>{ const k=B.k[bi]; around[b.a]+=2*k; around[b.b]+=2*k; kin[b.a]+=k; kin[b.b]+=k; });
+    G.at.forEach((a,i)=>{ around[i]+=2*lc[i]; });
+    const placed=B.k.reduce((s,k)=>s+2*k,0)+lc.reduce((s,x)=>s+2*x,0), target=G.at.map(a=>a.sym==='H'?2:8), full=around.map((x,i)=>x===target[i]), formal=G.at.map((a,i)=>a.v-(kin[i]+2*lc[i]));
+    const solved=B.totOK&&B.k.every(k=>k>=1)&&placed===G.total&&full.every(x=>x)&&formal.every(f=>f===0);
+    return {around,kin,lc,placed,target,full,formal,solved,total:G.total}; },
+  step(e){ const G=this.G,B=this.B; if(!B.totOK) return 1; if(B.k.some(k=>k===0)) return 2; if(e.placed>e.total) return 6;
+    const term=G.at.filter(a=>a.deg===1&&a.sym!=='H'), cen=G.at.filter(a=>a.sym!=='H'&&a.deg!==1);
+    if(term.some(a=>!e.full[a.i])&&e.placed<e.total) return 3; if(cen.some(a=>!e.full[a.i])&&e.placed<e.total) return 4;
+    if(e.full.some(x=>!x)) return 5; if(e.solved) return 7; return 8; },
+  coachText(st,e,lvl){ const G=this.G, parts=G.at.map(a=>`${a.sym} ${a.v}`).join(' + ');
+    const nm=a=>`<b>${a.sym}</b>`;
+    if(lvl===4){ switch(st){
+      case 1: return `<b>Step 1 · Count the valence electrons.</b> ${parts} = <b>${G.total}</b>. Type ${G.total} in the box.`;
+      case 2: return `<b>Step 2 · Connect the atoms.</b> Tap each <b>dashed line</b> once to make a single bond: a shared pair that uses 2 electrons.`;
+      case 3: { const a=G.at.find(a=>a.deg===1&&a.sym!=='H'&&!e.full[a.i]); return `<b>Step 3 · Outer atoms first.</b> ${nm(a)} has ${e.around[a.i]} electrons around it (shared ones count) and needs 8. Tap its <b>dotted circles</b> to add lone pairs. Hydrogen is already full with its bond.`; }
+      case 4: { const a=G.at.find(a=>a.sym!=='H'&&a.deg!==1&&!e.full[a.i]); return `<b>Step 4 · Put the leftovers on the central atom.</b> ${nm(a)} has ${e.around[a.i]} electrons around it. Tap its <b>dotted circles</b> to add lone pairs until it has 8.`; }
+      case 5: return `<b>Step 5 · Still short of 8, and no electrons left.</b> Make a <b>double or triple bond</b>: tap the bond between the short atom and its neighbor, then tap a lone pair on that neighbor to take it away, so you still use exactly ${G.total} electrons.`;
+      case 6: return `<b>Too many electrons.</b> You have placed ${e.placed} electrons but only have ${G.total}. Tap a lone pair to remove it, or lower a bond.`;
+      case 7: return `<b>✓ Every atom is full and all ${G.total} electrons are used.</b>`;
+      default: return `<b>Almost.</b> Every atom has a full shell, but atoms usually make a set number of bonds: <b>H 1, C 4, N 3, O 2</b>. Try a different arrangement.`; } }
+    switch(st){ case 1: return `<b>Count the total valence electrons</b> and type it in the box.`; case 2: return `<b>Connect the atoms</b> with single bonds.`; case 3: return `<b>Fill the outer atoms</b> (8 each, hydrogen 2).`;
+      case 4: return `<b>Put the leftover electrons</b> on the central atom.`; case 5: return `<b>The central atom is short.</b> Use a multiple bond.`; case 6: return `<b>You used too many electrons.</b> Remove a lone pair.`;
+      case 7: return `<b>✓ Done!</b>`; default: return `<b>Check each atom's usual number of bonds</b> (H 1, C 4, N 3, O 2).`; } },
+  after(){ const P=this.P,B=this.B,G=this.G,lvl=P.lvl, e=this.ev(), st=this.step(e); this.e=e; this.st=st;
+    $('#l2goal').innerHTML=`Draw the Lewis structure for <b>${P.f}</b> (${P.name}). The skeleton is laid out for you: use the recipe to place every one of the <b>${G.total}</b> valence electrons.
+      <div class="hintline" style="margin-top:6px">Help level: <b>${HELP_LBL[lvl]}</b> · structure ${this.i+1} of ${PRAC.length}</div>`;
+    let html='',list='';
+    if(B.solved||e.solved&&lvl>=2){ html=`<div class="okbox">✓ Every atom is full and you used all ${G.total} electrons. Nice work!</div>`; }
+    else if(lvl>=3) html=`<div class="coach">${this.coachText(st,e,lvl)}</div>`;
+    if(lvl===2){ const term=G.at.filter(a=>a.deg===1&&a.sym!=='H'), cen=G.at.filter(a=>a.sym!=='H'&&a.deg!==1);
+      const items=[['Count the valence electrons',B.totOK],['Connect the atoms with single bonds',B.k.every(k=>k>=1)],['Fill the outer atoms',term.every(a=>e.full[a.i])&&B.k.every(k=>k>=1)],['Fill the central atom',cen.every(a=>e.full[a.i])&&B.k.every(k=>k>=1)],['Use multiple bonds if an atom is short',e.solved]];
+      list=items.map(([t,ok])=>`<li class="${ok?'ok':''}">${t}</li>`).join(''); }
+    if(lvl===1){ html+=`<div class="coach plain">${B.hintOn?`<b>The recipe</b><ol style="margin:6px 0 0 18px;padding:0"><li>Count the valence electrons.</li><li>Connect the atoms with single bonds.</li><li>Give the outer atoms lone pairs (8 each, hydrogen 2).</li><li>Put any leftovers on the central atom.</li><li>If the central atom is short of 8, turn lone pairs into double or triple bonds.</li></ol>`:'Stuck? Press <b>💡 Hint</b> to see the recipe.'}</div>`; }
+    if(lvl===0&&B.hintOn) html+=`<div class="coach plain"><b>Hint:</b> count the electrons first. Connect the atoms with single bonds, fill the outer atoms, then put leftovers on the central atom. If the central atom is still short of 8, share a lone pair from a neighbor by making a double or triple bond. Check that each atom makes its usual number of bonds (H 1, C 4, N 3, O 2).</div>`;
+    $('#l2coach').innerHTML=html; $('#l2list').innerHTML=list;
+    const hintBtn=$('#l2hint'); hintBtn.style.display=(lvl===1||(lvl===0&&B.fails>=2))&&!B.solved?'':'none'; hintBtn.textContent=B.hintOn?'Hide hint':'💡 Hint';
+    const auto=lvl>=2; $('#l2check').style.display=auto||B.solved?'none':'';
+    $('#l2tot').classList.toggle('good',B.totOK); $('#l2tot').classList.toggle('hl',lvl===4&&st===1&&!B.solved); $('#l2mk').textContent=B.totOK?'✓':(B.totText?'✗':'');
+    $('#l2mk').style.color=B.totOK?'#8ff0b6':'#ff9aa9';
+    $('#l2next').style.display=B.solved&&this.i<PRAC.length-1?'':'none';
+    if(!B.solved&&auto&&e.solved){ this.win(); return; }
+    this.chips(); this.status(); },
+  status(){ const B=this.B,e=this.e,lvl=this.P.lvl; let msg=B.msg||'';
+    if(B.solved) msg=`✓ ${this.P.f} is done. ${this.i<PRAC.length-1?'Press Next structure for the next one, with a little less help.':'You finished all five!'}`;
+    else if(!msg) msg=lvl>=2?'Tap to build your structure. The picture shows each atom’s electron count.':'Build your structure, then press Check.';
+    $('#l2stat').textContent=msg;
+    const show=lvl>=2; $('#l2led').innerHTML=show?`<span>Valence electrons you have</span><b>${this.G.total}</b><span>Electrons placed</span><b style="color:${e.placed>this.G.total?'#ff9aa9':'inherit'}">${e.placed}</b><span>Still to place</span><b>${Math.max(0,this.G.total-e.placed)}</b>`:''; },
+  checkBtn(){ const B=this.B,G=this.G,e=this.ev(); if(e.solved){ this.win(); return; } B.fails++;
+    const lvl=this.P.lvl; let m;
+    const notFull=G.at.filter((a,i)=>!e.full[i]);
+    if(!B.totOK) m='First count the valence electrons and type the total in the box.';
+    else if(B.k.some(k=>k===0)) m='Some atoms are not connected yet. Tap the dashed line between them.';
+    else if(e.placed!==G.total) m=`You placed ${e.placed} electrons, but ${this.P.f} has ${G.total}. A correct structure uses exactly ${G.total}.`;
+    else if(notFull.length) m=(lvl>=1||B.fails>=3)?`${notFull.map(a=>`${a.sym} has ${e.around[a.i]} electrons around it (needs ${e.target[a.i]})`).join('; ')}.`:'At least one atom does not have a full outer shell yet. Shared pairs count for both atoms.';
+    else m='All atoms are full and you used every electron, but this is not the best arrangement. Atoms usually make a set number of bonds: H 1, C 4, N 3, O 2.';
+    B.msg='✗ '+m; this.after(); },
+  win(){ const B=this.B,P=this.P; if(B.solved) return; B.solved=true; B.msg=''; B.winT=0; state.p[P.key]=true; save(); toast(`✓ ${P.f} complete!`); this.after();
+    if(PRAC.every(p=>state.p[p.key])) award('l2'); },
+  /* ----- input ----- */
+  slotPt(a,s){ return dotPos(a.x,a.y,s,0,RP); },
+  down(p){ const B=this.B,G=this.G; if(B.solved&&this.P.lvl>=0&&false) return;
+    for(const a of G.at){ if(a.sym==='H') continue; for(let s=0;s<4;s++){ if(a.face.includes(s)) continue; const q=this.slotPt(a,s); if(Math.hypot(p.x-q[0],p.y-q[1])<25){ B.lone[a.i][s]^=1; B.msg=''; this.after(); return; } } }
+    G.bd.forEach((b,bi)=>{ if(this.hit) return; const A=G.at[b.a],C=G.at[b.b]; const dx=C.x-A.x,dy=C.y-A.y,L=Math.hypot(dx,dy),tt=((p.x-A.x)*dx+(p.y-A.y)*dy)/(L*L),dist=Math.abs((p.x-A.x)*dy-(p.y-A.y)*dx)/L;
+      if(tt>.2&&tt<.8&&dist<26){ B.k[bi]=(B.k[bi]+1)%4; B.msg=''; this.hit=true; } });
+    if(this.hit){ this.hit=false; this.after(); } },
+  move(){}, up(){},
+  update(dt){ this.t+=dt; if(this.B&&this.B.solved&&this.B.winT!==undefined) this.B.winT+=dt; },
+  draw(){ const G=this.G,B=this.B,P=this.P,e=this.e||this.ev(),t=this.t,lvl=P.lvl, st=this.st;
+    txt(P.f,26,38,34,'#ffffff','left'); txt(P.name,26,74,20,'#cfdcf7','left',600);
+    // guidance level meter
+    txt('Help level',974,30,17,'#cfdcf7','right',600); for(let i=0;i<5;i++) fillRR(814+i*32,42,26,12,6,i<=lvl?'#ffd166':'rgba(255,255,255,.14)');
+    // bonds
+    ctx.lineCap='round';
+    G.bd.forEach((b,bi)=>{ const A=G.at[b.a],C=G.at[b.b],k=B.k[bi]; let dx=C.x-A.x,dy=C.y-A.y; const d=Math.hypot(dx,dy); dx/=d; dy/=d;
+      if(k===0){ ctx.save(); ctx.setLineDash([9,8]); ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(C.x,C.y); ctx.stroke(); ctx.restore(); }
+      else for(let j=0;j<k;j++){ const off=(j-(k-1)/2)*BO; ctx.strokeStyle='rgba(235,242,255,.9)'; ctx.lineWidth=3.6; ctx.beginPath(); ctx.moveTo(A.x-dy*off,A.y+dx*off); ctx.lineTo(C.x-dy*off,C.y+dx*off); ctx.stroke();
+        [[-1,A.col],[1,C.col]].forEach(([w,col])=>{ const mx=(A.x+C.x)/2-dy*off+dx*10*w, my=(A.y+C.y)/2+dx*off+dy*10*w; elec(mx+Math.cos(t*2+j+w)*1.3,my+Math.sin(t*1.8+j)*1.3,col,1,false,6.2); }); } });
+    // open spots / lone pairs
+    G.at.forEach(a=>{ if(a.sym==='H') return; for(let s=0;s<4;s++){ if(a.face.includes(s)) continue; const filled=B.lone[a.i][s];
+      [-EO,EO].forEach(off=>{ const q=dotPos(a.x,a.y,s,off,RP); if(filled) elec(q[0]+Math.cos(t*2+s+off)*1.2,q[1]+Math.sin(t*2.2+s)*1.2,a.col,1,false,6.2);
+        else{ ctx.save(); ctx.setLineDash([2.5,2.5]); circ(q[0],q[1],7,'rgba(255,255,255,.08)','rgba(255,255,255,.8)',1.8); ctx.restore(); } }); } });
+    // octet glow, cores, count pills
+    if(lvl>=2) G.at.forEach((a,i)=>{ if(e.full[i]&&B.k.every(k=>k>=1)) glowAround(a.x,a.y,80,1); });
+    G.at.forEach(a=>core(a.x,a.y,a.sym,CS));
+    if(lvl>=2) G.at.forEach((a,i)=>{ const n=e.around[i]; pill(a.x+58,a.y+64,n+' e⁻ '+(e.full[i]?'✓':''),e.full[i]); });
+    // coach highlights (most guided level only)
+    if(lvl===4&&!B.solved){ const pr=3*Math.sin(t*6); ctx.save(); ctx.strokeStyle='#ffd166'; ctx.lineWidth=3.5;
+      const ring=(x,y,r)=>{ ctx.beginPath(); ctx.arc(x,y,r+pr,0,TAU); ctx.stroke(); };
+      if(st===2) G.bd.forEach((b,bi)=>{ if(B.k[bi]===0){ const A=G.at[b.a],C=G.at[b.b]; ring((A.x+C.x)/2,(A.y+C.y)/2,26); } });
+      if(st===3||st===4){ const a=G.at.find(a=>(st===3?(a.deg===1&&a.sym!=='H'):(a.sym!=='H'&&a.deg!==1))&&!e.full[a.i]); if(a){ for(let s=0;s<4;s++){ if(a.face.includes(s)||B.lone[a.i][s]) continue; const q=this.slotPt(a,s); ring(q[0],q[1],20); } } }
+      if(st===5) G.bd.forEach((b,bi)=>{ const A=G.at[b.a],C=G.at[b.b]; if((!e.full[b.a]||!e.full[b.b])&&B.k[bi]<3) ring((A.x+C.x)/2,(A.y+C.y)/2,26); });
+      if(st===6) G.at.forEach(a=>{ for(let s=0;s<4;s++) if(B.lone[a.i][s]){ const q=this.slotPt(a,s); ring(q[0],q[1],20); } });
+      ctx.restore(); }
+    // electron tray
+    if(lvl>=2){ fillRR(700,100,285,196,14,'rgba(16,26,52,.85)','rgba(255,255,255,.25)',1.5); txt('Valence electrons',842,126,19,'#cfdcf7');
+      for(let i=0;i<Math.max(G.total,e.placed);i++){ const x=722+(i%8)*32, y=165+Math.floor(i/8)*34; if(i>=G.total){ circ(x+8,y,ER,'#ff6b6b','rgba(0,0,0,.5)',1); } else if(i<e.placed) circ(x+8,y,ER,null,'rgba(255,255,255,.45)',1.5); else elec(x+8,y,'#ffe08a',1,false,ER+1); }
+      const left=G.total-e.placed; txt(left>0?left+' left to place':left===0?'all placed ✓':(-left)+' too many',842,272,20,left===0?'#8ff0b6':left<0?'#ff9aa9':'#ffd166'); }
+    if(B.solved){ const w=B.winT||0; if(w<1.2){ ctx.save(); ctx.globalAlpha*=1-w/1.2; txt('✓',350,60,70,'#5be0a0'); ctx.restore(); } }
+    txt('Tap bonds and dotted circles',350,H-18,18,'rgba(200,215,245,.8)','center',600); }
+};
+
+/* =====================================================================
+   Naming helpers (binary covalent compounds)
+   ===================================================================== */
+const PRE=['','mono','di','tri','tetra','penta','hexa','hepta','octa','nona','deca'];
+const NC1='#7fd4ff', NC2='#ffcf6b';          // first-element words are blue, second-element words are gold
+function elide(p,s){ return (/[ao]$/.test(p)&&/^[aeiou]/.test(s))?p.slice(0,-1):p; }
+function nameParts(a,n1,b,n2){ const e1=ELM[a], e2=ELM[b]; const p1=n1>1?PRE[n1]:'', raw2=PRE[n2], p2=elide(raw2,e2.ide);
+  return {p1,w1:p1+e1.name,raw2,p2,s2:e2.ide,w2:p2+e2.ide,full:p1+e1.name+' '+p2+e2.ide,elided:p2!==raw2}; }
+const fmla=(a,n1,b,n2)=>a+(n1>1?sub(n1):'')+b+(n2>1?sub(n2):'');
+function multi(pieces,x,y,size,align,alpha){ ctx.save(); if(alpha!==undefined) ctx.globalAlpha*=alpha; ctx.font=`700 ${size}px ${FONT}`; const w=pieces.reduce((s,p)=>s+ctx.measureText(p.t).width,0);
+  let cx=align==='left'?x:align==='right'?x-w:x-w/2; ctx.textAlign='left'; ctx.textBaseline='middle';
+  pieces.forEach(p=>{ ctx.font=`${p.w||700} ${size}px ${FONT}`; ctx.fillStyle=p.c||'#fff'; ctx.fillText(p.t,cx,y); const pw=ctx.measureText(p.t).width;
+    if(p.strike){ ctx.strokeStyle=p.c; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(cx-2,y+1); ctx.lineTo(cx+pw+2,y+1); ctx.stroke(); } cx+=pw; }); ctx.restore(); return w; }
+function drawGroup(cx,cy,n,sym,ring,label,a){ ctx.save(); ctx.globalAlpha*=a===undefined?1:a; const per=5, rows=Math.ceil(n/per), step=64, w=Math.min(n,per)*step+22, h=rows*step+14;
+  ctx.save(); ctx.setLineDash([7,6]); fillRR(cx-w/2,cy-h/2,w,h,16,rgba(ring,.07),ring,2); ctx.restore();
+  for(let i=0;i<n;i++){ const r=Math.floor(i/per), c=i%per, inRow=Math.min(per,n-r*per), x=cx+(c-(inRow-1)/2)*step, y=cy+(r-(rows-1)/2)*step; core(x,y,sym,1.4); }
+  if(label) txt(label,cx,cy-h/2-17,17,ring,'center',700); ctx.restore(); }
+function drawPrefixTable(h1,h2,a){ ctx.save(); ctx.globalAlpha*=a===undefined?1:a; fillRR(690,70,295,466,14,'rgba(16,26,52,.88)','rgba(255,255,255,.22)',1.5);
+  txt('Prefix = number of atoms',837,96,17,'#cfdcf7'); const t=performance.now()/1000;
+  for(let i=1;i<=10;i++){ const y=132+(i-1)*39, hl=(i===h1&&i!==h2)?NC1:(i===h2?NC2:null);
+    if(hl){ fillRR(702,y-17,271,34,9,rgba(hl,.18+.08*Math.sin(t*5)),hl,2); }
+    txt(String(i),742,y,22,hl||'#ffd166','right'); txt(PRE[i]+'-',770,y,21,hl||'#ffffff','left'); }
+  ctx.restore(); }
+
+/* =====================================================================
+   TAB 4 — Prefix rules (animation)
+   ===================================================================== */
+const N1_SET={CO2:['C',1,'O',2],CO:['C',1,'O',1],N2O5:['N',2,'O',5],PCl3:['P',1,'Cl',3],SF6:['S',1,'F',6],P4O10:['P',4,'O',10]};
+const Q_N1=[
+  {q:'What is the correct name for CO?',opts:['carbon monoxide','monocarbon monoxide','carbon oxide','carbon monooxide'],ans:0,
+   hint:'The first element never gets mono-. The second element always gets a prefix, and its ending becomes -ide. Does “mono” keep its last letter before “oxide”?',
+   why:'carbon (no prefix on the first element) + mono + oxide. The “o” of mono is dropped before the vowel in oxide: monoxide.'},
+  {q:'Why isn’t NaCl called “sodium monochloride”?',opts:['Prefixes are only used for covalent compounds (two nonmetals). NaCl is ionic','Sodium is too small to need a prefix','Mono- is only ever used with oxygen','NaCl is covalent, so it is exempt from prefixes'],ans:0,
+   hint:'Look at step 2: when do we use prefixes? Think back to the ionic activities: how did we write the formula NaCl?',why:'Sodium is a metal and chlorine a nonmetal, so NaCl is ionic and the ratio is already fixed by the charges. Only covalent compounds, which can combine in many ratios (CO, CO₂), need prefixes.'}];
+const A4={ id:'CO2', t:0,
+  mount(){ this.t=0; $('#h1').textContent='Your mission'; $('#h2').textContent='Choose a compound'; $('#h3').textContent='Check your understanding';
+    $('#c1').innerHTML=`<div class="goal">Carbon and oxygen make <b>CO</b> and <b>CO₂</b>: the same atoms in different amounts. Chemists need names that tell them apart. Watch how a name is built from a formula, then try more.</div>
+      <ul class="checks"><li id="n1a">Watch the whole animation for 2 compounds <span class="muted" id="n1cnt"></span></li><li id="n1b">Answer the 2 check questions</li></ul>`;
+    $('#c2').innerHTML=`<div class="lab">Formula</div><div class="chips" id="n1els">${Object.keys(N1_SET).map(k=>{ const [a,n1,b,n2]=N1_SET[k]; return `<button class="chip big" data-k="${k}">${fmla(a,n1,b,n2)}</button>`; }).join('')}</div>
+      <div class="rule"><b>Rule 1.</b> Two nonmetals → covalent → use prefixes.</div><div class="rule"><b>Rule 2.</b> First element: its name, with a prefix only if there is more than one atom.</div><div class="rule"><b>Rule 3.</b> Second element: prefix + root + <b>-ide</b>, always with a prefix. Drop a prefix’s last <b>a</b> or <b>o</b> before a vowel.</div>`;
+    $('#c3').innerHTML=`<div id="n1q">${mqHTML(Q_N1,'n1')}</div>`; mqWire($('#n1q'),Q_N1,'n1',()=>this.check());
+    document.querySelectorAll('#n1els .chip').forEach(c=>c.onclick=()=>this.pick(c.dataset.k)); this.pick(this.id); this.check(); },
+  pick(k){ this.id=k; const [a,n1,b,n2]=N1_SET[k]; this.d={a,n1,b,n2,np:nameParts(a,n1,b,n2),f:fmla(a,n1,b,n2)};
+    document.querySelectorAll('#n1els .chip').forEach(c=>{ c.classList.toggle('on',c.dataset.k===k); c.classList.toggle('ok',!!(state.seen.n1||{})[c.dataset.k]); });
+    Player.setup(6,s=>this.text(s),s=>{ if(s===5){ (state.seen.n1=state.seen.n1||{})[k]=true; save(); this.check(); } }); },
+  text(s){ const {a,n1,b,n2,np,f}=this.d, e1=ELM[a], e2=ELM[b];
+    switch(s){
+      case 0: return `<b>Start with the formula ${f}.</b> The small numbers (subscripts) tell you how many atoms of each element are in one molecule: <b>${n1} ${e1.name}</b> and <b>${n2} ${e2.name}</b>. (No number means 1.)`;
+      case 1: return `<b>Is it covalent?</b> Both ${e1.name} and ${e2.name} are <b>nonmetals</b>, so the atoms share electrons. Covalent compounds use <b>prefixes</b> in their names. Ionic compounds like NaCl (a metal + a nonmetal) do not.`;
+      case 2: return `<b>Prefixes count the atoms.</b> ${n1} → <b>${PRE[n1]}-</b> and ${n2} → <b>${PRE[n2]}-</b>. Learn the list: mono, di, tri, tetra, penta, hexa, hepta, octa, nona, deca.`;
+      case 3: return n1>1?`<b>First element:</b> say its name, with its prefix because there is more than one atom: <b>${np.w1}</b>.`:`<b>First element:</b> just say its name: <b>${e1.name}</b>. There is only one atom, and <b>you never use mono- on the first element</b> (not “mono${e1.name}”).`;
+      case 4: return `<b>Second element:</b> change its ending to <b>-ide</b> and <b>always</b> use the prefix, even mono-. ${np.raw2} + ${np.s2}${np.elided?`: a prefix ending in <b>a</b> or <b>o</b> loses that letter before a vowel, so it becomes <b>${np.w2}</b>.`:` = <b>${np.w2}</b> (no vowel clash here).`}`;
+      default: return `<b>Put it together: ${np.full}.</b> The prefixes tell you exactly how many atoms of each kind are in one molecule. That is how we tell CO (carbon monoxide) from CO₂ (carbon dioxide).`; } },
+  check(){ const s=state.seen.n1||{}, n=Object.keys(s).length; const a=$('#n1a'); if(!a) return; $('#n1cnt').textContent='('+Math.min(n,2)+'/2)'; a.classList.toggle('ok',n>=2);
+    document.querySelectorAll('#n1els .chip').forEach(c=>c.classList.toggle('ok',!!s[c.dataset.k])); $('#n1b').classList.toggle('ok',mqDone('n1',2)); if(n>=2&&mqDone('n1',2)) award('n1'); },
+  down(){}, move(){}, up(){}, update(dt){ this.t+=dt; Player.update(dt); },
+  draw(){ const {a,n1,b,n2,np,f}=this.d, u=Player.u, t=this.t, e1=ELM[a], e2=ELM[b];
+    txt(f,26,48,56,'#ffffff','left'); multi([{t:n1+' ',c:NC1},{t:e1.name,c:NC1},{t:'  +  ',c:'#9fb0d6'},{t:n2+' ',c:NC2},{t:e2.name,c:NC2}],30,98,20,'left');
+    drawGroup(185,205,n1,a,NC1,n1+' '+e1.name+(n1>1?' atoms':' atom'));
+    drawGroup(500,205,n2,b,NC2,n2+' '+e2.name+(n2>1?' atoms':' atom'));
+    if(u>0.6){ const al=ease((u-.6)/.8); ctx.save(); ctx.globalAlpha*=al; [[185,NC1],[500,NC2]].forEach(([x,c])=>{ fillRR(x-62,306,124,26,13,'rgba(30,40,70,.95)',c,1.5); txt('nonmetal',x,319,17,c); });
+      if(u>=1&&u<2.4){ const q=clamp(u-1,0,1); ctx.globalAlpha*=q*(1-ease(clamp(u-2,0,.4)/.4)); txt('two nonmetals → covalent → prefixes ✓',342,352,19,'#8ff0b6'); txt('(NaCl is a metal + a nonmetal: ionic, no prefixes)',342,380,17,'#b8c6e6','center',600); } ctx.restore(); }
+    const a2=ease(clamp(u-1.2,0,1)); drawPrefixTable(u>=1.5?n1:0,u>=1.5?n2:0,.55+.45*a2);
+    if(u>=2){ const q=ease(clamp(u-1.7,0,1)); ctx.save(); ctx.globalAlpha*=q; txt(n1+'  →  '+(n1>1?PRE[n1]+'-':'(only 1)'),185,358,22,NC1); txt(n2+'  →  '+PRE[n2]+'-',500,358,22,NC2); ctx.restore(); }
+    const fin=ease(clamp(u-4.5,0,1)); // lines
+    if(u>=3){ const q=ease(clamp(u-2.7,0,1)), y=398; multi([{t:'first element:  ',c:'#9fb0d6',w:600},{t:np.p1,c:NC1},{t:e1.name,c:NC1}],30,y,24,'left',q*(1-fin));
+      if(n1===1&&u<5){ ctx.save(); ctx.globalAlpha*=q*(1-fin); multi([{t:'mono',c:'#ff9aa9',strike:true},{t:'  is never used on the first element',c:'#ff9aa9',w:600}],30,y+30,17,'left'); ctx.restore(); } }
+    if(u>=4){ const q=ease(clamp(u-3.7,0,1)), y=462, r=np.elided?ease(clamp(u-4.15,0,1)):0; const rawHead=np.raw2.slice(0,-1), rawLast=np.raw2.slice(-1);
+      if(np.elided){ multi([{t:'second element:  ',c:'#9fb0d6',w:600},{t:rawHead,c:NC2},{t:rawLast,c:r>.3?'#ff7a8d':NC2,strike:r>.3},{t:'  +  ',c:'#9fb0d6'},{t:np.s2,c:NC2},{t:'   →   ',c:'#9fb0d6'},{t:np.w2,c:NC2}],30,y,24,'left',q*(1-fin)); }
+      else multi([{t:'second element:  ',c:'#9fb0d6',w:600},{t:np.raw2,c:NC2},{t:'  +  ',c:'#9fb0d6'},{t:np.s2,c:NC2},{t:'   →   ',c:'#9fb0d6'},{t:np.w2,c:NC2}],30,y,24,'left',q*(1-fin)); }
+    if(u>=5){ const q=ease(clamp(u-4.5,0,1)); ctx.save(); ctx.globalAlpha*=q; fillRR(30,392,640,100,18,'rgba(20,70,45,.55)','#5be0a0',2);
+      multi([{t:np.p1+e1.name,c:NC1},{t:' ',c:'#fff'},{t:np.w2,c:NC2}],350,442,40,'center'); ctx.restore(); }
+  }
+};
+
+/* =====================================================================
+   TAB 5 — Naming practice (formula → name, name → formula, covalent or not?)
+   ===================================================================== */
+const NITEMS=[
+  {t:'sort'},
+  {t:'f2n',a:'C',n1:1,b:'Cl',n2:4},{t:'f2n',a:'N',n1:2,b:'O',n2:1},{t:'f2n',a:'P',n1:2,b:'O',n2:5},
+  {t:'n2f',a:'S',n1:1,b:'F',n2:6},{t:'n2f',a:'N',n1:2,b:'O',n2:4},{t:'n2f',a:'P',n1:1,b:'Cl',n2:3}];
+const SORT=[{f:'CO₂',cov:true,why:'C and O are both nonmetals'},{f:'NaCl',cov:false,why:'Na is a metal, so this is ionic'},{f:'N₂O',cov:true,why:'N and O are both nonmetals'},
+  {f:'MgO',cov:false,why:'Mg is a metal, so this is ionic'},{f:'SF₆',cov:true,why:'S and F are both nonmetals'},{f:'CaCl₂',cov:false,why:'Ca is a metal, so this is ionic'}];
+const A5={ i:0, t:0, pick:null, sel:[], p1:-1, p2:-1, c1:1, c2:1, msg:'', ok:false,
+  mount(){ Player.hide(); this.t=0; $('#h1').textContent='Your mission'; $('#h2').textContent='Controls'; $('#h3').textContent="What's happening";
+    $('#c1').innerHTML=`<div class="goal" id="n2goal"></div><div class="lab">Practice items</div><div class="chips" id="n2chips"></div><div class="hintline">The prefix table stays on screen. Use it!</div>`;
+    $('#c2').innerHTML=`<div id="n2ctl"></div><div class="rowbtns"><button class="btn" id="n2check">Check</button><button class="btn" id="n2next" style="display:none">Next →</button></div>`;
+    $('#c3').innerHTML=`<div class="status" id="n2stat"></div>`;
+    $('#n2check').onclick=()=>this.checkIt(); $('#n2next').onclick=()=>{ if(this.i<NITEMS.length-1) this.load(this.i+1); };
+    const f=NITEMS.findIndex((_,i)=>!state.n[i]); this.load(f<0?0:f); },
+  unl(i){ return UNLOCK||i===0||!!state.n[i-1]; },
+  load(i){ this.i=i; const it=NITEMS[i]; this.ok=!!state.n[i]; this.msg=''; this.sel=[]; this.p1=-1; this.p2=-1; this.c1=1; this.c2=1; this.it=it;
+    if(it.t==='f2n'){ this.np=nameParts(it.a,it.n1,it.b,it.n2); } if(it.t==='n2f'){ this.np=nameParts(it.a,it.n1,it.b,it.n2); this.c1=this.ok?it.n1:1; this.c2=this.ok?it.n2:1; }
+    if(it.t==='f2n'&&this.ok){ this.p1=it.n1>1?it.n1:0; this.p2=it.n2; }
+    this.goal(); this.controls(); this.chips(); this.stat(); },
+  goal(){ const it=this.it, g=$('#n2goal'); const n=NITEMS.length;
+    if(it.t==='sort') g.innerHTML=`<b>Item 1 of ${n}.</b> Which of these compounds use <b>prefixes</b> in their names? Tap every <b>covalent</b> compound on the picture, then press Check.`;
+    if(it.t==='f2n') g.innerHTML=`<b>Item ${this.i+1} of ${n} · formula → name.</b> Name <b>${fmla(it.a,it.n1,it.b,it.n2)}</b>. Choose the prefix for each element (or none), and watch the name build on the picture.`;
+    if(it.t==='n2f') g.innerHTML=`<b>Item ${this.i+1} of ${n} · name → formula.</b> Write the formula for <b>${this.np.full}</b>. Use the + and − buttons to set how many atoms of each element.`; },
+  controls(){ const it=this.it, c=$('#n2ctl'); const ch=(arr,sel,cls)=>arr.map((p,i)=>`<button class="chip ${cls} ${sel===i?'sel':''}" data-i="${i}">${p}</button>`).join('');
+    if(it.t==='sort') c.innerHTML=`<div class="hintline" style="margin:0 0 6px">Tap the picture, or these buttons:</div><div class="chips">${SORT.map((s,i)=>`<button class="chip big ${this.sel.includes(i)?'sel':''}" data-i="${i}">${s.f}</button>`).join('')}</div>`;
+    if(it.t==='f2n'){ const opts=['(none)',...PRE.slice(1).map(p=>p+'-')];
+      c.innerHTML=`<div class="lab">Prefix for ${ELM[it.a].name}</div><div class="chips" id="n2p1">${ch(opts,this.p1,'')}</div><div class="lab">Prefix for ${ELM[it.b].ide}</div><div class="chips" id="n2p2">${ch(opts,this.p2,'')}</div>`; }
+    if(it.t==='n2f') c.innerHTML=`<div class="stepper"><span class="lbl">Number of ${ELM[it.a].name} (${it.a}) atoms</span><button data-w="1" data-d="-1" aria-label="fewer">−</button><span class="val" id="n2v1">${this.c1}</span><button data-w="1" data-d="1" aria-label="more">+</button></div>
+      <div class="stepper"><span class="lbl">Number of ${ELM[it.b].name} (${it.b}) atoms</span><button data-w="2" data-d="-1" aria-label="fewer">−</button><span class="val" id="n2v2">${this.c2}</span><button data-w="2" data-d="1" aria-label="more">+</button></div>`;
+    c.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ if(this.ok) return; const i=+b.dataset.i;
+      if(it.t==='sort'){ const k=this.sel.indexOf(i); if(k>=0) this.sel.splice(k,1); else this.sel.push(i); this.msg=''; }
+      else if(b.parentElement.id==='n2p1') this.p1=i; else this.p2=i; this.msg=''; this.controls(); this.stat(); });
+    c.querySelectorAll('.stepper button').forEach(b=>b.onclick=()=>{ if(this.ok) return; const w=b.dataset.w, d=+b.dataset.d; if(w==='1') this.c1=clamp(this.c1+d,1,10); else this.c2=clamp(this.c2+d,1,10); $('#n2v1').textContent=this.c1; $('#n2v2').textContent=this.c2; this.msg=''; this.stat(); });
+    $('#n2check').style.display=this.ok?'none':''; $('#n2next').style.display=this.ok&&this.i<NITEMS.length-1?'':'none'; },
+  chips(){ $('#n2chips').innerHTML=NITEMS.map((_,i)=>`<button class="chip ${i===this.i?'on':''} ${state.n[i]?'ok':''}" data-i="${i}" ${this.unl(i)?'':'disabled'}>${state.n[i]?'✓ ':''}${i+1}</button>`).join('');
+    document.querySelectorAll('#n2chips .chip').forEach(c=>c.onclick=()=>this.load(+c.dataset.i)); },
+  stat(){ let m=this.msg; if(!m){ m=this.ok?'✓ Correct!':this.it.t==='sort'?'Tap each compound that is covalent (two nonmetals).':this.it.t==='f2n'?'Pick a prefix for each element. Remember: no mono- on the first element.':'Set the number of atoms from the prefixes in the name.'; }
+    $('#n2stat').textContent=m; $('#n2stat').style.color=/^✗/.test(m)?'#ff9aa9':''; },
+  checkIt(){ const it=this.it; let good=false, m='';
+    if(it.t==='sort'){ const want=SORT.map((s,i)=>s.cov?i:-1).filter(i=>i>=0), got=[...this.sel].sort(); good=want.length===got.length&&want.every((v,i)=>v===got[i]);
+      if(!good){ const wrong=SORT.map((s,i)=>({s,i})).filter(({s,i})=>s.cov!==this.sel.includes(i)); m='✗ Look again at '+wrong.map(({s})=>s.f+' ('+s.why+')').join('; ')+'.'; } else m='✓ Right: two nonmetals share electrons, so they get prefixes. A metal + nonmetal is ionic.'; }
+    if(it.t==='f2n'){ const w1=it.n1>1?it.n1:0; if(this.p1<0||this.p2<0) m='✗ Choose a prefix option for both elements (use “(none)” if there is no prefix).';
+      else if(this.p1===1&&it.n1===1) m='✗ Never use mono- on the first element. If there is only one atom, just say the name.';
+      else if(this.p1!==w1) m=`✗ Check the first element: there ${it.n1===1?'is only 1 atom, so no prefix':'are '+it.n1+' atoms, so use '+PRE[it.n1]+'-'}.`;
+      else if(this.p2!==it.n2) m=`✗ Count the ${ELM[it.b].name} atoms in the formula: there are ${it.n2}. Look it up in the prefix table.`;
+      else{ good=true; m=`✓ ${this.np.full}. ${this.np.elided?`The prefix ${this.np.raw2}- lost its last letter before the vowel in “${this.np.s2}”.`:`The second element always gets a prefix and ends in -ide.`}`; } }
+    if(it.t==='n2f'){ if(this.c1!==it.n1) m=`✗ Check the first element: ${it.n1===1?'with no prefix it means just 1 atom':'the prefix '+PRE[it.n1]+'- means '+it.n1}.`;
+      else if(this.c2!==it.n2) m=`✗ Check the second element: the prefix ${this.np.raw2}- means ${it.n2}.`; else{ good=true; m=`✓ ${fmla(it.a,it.n1,it.b,it.n2)}. No prefix on the first element means 1 atom, and the prefix on the second tells its subscript.`; } }
+    this.msg=m; if(good){ this.ok=true; state.n[this.i]=true; save(); toast('✓ Correct!'); if(NITEMS.every((_,i)=>state.n[i])) award('n2'); this.chips(); this.controls(); }
+    this.stat(); },
+  down(p){ if(this.it.t!=='sort'||this.ok) return; SORT.forEach((s,i)=>{ const x=50+(i%3)*220, y=130+Math.floor(i/3)*150; if(p.x>x&&p.x<x+205&&p.y>y&&p.y<y+125){ const k=this.sel.indexOf(i); if(k>=0) this.sel.splice(k,1); else this.sel.push(i); this.msg=''; this.controls(); this.stat(); } }); },
+  move(){}, up(){}, update(dt){ this.t+=dt; },
+  draw(){ const it=this.it, t=this.t;
+    if(it.t==='sort'){ txt('Which get prefixes? Tap every covalent compound.',26,40,22,'#ffd166','left');
+      SORT.forEach((s,i)=>{ const x=50+(i%3)*220, y=130+Math.floor(i/3)*150, on=this.sel.includes(i), show=this.ok; const good=this.ok&&s.cov;
+        fillRR(x,y,205,125,16,on?'rgba(42,61,114,.9)':'rgba(22,33,62,.9)',good||on?'#5be0a0':'rgba(255,255,255,.28)',on?3:1.5); txt(s.f,x+102,y+55,42,on?'#8ff0b6':'#ffffff');
+        txt(on?'✓ gets prefixes':'tap to choose',x+102,y+100,18,on?'#8ff0b6':'#b8c6e6','center',600); });
+      drawPrefixTable(0,0,1); return; }
+    const {a,n1,b,n2}=it;
+    if(it.t==='f2n'){ txt(fmla(a,n1,b,n2),26,48,56,'#ffffff','left'); txt('Name this compound',26,98,20,'#cfdcf7','left',600);
+      drawGroup(185,215,n1,a,NC1,n1+' '+ELM[a].name+(n1>1?' atoms':' atom')); drawGroup(500,215,n2,b,NC2,n2+' '+ELM[b].name+(n2>1?' atoms':' atom'));
+      const e1=ELM[a], e2=ELM[b]; const pr1=this.p1<0?'':(this.p1===0?'':PRE[this.p1]), pr2=this.p2<0?'':elide(PRE[this.p2]||'',e2.ide);
+      const blank=(s,c)=>({t:s?s:'___',c:s?c:'#6b7a9e'});
+      multi([blank(this.p1<0?'':pr1+e1.name,NC1),{t:' ',c:'#fff'},blank(this.p2<0?'':pr2+e2.ide,NC2)],350,440,this.p1>=0&&this.p2>=0?36:30,'center');
+      if(this.p1===1&&n1===1) txt('Hmm, is mono- allowed on the first element?',350,490,18,'#ffb066','center',600);
+      drawPrefixTable(this.p1>0?this.p1:0,this.p2>0?this.p2:0,1); }
+    else{ const np=this.np; txt('Write the formula for',26,38,20,'#cfdcf7','left',600); multi([{t:np.p1+ELM[a].name,c:NC1},{t:' ',c:'#fff'},{t:np.w2,c:NC2}],26,76,38,'left');
+      drawGroup(185,215,this.c1,a,NC1,this.c1+' '+ELM[a].name+(this.c1>1?' atoms':' atom')); drawGroup(500,215,this.c2,b,NC2,this.c2+' '+ELM[b].name+(this.c2>1?' atoms':' atom'));
+      multi([{t:'Formula:  ',c:'#9fb0d6',w:600},{t:fmla(a,this.c1,b,this.c2),c:'#ffffff'}],350,440,44,'center');
+      drawPrefixTable(0,0,1); }
+    if(this.ok){ fillRR(40,478,620,52,14,'rgba(20,70,45,.9)','#5be0a0',2); txt('✓ Correct! Press Next →',350,505,22,'#8ff0b6'); } }
+};
+
+/* =====================================================================
+   Acids
+   ===================================================================== */
+function wrapText(s,x,y,maxW,lh,size,color,align,weight){ ctx.font=`${weight||600} ${size}px ${FONT}`; const words=s.split(' '); let line='',yy=y;
+  words.forEach(w=>{ const test=line?line+' '+w:w; if(ctx.measureText(test).width>maxW&&line){ txt(line,x,yy,size,color,align||'left',weight||600); yy+=lh; line=w; } else line=test; });
+  if(line) txt(line,x,yy,size,color,align||'left',weight||600); return yy; }
+function bracketPair(x0,x1,y0,y1,label,a){ ctx.save(); ctx.globalAlpha*=a; ctx.strokeStyle='#ffd166'; ctx.lineWidth=4; ctx.lineCap='butt';
+  [[x0,1],[x1,-1]].forEach(([x,sg])=>{ ctx.beginPath(); ctx.moveTo(x+sg*20,y0); ctx.lineTo(x,y0); ctx.lineTo(x,y1); ctx.lineTo(x+sg*20,y1); ctx.stroke(); }); txt(label,x1+22,y0+6,32,'#ffd166'); ctx.restore(); }
+function miniWater(x,y,s,a){ ctx.save(); ctx.globalAlpha*=a; ctx.strokeStyle='rgba(235,242,255,.7)'; ctx.lineWidth=3; [[-1,1],[1,1]].forEach(([dx,dy])=>{ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+dx*50*s,y+dy*38*s); ctx.stroke(); });
+  core(x,y,'O',CS*s); core(x-50*s,y+38*s,'H',CS*s); core(x+50*s,y+38*s,'H',CS*s); txt('H₂O',x,y-48*s-8,16,'#b8c6e6','center',600); ctx.restore(); }
+
+const AC1_TITLES=['Covalent HCl','Add water','Water pulls on H','H⁺ transfers','An acid!','Why odd names?','The pattern'];
+const Q_AC1=[
+  {q:'When HCl dissolves in water, what happens to the shared pair of electrons?',
+   opts:['Both electrons stay with chlorine, making Cl⁻, and the H leaves as H⁺','Both electrons leave with the hydrogen','One electron goes to each atom and the bond stays','The electrons escape as a gas'],ans:0,
+   hint:'Look at step 4 of the animation: which atom ends up with 4 lone pairs (8 electrons) around it?',why:'Chlorine keeps both electrons of the shared pair, becoming Cl⁻ with a full octet. The hydrogen leaves as a bare H⁺, which water picks up to make H₃O⁺.'},
+  {q:'What does the “hydro-” in hydrochloric acid tell you?',
+   opts:['The acid has no oxygen: it is just hydrogen plus one other element','The acid contains water','The acid has two hydrogen atoms','The acid is made with extra oxygen'],ans:0,
+   hint:'Remember Lavoisier’s mistaken idea about which element every acid contains.',why:'Oxygen means “acid-former,” so oxygen-containing acids got plain -ic or -ous names. Acids with no oxygen needed a different tag, hydro-.'}];
+const A6={ t:0,
+  mount(){ this.t=0; $('#h1').textContent='Your mission'; $('#h2').textContent='What to look for'; $('#h3').textContent='Check your understanding';
+    $('#c1').innerHTML=`<div class="goal">You already know how to name covalent compounds, such as <b>hydrogen chloride</b>. But dissolve it in water and chemists call it <b>hydrochloric acid</b>. Why the change, and why that strange name? Watch what happens to the electrons.</div>
+      <ul class="checks"><li id="ac1a">Watch all 7 steps</li><li id="ac1b">Answer the 2 check questions</li></ul>`;
+    $('#c2').innerHTML=`<div class="rule ac"><b>Acid</b> (Arrhenius): a substance that releases <b>H⁺</b> ions when dissolved in water.</div>
+      <div class="rule lw"><b>Connect it:</b> the shared pair in H–Cl is the same kind of shared pair you drew in the Lewis structures.</div>
+      <div class="hintline">(aq) means <b>aq</b>ueous: dissolved in water. The same formula can mean a different substance with a different name.</div>`;
+    $('#c3').innerHTML=`<div id="ac1q">${mqHTML(Q_AC1,'ac1')}</div>`; mqWire($('#ac1q'),Q_AC1,'ac1',()=>this.check());
+    Player.setup(7,k=>this.text(k),k=>{ if(k===6){ state.seen.ac1=true; save(); this.check(); } }); this.check(); },
+  text(k){ switch(k){
+    case 0: return `<b>Pure HCl is a covalent molecule.</b> In its Lewis structure, H and Cl share one pair, and Cl has three lone pairs. By the prefix rules it is named <b>hydrogen chloride</b> (a gas).`;
+    case 1: return `<b>Now dissolve it in water.</b> Water molecules (H₂O) surround it, and each oxygen has two lone pairs. We write the dissolved form as HCl(aq).`;
+    case 2: return `<b>Tug of war.</b> Chlorine pulls the shared pair strongly toward itself. At the same time, a lone pair on a water molecule’s oxygen is attracted to the hydrogen.`;
+    case 3: return `<b>The H leaves as H⁺.</b> Both shared electrons stay with chlorine, giving <b>Cl⁻</b> with a full octet. The bare H⁺ (a proton, no electrons) bonds to a lone pair on water, making <b>H₃O⁺</b>. Water supplied both electrons for that new bond.`;
+    case 4: return `<b>That is what makes it an acid.</b> A substance that releases H⁺ in water is an acid. The solution of H₃O⁺ and Cl⁻ is called <b>hydrochloric acid</b>: the name describes the <b>solution</b>, and it is built from the anion’s name, chlor-ide.`;
+    case 5: return `<b>Why the odd names?</b> Acids were named by taste long before bonding was understood (Latin <i>acidus</i> = sour). In 1777 Lavoisier thought every acid contained oxygen and named it <i>oxygène</i>, “acid-former.” He was wrong, but the idea stuck. Acids <b>without</b> oxygen, like HCl, got the tag <b>hydro-</b>.`;
+    default: return `<b>The pattern.</b> An acid’s name comes from its <b>anion’s</b> name: chlor<b>ide</b> → <b>hydro</b>chlor<b>ic</b> acid; nitr<b>ate</b> → nitr<b>ic</b> acid; nitr<b>ite</b> → nitr<b>ous</b> acid. You drew nitrate and nitrite earlier. The next tab has the exact rules.`; } },
+  check(){ const a=$('#ac1a'); if(!a) return; a.classList.toggle('ok',!!state.seen.ac1); $('#ac1b').classList.toggle('ok',mqDone('ac1',2)); if(state.seen.ac1&&mqDone('ac1',2)) award('ac1'); },
+  down(){}, move(){}, up(){}, update(dt){ this.t+=dt; Player.update(dt); },
+  draw(){ const u=Player.u, t=this.t; txt(AC1_TITLES[Math.min(6,Math.round(u))],26,34,23,'#ffd166','left');
+    const sceneA=u<4?1:u<5?lerp(1,.12,ease(u-4)):lerp(.12,0,ease(u-5));
+    if(sceneA>0.005){ ctx.save(); ctx.globalAlpha*=sceneA; this.scene(u,t); ctx.restore(); }
+    if(u>4.2&&u<6) this.history(u);
+    if(u>5.3) this.pattern(u); },
+  scene(u,t){ const aw=ease(clamp(u,0,1)), CLx=190, CLy=290, OX=730, OY=290;
+    if(aw>0.01){ ctx.save(); ctx.globalAlpha*=aw; fillRR(520,64,465,470,22,'rgba(63,140,255,.10)','rgba(127,184,255,.38)',2); txt('liquid water',752,90,19,'#8fc2ff','center',700); miniWater(915,160,.65,.7); miniWater(915,440,.65,.7); ctx.restore(); }
+    const pa=ease(clamp((u-2)/.5,0,1)), pb=ease(clamp((u-2.5)/.5,0,1)), pull=ease(clamp(u-1,0,1))*(1-pa);
+    const Hx=lerp(350,580,pb), Hy=OY;
+    // water molecule (O with H above and below, lone pairs on W and E)
+    const wHs=[[OX,OY-130,ECOL[3]],[OX,OY+130,ECOL[4]]];
+    ctx.lineCap='round'; ctx.strokeStyle='rgba(235,242,255,.9)'; ctx.lineWidth=3.6;
+    if(aw>0.01) wHs.forEach(([x,y])=>{ ctx.save(); ctx.globalAlpha*=aw; ctx.beginPath(); ctx.moveTo(OX,OY); ctx.lineTo(x,y); ctx.stroke(); ctx.restore(); });
+    // bonds H–Cl and new H–O
+    ctx.save(); ctx.globalAlpha*=1-pa; ctx.beginPath(); ctx.moveTo(CLx,CLy); ctx.lineTo(350,CLy); ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.globalAlpha*=pb; ctx.beginPath(); ctx.moveTo(Hx,Hy); ctx.lineTo(OX,OY); ctx.stroke(); ctx.restore();
+    // cores
+    core(CLx,CLy,'Cl',CS); core(OX,OY,'O',CS,aw); wHs.forEach(([x,y])=>core(x,y,'H',CS,aw));
+    core(Hx,Hy,'H',CS*(1-.3*pa*(1-pb)));
+    if(pa>0.05&&pb<0.98){ ctx.save(); ctx.globalAlpha*=pa*(1-pb); txt('H⁺',Hx,Hy-34,22,'#ffd166'); ctx.restore(); }
+    // electrons
+    const E=ECOL;
+    for(const s of [0,2,3]) [-EO,EO].forEach(off=>{ const p=dotPos(CLx,CLy,s,off,RP); elec(p[0]+Math.cos(t*2+s)*1.2,p[1]+Math.sin(t*2.1+s)*1.2,E[0],1,false,6); });
+    // shared pair slides to chlorine, then H leaves
+    { const mid=(CLx+350)/2, a0=[mid-10-12*pull,CLy], b0=[mid+10-12*pull,CLy], a1=dotPos(CLx,CLy,1,-EO,RP), b1=dotPos(CLx,CLy,1,EO,RP);
+      elec(lerp(a0[0],a1[0],pa),lerp(a0[1],a1[1],pa),E[0],1,pa>0&&pa<1,6); elec(lerp(b0[0],b1[0],pa),lerp(b0[1],b1[1],pa),E[1],1,pa>0&&pa<1,6); }
+    // water electrons
+    if(aw>0.01){ ctx.save(); ctx.globalAlpha*=aw;
+      wHs.forEach(([x,y,hc],i)=>{ const dir=i?1:-1; elec(OX,OY+dir*55,E[2],1,false,6); elec(OX,OY+dir*75,hc,1,false,6); });
+      { const p1=dotPos(OX,OY,1,-EO,RP), p2=dotPos(OX,OY,1,EO,RP); elec(p1[0],p1[1],E[2],1,false,6); elec(p2[0],p2[1],E[2],1,false,6); }
+      { const w1=dotPos(OX,OY,3,-EO,RP), w2=dotPos(OX,OY,3,EO,RP), m1=[(Hx+OX)/2-10,OY], m2=[(Hx+OX)/2+10,OY];
+        elec(lerp(w1[0],m1[0],pb),lerp(w1[1],m1[1],pb),E[2],1,pb>0&&pb<1,6); elec(lerp(w2[0],m2[0],pb),lerp(w2[1],m2[1],pb),E[2],1,pb>0&&pb<1,6); }
+      ctx.restore(); }
+    // tug of war (step 3)
+    if(u>1.2&&u<2.6){ const a=clamp((u-1.2)*2,0,1)*clamp((2.6-u)*3,0,1); ctx.save(); ctx.globalAlpha*=a; arrow(OX-RP-22,OY-40,372,OY-40,'#ffd166',3); arrow(318,OY+40,262,OY+40,'#7fd4ff',3);
+      txt("water's lone pair pulls on H",500,OY-62,19,'#ffd166'); txt('Cl pulls the shared pair',262,OY+68,19,'#7fd4ff'); ctx.restore(); }
+    // brackets + names
+    const ba=ease(clamp(u-3,0,1)); if(ba>0.01){ bracketPair(CLx-90,CLx+90,CLy-92,CLy+92,'−',ba); bracketPair(Hx-48,OX+88,OY-180,OY+180,'+',ba); }
+    if(u<1.5) txt(u<0.99?'hydrogen chloride':'HCl(aq)',270,410,24,'#ffd166');
+    if(u>=1.5&&u<3.6) txt('HCl(aq)',270,410,24,'#ffd166');
+    if(u>=3.3&&u<4.3){ const a=ease(clamp(u-3.3,0,1)); ctx.save(); ctx.globalAlpha*=a; txt('Cl⁻  chloride ion',CLx,CLy+122,19,'#8ff0b6'); txt('H₃O⁺  hydronium ion',OX-30,OY+200,19,'#8ff0b6'); ctx.restore(); }
+    if(u>=3.7){ const a=ease(clamp(u-3.7,0,1)); ctx.save(); ctx.globalAlpha*=a; fillRR(40,452,460,74,16,'rgba(20,70,45,.7)','#5be0a0',2); txt('hydrochloric acid',270,479,31,'#8ff0b6'); txt('(the solution of HCl in water)',270,508,16,'#cfdcf7','center',600); ctx.restore(); } },
+  history(u){ const a=u<5?ease(clamp((u-4.2)/.8,0,1)):1-ease(clamp(u-5,0,1)); ctx.save(); ctx.globalAlpha*=a;
+    const cards=[{x:30,h:'1700s',s:'Named by taste',b:'“Acid” comes from the Latin acidus, “sour.” Vinegar and lemon juice were named long before anyone knew about atoms or bonds.',c:'#ff8fc7'},
+      {x:345,h:'1777',s:'Lavoisier’s guess',b:'Antoine Lavoisier thought every acid contained oxygen, so he named the element oxygène: Greek for “acid-former.” He was wrong about that.',c:'#ffd166'},
+      {x:660,h:'So we got…',s:'hydro-',b:'Acids with no oxygen, like HCl, needed their own tag: hydro- means “just hydrogen plus one other element.” The endings -ic and -ous come from the same old naming.',c:'#7fd4ff'}];
+    cards.forEach(c=>{ fillRR(c.x,100,310,380,18,'rgba(22,33,62,.95)',c.c,2.5); txt(c.h,c.x+155,140,34,c.c); txt(c.s,c.x+155,184,23,'#ffffff'); wrapText(c.b,c.x+22,236,268,30,19,'#dbe6ff','left',600); });
+    ctx.restore(); },
+  pattern(u){ const a=ease(clamp(u-5.3,0,.7)/.7); ctx.save(); ctx.globalAlpha*=a; txt('The acid’s name comes from the anion’s name',500,96,26,'#ffffff');
+    const rows=[{an:'Cl⁻',w:'chloride',pc:[['hydro',NC2],['chlor','#fff'],['ic',NC1]],r:'hydro + root + ic'},{an:'NO₃⁻',w:'nitrate',pc:[['nitr','#fff'],['ic',NC1]],r:'-ate → -ic'},{an:'NO₂⁻',w:'nitrite',pc:[['nitr','#fff'],['ous',NC1]],r:'-ite → -ous'}];
+    rows.forEach((r,i)=>{ const y=190+i*100; fillRR(60,y-40,880,80,16,'rgba(22,33,62,.95)','rgba(255,255,255,.25)',1.5);
+      txt(r.an,120,y-8,30,'#ffffff'); txt(r.w,120,y+22,19,'#cfdcf7','center',600); arrow(215,y,300,y,'#9fb0d6',3);
+      multi([...r.pc.map(([s,c])=>({t:s,c})),{t:' acid',c:'#ffffff'}],330,y,36,'left'); txt(r.r,930,y,22,'#ffd166','right'); });
+    txt('(hydro- and the -ic / -ous endings are leftovers of Lavoisier’s era)',500,500,19,'#b8c6e6','center',600); ctx.restore(); }
+};
+
+/* =====================================================================
+   TAB 7 — Naming acids: the decision flow + practice
+   ===================================================================== */
+const ACIDS={
+  HCl :{f:'HCl',an:'chloride',ion:'Cl⁻',kind:'bin',stem:'chlor',root:'chlor'},
+  H2S :{f:'H₂S',an:'sulfide',ion:'S²⁻',kind:'bin',stem:'sulf',root:'sulfur'},
+  HBr :{f:'HBr',an:'bromide',ion:'Br⁻',kind:'bin',stem:'brom',root:'brom'},
+  HNO3:{f:'HNO₃',an:'nitrate',ion:'NO₃⁻',kind:'ate',stem:'nitr',root:'nitr'},
+  HNO2:{f:'HNO₂',an:'nitrite',ion:'NO₂⁻',kind:'ite',stem:'nitr',root:'nitr'},
+  H2SO4:{f:'H₂SO₄',an:'sulfate',ion:'SO₄²⁻',kind:'ate',stem:'sulf',root:'sulfur'},
+  H2SO3:{f:'H₂SO₃',an:'sulfite',ion:'SO₃²⁻',kind:'ite',stem:'sulf',root:'sulfur'},
+  H3PO4:{f:'H₃PO₄',an:'phosphate',ion:'PO₄³⁻',kind:'ate',stem:'phosph',root:'phosphor'},
+  HClO3:{f:'HClO₃',an:'chlorate',ion:'ClO₃⁻',kind:'ate',stem:'chlor',root:'chlor'},
+  HClO2:{f:'HClO₂',an:'chlorite',ion:'ClO₂⁻',kind:'ite',stem:'chlor',root:'chlor'}
+};
+Object.values(ACIDS).forEach(a=>{ a.end=a.kind==='bin'?'ic':a.kind==='ate'?'ic':'ous'; a.name=(a.kind==='bin'?'hydro':'')+a.root+a.end+' acid'; a.ending=a.an.slice(a.stem.length); });
+const AC_LEARN=['HCl','H2S','HNO3','HNO2','H2SO4','H2SO3','H3PO4','HClO3'];
+const AC_PRAC=[
+  {id:'HBr',opts:['hydrobromic acid','bromic acid','hydrobromous acid','bromous acid'],ans:0,why:'HBr is H + bromide (-ide, no oxygen), so: hydro + brom + ic.'},
+  {id:'HNO2',opts:['nitric acid','nitrous acid','hydronitric acid','nitrite acid'],ans:1,why:'HNO₂ comes from nitrite (NO₂⁻). Oxygen is present and the ending is -ite, so -ite → -ous: nitrous acid.'},
+  {id:'H2SO4',opts:['hydrosulfuric acid','sulfurous acid','sulfuric acid','sulfic acid'],ans:2,why:'H₂SO₄ comes from sulfate (-ate), so -ate → -ic. The root is the longer “sulfur-”, so sulfuric acid.'},
+  {id:'H2S',opts:['sulfuric acid','hydrosulfic acid','sulfurous acid','hydrosulfuric acid'],ans:3,why:'H₂S has no oxygen (sulfide, -ide), so hydro- … -ic, and the root is “sulfur-”: hydrosulfuric acid.'},
+  {id:'HClO2',opts:['chlorous acid','chloric acid','hydrochlorous acid','hydrochloric acid'],ans:0,why:'HClO₂ comes from chlorite (-ite), so -ite → -ous: chlorous acid. (Hydrochloric acid is HCl, with no oxygen.)'},
+  {id:'H3PO4',opts:['phosphorous acid','hydrophosphoric acid','phosphoric acid','phosphic acid'],ans:2,why:'H₃PO₄ comes from phosphate (-ate), so -ate → -ic with the root “phosphor-”: phosphoric acid.'}];
+const A7={ mode:'learn', id:'HNO3', t:0, pi:0, answered:false,
+  mount(){ this.t=0; $('#h1').textContent='Your mission'; $('#h2').textContent='Controls'; $('#h3').textContent="What's happening";
+    $('#c1').innerHTML=`<div class="goal">An acid is <b>H⁺ + an anion</b>, and its name comes from the anion. First learn the three-way rule, then name six acids yourself.</div>
+      <ul class="checks"><li id="ac2a">Watch the rule for 2 acids <span class="muted" id="ac2cnt"></span></li><li id="ac2b">Name 6 acids correctly <span class="muted" id="ac2pc"></span></li></ul>
+      <div class="rowbtns"><button class="btn" id="ac2m1">1 · Learn the rule</button><button class="btn secondary" id="ac2m2">2 · Try it</button></div>`;
+    $('#c2').innerHTML=`<div id="ac2c2"></div>`; $('#c3').innerHTML=`<div class="rule ac"><b>No oxygen:</b> hydro + root + <b>ic</b> acid (HCl → hydrochloric)</div><div class="rule ac"><b>-ate</b> anion → root + <b>ic</b> acid (nitrate → nitric)</div><div class="rule ac"><b>-ite</b> anion → root + <b>ous</b> acid (nitrite → nitrous)</div><div class="hintline">Some roots are the longer older names: sulf<b>ur</b>-ic, phosph<b>or</b>-ic.</div><div class="status" id="ac2stat"></div>`;
+    $('#ac2m1').onclick=()=>this.setMode('learn'); $('#ac2m2').onclick=()=>{ if(!this.practiceReady()){ toast('Watch the rule for 2 acids first.',true); return; } this.setMode('practice'); };
+    this.setMode(this.practiceReady()&&Object.keys(state.a).length<AC_PRAC.length?'practice':'learn'); this.check(); },
+  practiceReady(){ return UNLOCK||Object.keys(state.seen.ac2||{}).length>=2||Object.keys(state.a).length>0; },
+  setMode(m){ this.mode=m; $('#ac2m1').className=m==='learn'?'btn':'btn secondary'; $('#ac2m2').className=m==='practice'?'btn':'btn secondary';
+    if(m==='learn'){ this.id=AC_LEARN.includes(this.id)?this.id:'HNO3'; $('#ac2c2').innerHTML=`<div class="lab">Choose an acid</div><div class="chips" id="ac2els">${AC_LEARN.map(k=>`<button class="chip big" data-k="${k}">${ACIDS[k].f}</button>`).join('')}</div>`;
+      document.querySelectorAll('#ac2els .chip').forEach(c=>c.onclick=()=>this.pickLearn(c.dataset.k)); this.pickLearn(this.id); }
+    else{ const f=AC_PRAC.findIndex((_,i)=>!state.a[i]); this.loadPrac(f<0?0:f); } },
+  pickLearn(k){ this.id=k; document.querySelectorAll('#ac2els .chip').forEach(c=>{ c.classList.toggle('on',c.dataset.k===k); c.classList.toggle('ok',!!(state.seen.ac2||{})[c.dataset.k]); });
+    Player.setup(5,s=>this.text(s),s=>{ if(s===4){ (state.seen.ac2=state.seen.ac2||{})[k]=true; save(); this.check(); document.querySelectorAll('#ac2els .chip').forEach(c=>c.classList.toggle('ok',!!state.seen.ac2[c.dataset.k])); } }); $('#ac2stat').textContent=''; },
+  loadPrac(i){ this.pi=i; this.answered=!!state.a[i]; Player.hide(); const it=AC_PRAC[i]; this.id=it.id; this.wrong=[];
+    $('#ac2c2').innerHTML=`<div class="lab">Item ${i+1} of ${AC_PRAC.length}</div><div style="font-size:15px;font-weight:700;margin:4px 0">What is the name of <span style="color:var(--accent);font-size:20px">${ACIDS[it.id].f}</span>?</div><div class="opts" id="ac2o">${it.opts.map((o,j)=>`<button class="chip" data-j="${j}">${o}</button>`).join('')}</div>
+      <div class="chips" id="ac2dots">${AC_PRAC.map((_,j)=>`<button class="chip ${j===i?'on':''} ${state.a[j]?'ok':''}" data-j="${j}" ${(UNLOCK||j===0||state.a[j-1])?'':'disabled'}>${state.a[j]?'✓ ':''}${j+1}</button>`).join('')}</div>`;
+    document.querySelectorAll('#ac2o .chip').forEach(b=>b.onclick=()=>this.answer(+b.dataset.j));
+    document.querySelectorAll('#ac2dots .chip').forEach(b=>b.onclick=()=>this.loadPrac(+b.dataset.j));
+    if(this.answered){ document.querySelectorAll('#ac2o .chip')[it.ans].classList.add('ok'); document.querySelectorAll('#ac2o .chip').forEach(b=>b.disabled=true); $('#ac2stat').textContent='✓ '+it.why; this.reveal(); }
+    else $('#ac2stat').textContent='Decide: does the anion have oxygen? Then check its ending.'; },
+  answer(j){ const it=AC_PRAC[this.pi]; if(this.answered) return; const btns=document.querySelectorAll('#ac2o .chip');
+    if(j===it.ans){ this.answered=true; state.a[this.pi]=true; save(); btns[j].classList.add('ok'); btns.forEach(b=>b.disabled=true); $('#ac2stat').textContent='✓ '+it.why; toast('✓ Correct!'); this.reveal(); this.check();
+      document.querySelectorAll('#ac2dots .chip').forEach((b,k)=>{ b.classList.toggle('ok',!!state.a[k]); b.disabled=!(UNLOCK||k===0||state.a[k-1]); }); }
+    else{ btns[j].classList.add('bad'); btns[j].disabled=true; const a=ACIDS[it.id]; $('#ac2stat').textContent=`✗ Not quite. ${a.kind==='bin'?'This anion has no oxygen (it ends in -ide).':'This anion has oxygen and ends in -'+(a.kind==='ate'?'ate':'ite')+'.'} Use the three rules and the flow chart, then pick again.`; } },
+  reveal(){ Player.setup(5,s=>this.text(s),null,0); Player.k=4; Player.u=0; Player.playing=true; Player.render(); },
+  text(s){ const a=ACIDS[this.id], oxy=a.kind!=='bin';
+    switch(s){
+      case 0: return `<b>An acid is H⁺ + an anion.</b> ${a.f} → H⁺ + ${a.ion}. The anion is <b>${a.an}</b>, and the acid’s name is built from it.`;
+      case 1: return `<b>Question 1: does the anion contain oxygen?</b> ${a.ion}: ${oxy?'<b>yes</b>, there is oxygen in it.':'<b>no</b>, it is just one nonmetal (the name ends in -ide).'}`;
+      case 2: return oxy?`<b>Question 2: how does the anion’s name end?</b> ${a.an} ends in <b>-${a.ending}</b>.`:`<b>No oxygen, ending -ide.</b> That path always gives <b>hydro- + root + -ic</b>.`;
+      case 3: return a.kind==='bin'?`<b>Build the name:</b> take the root <b>${a.root}</b> (${a.root!==a.stem?'the longer, older root, not “'+a.stem+'”':'from the element’s name'}), add <b>hydro-</b> in front and <b>-ic</b> at the end, then say “acid”.`
+        :`<b>Build the name:</b> drop <b>-${a.ending}</b> from ${a.an} and use the root <b>${a.root}</b>${a.root!==a.stem?' (the longer, older root, not “'+a.stem+'”)':''}. Add <b>-${a.end}</b>${a.kind==='ate'?' (-ate → -ic: “I ate something icky”)':' (-ite → -ous)'}, then say “acid”.`;
+      default: return `<b>${a.f} in water is called ${a.name}.</b>`; } },
+  check(){ const s=state.seen.ac2||{}, n=Object.keys(s).length, p=Object.keys(state.a).length; const a=$('#ac2a'); if(!a) return; $('#ac2cnt').textContent='('+Math.min(2,n)+'/2)'; $('#ac2pc').textContent='('+p+'/'+AC_PRAC.length+')';
+    a.classList.toggle('ok',n>=2); $('#ac2b').classList.toggle('ok',p>=AC_PRAC.length); if(p>=AC_PRAC.length&&AC_PRAC.every((_,i)=>state.a[i])) award('ac2'); },
+  down(){}, move(){}, up(){}, update(dt){ this.t+=dt; if(Player.getText) Player.update(dt); },
+  draw(){ const a=ACIDS[this.id], prac=this.mode==='practice'&&!this.answered, u=prac?0:Player.u, t=this.t, oxy=a.kind!=='bin';
+    txt(a.f,26,48,52,'#ffffff','left');
+    if(!prac||true){ const al=prac?1:ease(clamp(u+.3,0,1)); multi([{t:'→  H⁺  +  ',c:'#9fb0d6'},{t:a.ion,c:NC2},{t:'   '+(prac?'':a.an),c:NC2}],250,52,30,'left',al); }
+    // flow chart
+    const node=(cx,cy,w,h,l1,l2,lit,col)=>{ ctx.save(); fillRR(cx-w/2,cy-h/2,w,h,14,lit>0?rgba(col,.18+.12*lit):'rgba(22,33,62,.92)',lit>0?col:'rgba(255,255,255,.28)',lit>0?3:1.5); txt(l1,cx,l2?cy-12:cy,20,lit>0?col:'#ffffff'); if(l2) txt(l2,cx,cy+15,18,lit>0?'#ffffff':'#cfdcf7','center',600); ctx.restore(); };
+    const edge=(x0,y0,x1,y1,lit,lab)=>{ ctx.save(); ctx.lineCap='round'; ctx.strokeStyle=lit>0?'#ffd166':'rgba(255,255,255,.3)'; ctx.lineWidth=lit>0?4:2.5; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(lerp(x0,x1,lit>0?lit:1),lerp(y0,y1,lit>0?lit:1)); ctx.stroke(); ctx.restore(); if(lab){ const mx=(x0+x1)/2,my=(y0+y1)/2; fillRR(mx-20,my-12,40,24,12,'#0b1330',lit>0?'#ffd166':'rgba(255,255,255,.3)',1.5); txt(lab,mx,my+1,18,lit>0?'#ffd166':'#cfdcf7'); } };
+    const L=k=>prac?0:ease(k);
+    const q1=L(u-.4), eN=L(u-.9)*(oxy?0:1), eY=L(u-.9)*(oxy?1:0), q2=oxy?L(u-1.4):0, resA=!oxy?L(u-1.4):0, e2B=a.kind==='ate'?L(u-1.9):0, e2C=a.kind==='ite'?L(u-1.9):0, resB=a.kind==='ate'?L(u-2.3):0, resC=a.kind==='ite'?L(u-2.3):0;
+    edge(300,196,125,372,eN,'no'); edge(360,196,520,238,eY,'yes'); edge(480,290,400,372,e2B,''); edge(560,290,610,372,e2C,'');
+    node(330,170,230,52,'Oxygen in the anion?','',q1,'#ffd166'); node(520,265,200,52,'Ending of the anion?','',q2,'#ffd166');
+    node(125,410,210,76,'no oxygen (-ide)','hydro + root + ic',resA,NC2); node(400,410,190,76,'-ate','root + ic',resB,NC2); node(610,410,190,76,'-ite','root + ous',resC,NC2);
+    // cheat sheet panel
+    fillRR(715,70,270,278,16,'rgba(16,26,52,.88)','rgba(255,255,255,.22)',1.5); txt('The three endings',850,96,19,'#cfdcf7');
+    [['-ide','hydro-…-ic','bin'],['-ate','…-ic','ate'],['-ite','…-ous','ite']].forEach(([e,r,k],i)=>{ const y=146+i*62, on=!prac&&u>=2.7&&a.kind===k; fillRR(727,y-26,246,52,12,on?'rgba(255,209,102,.18)':'rgba(29,43,82,.9)',on?'#ffd166':'rgba(255,255,255,.2)',on?3:1.2); txt(e,770,y,23,on?'#ffd166':'#ffffff','center'); txt('→',830,y,22,'#9fb0d6'); txt(r,900,y,21,on?'#ffd166':'#ffffff'); });
+    txt('“I ATE something ICky”',850,330,19,'#b8c6e6','center',600);
+    // name building line
+    if(prac){ txt('Which name is correct? Use the flow chart.',350,505,24,'#ffd166'); return; }
+    if(u>=2.9&&u<4){ const q=L(u-2.9), y=496;
+      multi([{t:a.an.slice(0,a.stem.length),c:'#ffffff'},{t:a.ending,c:'#ff7a8d',strike:true}],160,y,30,'center',q);
+      arrow(256,y,330,y,'#9fb0d6',3); ctx.save(); ctx.globalAlpha*=q; multi([{t:a.kind==='bin'?'hydro':'',c:NC2},{t:a.root,c:'#ffffff'},{t:a.end,c:NC1},{t:' acid',c:'#ffffff'}],350,y,30,'left'); ctx.restore(); }
+    if(u>=4){ const q=L(u-3.7); ctx.save(); ctx.globalAlpha*=q; fillRR(40,462,640,70,18,'rgba(20,70,45,.6)','#5be0a0',2); multi([{t:a.kind==='bin'?'hydro':'',c:NC2},{t:a.root,c:'#ffffff'},{t:a.end,c:NC1},{t:' acid',c:'#ffffff'}],360,497,46,'center'); ctx.restore(); } }
+};
+
+/* =====================================================================
+   TAB 8 — Summary
+   ===================================================================== */
+const Q_SM=[
+  {q:'How many valence electrons must the Lewis structure of the nitrite ion, NO₂⁻, show?',opts:['17','18','19','12'],ans:1,
+   hint:'Add up N (5) and two O (6 each), then think about what the “−” sign means.',why:'5 + 6 + 6 = 17, plus 1 extra electron for the 1− charge = 18.'},
+  {q:'What is the correct name for N₂O₄?',opts:['dinitrogen tetroxide','nitrogen tetroxide','dinitrogen tetraoxide','tetranitrogen dioxide'],ans:0,
+   hint:'The first element gets a prefix only if it has more than one atom. Which prefix means 4, and what happens before “oxide”?',why:'Two N atoms: dinitrogen. Four O atoms: tetra + oxide loses its a: tetroxide.'},
+  {q:'HNO₂ is made from the nitrite ion (NO₂⁻), which contains oxygen and ends in -ite. What is the acid called?',opts:['nitric acid','nitrous acid','hydronitric acid','nitrite acid'],ans:1,
+   hint:'Use the three rules: no oxygen → hydro-…-ic; -ate → -ic; -ite → -?',why:'-ite → -ous, so nitrite becomes nitrous acid (and nitrate, -ate, becomes nitric acid).'}];
+const A8={ t:0, M:null,
+  mount(){ Player.hide(); this.t=0; this.M=buildMol(SPEC.CO2,{cx:0,cy:0,z:1}); $('#h1').textContent='Your mission'; $('#h2').textContent='Put it together (1–2)'; $('#h3').textContent='Put it together (3)';
+    $('#c1').innerHTML=`<div class="goal">You drew Lewis structures, named covalent compounds with prefixes, and explained acid names. Answer three questions that connect them. When all three are right you'll get your <b>completion code</b>.</div>
+      <ul class="checks"><li id="smk0">Lewis structure</li><li id="smk1">Covalent naming</li><li id="smk2">Acid naming</li></ul><div class="hintline" id="smhint"></div>`;
+    $('#c2').innerHTML=`<div id="smqa">${mqHTML(Q_SM.slice(0,2),'sm')}</div>`;
+    $('#c3').innerHTML=`<div id="smqb">${mqHTML([Q_SM[2]],'sm',2)}</div><div class="rowbtns" id="smcode" style="display:none"><button class="btn" id="smcodeBtn">🏅 Get my code</button></div>`;
+    mqWire($('#smqa'),Q_SM,'sm',()=>this.refresh()); mqWire($('#smqb'),Q_SM,'sm',()=>this.refresh(),0); this.refresh(); },
+  refresh(){ const got=state.q.sm||[]; for(let i=0;i<3;i++) $('#smk'+i).classList.toggle('ok',!!got[i]);
+    const all=mqDone('sm',3); $('#smhint').textContent=all?'🎉 All three correct!':'Answer all three to finish. You can retry a question after the one-minute pause.';
+    if(all){ award('sm'); $('#smcode').style.display=''; $('#smcodeBtn').onclick=openName; } },
+  down(){}, move(){}, up(){}, update(dt){ this.t+=dt; },
+  draw(){ const t=this.t, cols=[{x:170,c:'#5be0a0',n:'LEWIS STRUCTURES'},{x:500,c:'#c3a1ff',n:'NAMING'},{x:830,c:'#ff8fc7',n:'ACIDS'}];
+    cols.forEach(c=>{ fillRR(c.x-155,22,310,H-44,16,'rgba(22,33,62,.8)',c.c,1.8); txt(c.n,c.x,54,22,c.c); });
+    const bl=(list,x,y,w)=>{ list.forEach(s=>{ y=wrapText('• '+s,x,y,w,23,17.5,'#eaf0ff','left',600)+36; }); return y; };
+    ctx.save(); ctx.translate(170,138); ctx.scale(.52,.52); drawMolAt(this.M,5,t); ctx.restore(); txt('CO₂ has 16 valence e⁻',170,218,18,'#cfdcf7','center',700);
+    let y=bl(['Count the valence electrons','Single bonds, then lone pairs','Short of 8? Share more','Ions: add or remove electrons'],30,262,282);
+    wrapText('Lines = shared pairs. Dots = lone pairs.',170,y+6,290,23,17.5,'#b8c6e6','center',600);
+    multi([{t:'CO₂',c:'#fff'},{t:'  →  ',c:'#9fb0d6'},{t:'carbon dioxide',c:NC1}],500,106,21,'center'); multi([{t:'N₂O₅',c:'#fff'},{t:'  →  ',c:'#9fb0d6'},{t:'dinitrogen pentoxide',c:NC2}],500,148,21,'center');
+    y=bl(['Two nonmetals: use prefixes','mono, di, tri, tetra, penta, hexa, hepta, octa, nona, deca','No mono- on the first element','Second element ends in -ide','Drop a/o before a vowel: monoxide'],360,208,282);
+    multi([{t:'HCl(aq)',c:'#fff'},{t:' → ',c:'#9fb0d6'},{t:'hydrochloric acid',c:NC1}],830,106,20,'center'); multi([{t:'HNO₂',c:'#fff'},{t:' → ',c:'#9fb0d6'},{t:'nitrous acid',c:NC1}],830,148,20,'center');
+    y=bl(['An acid releases H⁺ in water','Its name comes from the anion','No oxygen: hydro-…-ic','-ate → -ic','-ite → -ous'],692,208,282);
+    wrapText('hydro- = no oxygen (Lavoisier’s old idea)',830,y+6,290,23,17.5,'#b8c6e6','center',600); }
+};
+
+/* =====================================================================
+   Stage plumbing
+   ===================================================================== */
+const ACT_OBJ=[A1,A2,A3,A4,A5,A6,A7,A8];
+let cur_i=0, cur=A1, lastT=performance.now();
+function switchTo(i){ if(!unlocked(i)){ toast('🔒 Finish the previous activity first.',true); return; }
+  if(cur&&cur.up) cur.up(); Player.hide(); cur_i=i; cur=ACT_OBJ[i]; $('#toast').classList.remove('show'); renderChrome();
+  cv.style.cursor=(cur===A2||cur===A5)?'pointer':'default'; cur.mount(); updateNav(); try{localStorage.setItem(KEY+'.tab',String(i));}catch(e){} }
+function pt(e){ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}; }
+cv.addEventListener('pointerdown',e=>{ e.preventDefault(); try{cv.setPointerCapture(e.pointerId);}catch(_){} cur.down&&cur.down(pt(e)); });
+cv.addEventListener('pointermove',e=>{ cur.move&&cur.move(pt(e)); });
+cv.addEventListener('pointerup',e=>{ cur.up&&cur.up(pt(e)); });
+cv.addEventListener('pointercancel',e=>{ cur.up&&cur.up(pt(e)); });
+$('#prevBtn').onclick=()=>switchTo(cur_i-1);
+$('#nextBtn').onclick=()=>{ if(state.done[ACTS[cur_i].id]&&cur_i<ACT_OBJ.length-1){ switchTo(cur_i+1); $('.stagewrap').scrollIntoView({block:'nearest'}); } };
+(function(){ const b=$('#belowHint'); if(!b) return; b.onclick=()=>{ const d=document.querySelector('.dock'); if(d) d.scrollIntoView({behavior:'smooth',block:'start'}); };
+  const upd=()=>b.classList.toggle('gone',window.scrollY>40); window.addEventListener('scroll',upd,{passive:true}); upd(); })();
+function frame(now){ const dt=Math.min(.033,(now-lastT)/1000||0); lastT=now;
+  cur.update(dt);
+  ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); ctx.setTransform(VS,0,0,VS,0,0);
+  const bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#0b1330'); bg.addColorStop(1,'#0a1024'); ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  cur.draw(); requestAnimationFrame(frame); }
+(function(){ const strip=$('#scrollstrip'),thumb=$('#scrollthumb'); let drag=null;
+  const de=document.documentElement;
+  function layout(){ const docH=de.scrollHeight,view=window.innerHeight,track=strip.clientHeight;
+    if(docH<=view+4){ strip.style.display='none'; document.body.classList.remove('hasstrip'); return; }
+    strip.style.display='block'; document.body.classList.add('hasstrip');
+    const th=Math.max(48,track*view/docH); thumb.style.height=th+'px'; const max=docH-view; thumb.style.top=((window.scrollY/max)*(track-th))+'px'; }
+  function scrollToY(y){ const track=strip.clientHeight,th=thumb.offsetHeight,max=de.scrollHeight-window.innerHeight,r=strip.getBoundingClientRect();
+    window.scrollTo(0,clamp((y-r.top-th/2)/(track-th),0,1)*max); }
+  strip.addEventListener('pointerdown',e=>{ e.preventDefault(); try{strip.setPointerCapture(e.pointerId);}catch(_){} drag=true; strip.classList.add('drag'); scrollToY(e.clientY); });
+  strip.addEventListener('pointermove',e=>{ if(drag) scrollToY(e.clientY); });
+  const end=()=>{ drag=null; strip.classList.remove('drag'); }; strip.addEventListener('pointerup',end); strip.addEventListener('pointercancel',end);
+  window.addEventListener('scroll',layout,{passive:true}); window.addEventListener('resize',layout);
+  new MutationObserver(layout).observe(document.body,{childList:true,subtree:true}); setInterval(layout,800); layout(); })();
+resize(); renderChrome();
+let startTab=0; try{ startTab=+(localStorage.getItem(KEY+'.tab')||0)||0; }catch(e){}
+while(startTab>0&&!unlocked(startTab)) startTab--;
+switchTo(Math.min(ACT_OBJ.length-1,Math.max(0,startTab)));
+try{ if(!localStorage.getItem(KEY+'.seen')) $('#helpModal').classList.add('show'); }catch(e){}
+requestAnimationFrame(frame);
+window.__lewis={A1,A2,A3,A4,A5,A6,A7,A8,switchTo,state,Player,buildMol,SPEC};
+</script>
+</body>
+</html>

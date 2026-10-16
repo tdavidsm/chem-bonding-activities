@@ -1,6 +1,6 @@
 # ⚛️ Chemical Bonding Lab
 
-Six hands-on simulations (plus a comparison summary) that show high school chemistry students how **ionic**, **metallic**, and **covalent** bonds form. Everything runs in the browser, with no install and no accounts.
+Six hands-on simulations (plus a comparison summary) that show high school chemistry students how **ionic**, **metallic**, and **covalent** bonds form. Everything runs in the browser, with no install and no accounts. A second page continues with Lewis structures, naming, and acids (see below).
 
 **▶ Open it:** https://tdavidsm.github.io/chem-bonding-activities/
 
@@ -49,6 +49,31 @@ Teacher notes:
 - The atom views never show the final Ca:Cl ratio: the sample is a small window of the flask, the solid is a jumbled cluster, and extra HCl (used to dissolve the last of the white solid) boils away. Day 1 does show calcium giving up electrons (the handout already gives Ca(OH)₂).
 - The practice masses are randomized per student (flask mass and a small weighing error), and the Analysis tab's three mass boxes can be overwritten with the student's **real** lab numbers.
 - Add `#unlock` to the URL to open every tab without finishing the steps. "Start the practice lab over" (under the data table) clears saved progress.
+
+## Lewis structures, naming, and acids (separate page)
+
+**▶ Open it:** https://tdavidsm.github.io/chem-bonding-activities/lewis-structures.html (also linked from the main page header)
+
+The follow-up to the covalent activities. Same look, same electron colors per atom, same dotted open spots, same one-minute freeze after a wrong answer, and the same Google Form turn-in (Name + Code), but it has its **own completion code** and does not touch the bonding activities' progress. Eight tabs, each unlocking the next (about 45–60 minutes):
+
+| # | Tab | What students do |
+|---|-----|------------------|
+| 1 | **Lewis 1: Dot Pictures** | Animation: Bohr model → valence electrons → core + symbol → Lewis dot symbol (one dot per side, then pair up) → unpaired dots = bonds → two atoms share. Pick H, C, N, O, F or Cl. Watch 2 elements, answer 2 questions. |
+| 2 | **Lewis 2: Practice Five** | Build H₂O, NH₃, CO₂, HCN and CH₂O by tapping bonds and open spots. Guidance fades: step-by-step coach with highlights → short coaching → checklist only → recipe on request → no help (hint after 2 wrong checks). A tray of valence electrons empties as they are placed. |
+| 3 | **Lewis 3: Same Atoms** | The recipe (count, single bonds, outer atoms, center, multiple bonds) animated for CO, CO₂, NO₂⁻, NO₃⁻ (bonus H₂O, H₂O₂). Ions add an electron per negative charge, and the double bond slides between oxygens to show resonance. A comparison table fills in. 3 questions. |
+| 4 | **Naming 1: Prefix Rules** | Animation of how a formula becomes a name (nonmetals only, prefix = atom count, no mono- on the first element, second element ends in -ide, drop a/o before a vowel). Watch 2 compounds, answer 2 questions. |
+| 5 | **Naming 2: Name It** | 7 items: which compounds use prefixes (covalent vs. ionic), three formula → name and three name → formula. A prefix table stays on screen. |
+| 6 | **Acids 1: Why So Odd?** | HCl in water, drawn with Lewis structures: the shared pair stays on Cl, H⁺ moves to water. Then the history: acid = sour, Lavoisier's “oxygen = acid-former” mistake, hence hydro-. 2 questions. |
+| 7 | **Acids 2: Name Acids** | A flow chart (no oxygen → hydro-…-ic; -ate → -ic; -ite → -ous) animated for 8 acids, then name 6 acids. |
+| 8 | **Summary** | One-glance recap and 3 questions (NO₂⁻ electron count, N₂O₄, HNO₂). Answering all three gives the **completion code** and the Turn it in button. |
+
+Teacher notes:
+- Add `#unlock` to the URL to open every tab without finishing the steps.
+- Lewis structures are drawn flat with atoms on a grid and four sides per atom; the footer says real shapes are 3-D (water is bent, nitrate is a flat triangle).
+- A Lewis structure is accepted when the electron total matches, every atom has a full shell (8, or 2 for H), and every formal charge is zero, so the usual textbook structure is the one that counts (for example, CO₂ must be O=C=O, not C≡O with a single bond).
+- Resonance is shown but not drawn by students. Carbon monoxide uses the triple-bond structure and does not discuss formal charge.
+- Electron colors by atom are assigned by position in the molecule, as in the covalent activities. In the animations the electrons recolor when they move into a lone pair on a new atom.
+- To point it at a different form, change `FORM_BASE` and `FORM_ENTRY` in `lewis-structures.html`.
 
 ## Modeling notes (for teachers)
 - **Activity 1:** a nonmetal is stable at 8 valence electrons; a metal is stable once its valence shell is empty. Electrons that came from the metal stay gold so students can track them. The formula uses the simplest ratio (2 Na + 2 Cl is still NaCl).
