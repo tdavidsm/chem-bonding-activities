@@ -364,9 +364,9 @@ function letter(c){ c=(c||'').toUpperCase(); return /[A-Z]/.test(c)?c:'X'; }
 function initials(name){ const p=name.trim().split(/\s+/).filter(Boolean);
   const a=letter((p[0]||'')[0]); const b=letter(p.length>1?(p[p.length-1]||'')[0]:((p[0]||'')[1]||(p[0]||'')[0])); return [a,b]; }
 function makeCode(name){ const [i1,i2]=initials(name); const cs='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; const r=()=>cs[Math.floor(Math.random()*cs.length)];
-  return [r(),r(),i1,r(),r(),i2,r(),r()].join(''); }
+  return 'L'+[r(),r(),i1,r(),r(),i2,r(),r()].join(''); }   // leading L marks a Lewis/naming/acids code
 function openName(){ if(!canGetCode()) return; if(state.code){ showCode(); return; } $('#nameField').value=''; $('#nameErr').textContent=''; $('#nameModal').classList.add('show'); setTimeout(()=>$('#nameField').focus(),50); }
-const FORM_BASE='https://docs.google.com/forms/d/e/1FAIpQLSdWMUSHB0cym2_ke-mQ-wd1abj46G8BVvWsJmk9aQac5r-7AA/viewform';
+const FORM_BASE='https://docs.google.com/forms/d/e/1FAIpQLScQzdRyjHGywPmbojMNalMV6eTELDk_JB0D-DwezL9pQA4HWQ/viewform';
 const FORM_ENTRY={name:'entry.2072631698',code:'entry.1611661514'}; // "Name" and "Code" questions on the class form
 function turnInURL(){ const q=new URLSearchParams({usp:'pp_url'}); q.append(FORM_ENTRY.name,state.name||''); q.append(FORM_ENTRY.code,state.code||''); return FORM_BASE+'?'+q.toString(); }
 function showCode(){ $('#turnIn').href=turnInURL(); $('#winName').textContent=(state.name||'').split(/\s+/)[0]; $('#codeOut').textContent=state.code; $('#nameModal').classList.remove('show'); $('#winModal').classList.add('show'); }

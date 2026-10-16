@@ -54,7 +54,7 @@ Teacher notes:
 
 **▶ Open it:** https://tdavidsm.github.io/chem-bonding-activities/lewis-structures.html (also linked from the main page header)
 
-The follow-up to the covalent activities. Same look, same electron colors per atom, same dotted open spots, same one-minute freeze after a wrong answer, and the same Google Form turn-in (Name + Code), but it has its **own completion code** and does not touch the bonding activities' progress. Eight tabs, each unlocking the next (about 45–60 minutes):
+The follow-up to the covalent activities. Same look, same electron colors per atom, same dotted open spots, same one-minute freeze after a wrong answer, and the same Google Form turn-in (Name + Code), but it has its **own completion code** (starts with an L) and does not touch the bonding activities' progress. Eight tabs, each unlocking the next (about 45–60 minutes):
 
 | # | Tab | What students do |
 |---|-----|------------------|
