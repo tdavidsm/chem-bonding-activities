@@ -343,7 +343,7 @@ const doneCount=()=>ACTS.filter(a=>state.done[a.id]).length;
 const ALL_Q=[['l1',2],['l3',3],['n1',2],['ac1',2],['sm',3]];
 function mqDone(key,n){ const got=(state.q&&state.q[key])||[]; for(let i=0;i<n;i++) if(!got[i]) return false; return true; }
 const allQuestionsRight=()=>ALL_Q.every(([k,n])=>mqDone(k,n));
-const canGetCode=()=>ACTS.every(a=>state.done[a.id])&&allQuestionsRight();
+const canGetCode=()=>UNLOCK||(ACTS.every(a=>state.done[a.id])&&allQuestionsRight());   // #unlock (teacher preview) always allows the code
 (function sanitize(){ ALL_Q.forEach(([k,n])=>{ if(state.done[k]&&!mqDone(k,n)) state.done[k]=false; }); })();
 function award(id){ if(state.done[id]) return; state.done[id]=true; save(); renderChrome(); updateNav();
   toast(`⭐ Activity complete! (${doneCount()}/${ACTS.length})`);
