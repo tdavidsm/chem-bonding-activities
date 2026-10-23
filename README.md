@@ -69,6 +69,10 @@ A practice run of *Miscible and Immiscible Liquids – Separation Techniques* (w
 
 Electron colors: **blue** = water, **violet** = alcohol, **gold** = from sodium, **teal** = oxygen gas.
 
+Finishing every step and answering the five lab questions gives a **completion code** (the bonus question is optional). **Turn it in** opens the class Google Form with the name and code already filled in (`FORM_BASE` / `FORM_ENTRY` in `miscible-liquids-lab.html`; the form has two questions, Name and Code).
+
+**Updates:** both lab pages show `Lab version: …` at the bottom and, when a newer version is live, show a yellow "Update now" banner (progress is stored on the device under the same key, so it is kept). To force a refresh on a stale copy, open the page with `?v=<anything>` added, e.g. `miscible-liquids-lab.html?v=2`; do **not** clear Safari's "website data", which would erase saved progress. Bump `APP_VERSION` in the page whenever you publish a change.
+
 Teacher notes: the atom views use tiny samples, and the water : alcohol count is much closer to 1 : 1 than the real mole ratio (about 8 : 1) so the molecules are easy to see. In the simulation the Part 1 mixture only flickers, and the burning of the top layer is shown with a simplified one-step reaction. Add `#unlock` to the URL to open every tab. Note that this simulation chooses the outcomes (the mixture does not sustain a flame, two scoops are needed for layers); check them against what actually happens in your classroom.
 
 ## Lewis structures, naming, and acids (separate page)
