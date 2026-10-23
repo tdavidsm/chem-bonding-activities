@@ -259,6 +259,7 @@ const KEY='miscible.v1';
 let state={done:{},d:{},watched:{},qa:{}};
 try{ const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) state=Object.assign(state,s); }catch(e){}
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+const APP_VERSION='m3';
 const UNLOCK=/unlock/.test(location.hash);
 let toastT=0;
 function toast(msg,bad){ const t=$('#toast'); t.textContent=msg; t.style.borderColor=bad?'#e6294b':''; t.style.color=bad?'#ffb4c0':''; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3600); }
@@ -921,6 +922,15 @@ switchTo(startTab);
 try{ if(!localStorage.getItem(KEY+'.seen')) $('#helpModal').classList.add('show'); }catch(e){}
 requestAnimationFrame(frame);
 window.__lab={STEPS,state,switchTo,MIX,SALT,BURN,ATOMCTL,LAB};
+
+/* ---------------- "a newer version is available" check ----------------
+   Students' progress lives in localStorage (same address, same key), so reloading never loses it. */
+(function(){ const f=document.querySelector('footer'); if(f){ const v=document.createElement('div'); v.style.marginTop='6px'; v.textContent='Lab version: '+APP_VERSION; f.appendChild(v); }
+  if(location.protocol==='file:') return;
+  fetch(location.pathname+'?chk='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>{ const m=t.match(/const APP_VERSION='([^']+)'/); if(!m||m[1]===APP_VERSION) return;
+    const bar=document.createElement('div'); bar.style.cssText='position:fixed;left:0;right:0;top:0;z-index:60;background:#ffd166;color:#10213a;padding:10px 14px;font:700 14px -apple-system,Segoe UI,Roboto,sans-serif;text-align:center;box-shadow:0 4px 14px #0008';
+    bar.innerHTML='🔄 A newer version of this lab is ready. Your progress is saved. <button id="updNow" style="margin-left:8px;border:0;border-radius:8px;padding:6px 12px;font-weight:800;background:#10213a;color:#ffd166;cursor:pointer">Update now</button>';
+    document.body.appendChild(bar); document.getElementById('updNow').onclick=()=>location.replace(location.pathname+'?v='+encodeURIComponent(m[1])+location.hash); }).catch(()=>{}); })();
 </script>
 </body>
 </html>
