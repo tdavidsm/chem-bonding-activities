@@ -50,6 +50,27 @@ Teacher notes:
 - The practice masses are randomized per student (flask mass and a small weighing error), and the Analysis tab's three mass boxes can be overwritten with the student's **real** lab numbers.
 - Add `#unlock` to the URL to open every tab without finishing the steps. "Start the practice lab over" (under the data table) clears saved progress.
 
+## Virtual lab: miscible and immiscible liquids (separate page)
+
+**▶ Open it:** https://tdavidsm.github.io/chem-bonding-activities/miscible-liquids-lab.html (also linked from the main page header)
+
+A practice run of *Miscible and Immiscible Liquids – Separation Techniques* (water, isopropyl alcohol, salt), in the handout's order. Same look and controls as the calcium chloride lab; progress is saved separately on the device.
+
+| Tab | Handout step | What students do |
+|-----|--------------|------------------|
+| Prep | Safety / equipment | Goggles, tap each item, 2 safety questions |
+| Steps 1–2 | 1, 2 | Pour water to 4 cm and isopropyl alcohol to 2 cm, reading the cm marks (big landing zone; the tube turns green at 3.5–4.5 cm / 1.5–2.5 cm) |
+| Steps 3–4 | 3, 4 | Pour tube 1 into tube 2, stopper it, rock it. **Atom view:** water and alcohol both have a polar O–H, form hydrogen bonds with each other, and mix: *miscible* |
+| Step 5 | 5 | Draw up a few drops of the mixture, squirt them on the table (marked safe spot), try a match: it only flickers |
+| Steps 6–7 | 6, 7 | Add a scoop of salt, stopper, shake (drag or button). One scoop dissolves with no layers, so add a second; layers form. **Atom view:** water molecules wrap the Na⁺ and Cl⁻ ions, fewer are free to bond with alcohol, and the alcohol is squeezed out to the top ("salting out"); a live counter of water–alcohol hydrogen bonds falls to 0 |
+| Steps 8–9 | 8, 9 | Sample the top layer (the depth of the dropper tip decides which layer) and burn it; the bottom layer (optional) does not burn. **Atom view:** 2 C₃H₈O + 9 O₂ → 6 CO₂ + 8 H₂O, with the new bonds' electron pairs colored from both reactants |
+| Steps 10–11 | 10, 11 | Pour the contents into the sink, wash and return the four pieces of equipment |
+| Questions | Questions 1–5 + a bonus | The five handout questions (water and isopropyl alcohol are compounds, miscible, top layer = isopropyl alcohol, what was left = salt water + undissolved salt), plus an atom-level "why did the alcohol get squeezed out?" |
+
+Electron colors: **blue** = water, **violet** = alcohol, **gold** = from sodium, **teal** = oxygen gas.
+
+Teacher notes: the atom views use tiny samples, and the water : alcohol count is much closer to 1 : 1 than the real mole ratio (about 8 : 1) so the molecules are easy to see. In the simulation the Part 1 mixture only flickers, and the burning of the top layer is shown with a simplified one-step reaction. Add `#unlock` to the URL to open every tab. Note that this simulation chooses the outcomes (the mixture does not sustain a flame, two scoops are needed for layers); check them against what actually happens in your classroom.
+
 ## Lewis structures, naming, and acids (separate page)
 
 **▶ Open it:** https://tdavidsm.github.io/chem-bonding-activities/lewis-structures.html (also linked from the main page header)
