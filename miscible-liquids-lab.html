@@ -165,6 +165,7 @@
   <span class="tag">Separation techniques: water, isopropyl alcohol and salt</span>
   <span class="spacer"></span>
   <a class="backlink" href="index.html">← Bonding activities</a>
+  <button class="helpbtn" id="codeBtn" style="display:none">🏅 Get my code</button>
   <button class="helpbtn" id="helpBtn">? How it works</button>
 </header>
 
@@ -195,6 +196,22 @@
   <p><b>Colors in the atom views:</b> <span style="color:#8fd3ff">●</span> blue = a water molecule's electrons &nbsp; <span style="color:#c792ff">●</span> violet = isopropyl alcohol's electrons &nbsp; <span style="color:#ffd166">●</span> gold = electron from sodium &nbsp; <span style="color:#6bf0e0">●</span> teal = oxygen gas</p>
   <p class="muted" style="font-size:13px">Each step unlocks when you finish the one before it. Your progress is saved on this device.</p>
   <div class="row2"><button class="btn" id="helpClose">Let's go</button></div>
+</div></div>
+
+<div class="modal" id="nameModal"><div class="modalbox" style="max-width:440px">
+  <h2>🎉 Everything is done!</h2>
+  <p>Type your first and last name to get your completion code.</p>
+  <input class="field" id="nameField" type="text" autocomplete="off" placeholder="First and last name">
+  <div id="nameErr" style="color:#ff8b9b;font-size:13px;min-height:1.2em;margin-top:6px"></div>
+  <div class="row2"><button class="btn secondary" id="nameCancel">Later</button><button class="btn" id="nameGo">Get my code</button></div>
+</div></div>
+
+<div class="modal" id="winModal"><div class="modalbox" style="max-width:460px;text-align:center">
+  <h2>Nice work, <span id="winName"></span>!</h2>
+  <p>Your completion code:</p>
+  <div class="code" id="codeOut"></div>
+  <p class="muted" style="font-size:13px">Press <b>Turn it in</b> to open the class form with your name and code already filled in, then press Submit there. (Form won't open? Screenshot this page or copy the code.)</p>
+  <div class="row2" style="justify-content:center;flex-wrap:wrap"><a class="btn" id="turnIn" target="_blank" rel="noopener">Turn it in →</a><button class="btn secondary" id="copyBtn">Copy code</button><button class="btn secondary" id="winClose">Close</button></div>
 </div></div>
 
 <script>
@@ -582,7 +599,7 @@ function makeStep(def){ const s={ id:def.id, def, view:'bench', zt:0, qt:0,
     else { const ok=def.zoomOK(this); el.innerHTML=`<button class="btn ${ok?'':'secondary'}" id="zin" style="width:100%;margin-bottom:8px">🔬 Zoom in: see the atoms</button>`; $('#zin').onclick=()=>this.zoomIn(); } },
   check(force){ if(!def.goals) return; let all=true; def.goals.forEach((g,i)=>{ const ok=!!g.ok(this)||!!state.done[def.id]; all=all&&ok; const li=$('#g'+i); if(li) li.classList.toggle('ok',ok); if(g.live&&li) li.innerHTML=g.live(this); });
     if(this.view==='bench'&&def.atom&&!force&&this.qz!==def.zoomOK(this)){ this.qz=def.zoomOK(this); this.zoomUI(); } else if(force) this.qz=def.atom?def.zoomOK(this):0;
-    if(all&&!state.done[def.id]){ state.done[def.id]=true; save(); renderChrome(); toast('✅ Step complete! Press “Next step →” to continue.'); }
+    if(all&&!state.done[def.id]){ state.done[def.id]=true; save(); renderChrome(); toast('✅ Step complete! Press “Next step →” to continue.'); if(typeof afterDone==='function') afterDone(); }
     updateNav(); },
   update(dt){ this.qt+=dt; if(this.view==='atoms'&&this.zt<1) this.zt=Math.min(1,this.zt+dt*2.2); if(this.view==='bench'&&this.zt>0) this.zt=Math.max(0,this.zt-dt*2.2);
     this.b.update(dt); def.upd&&def.upd(dt,this);
@@ -822,10 +839,10 @@ const QS=[
 const qOK=k=>!!(state.qa&&state.qa[k]);
 const S7=makeStep({id:'s7',g:'pre',n:'Questions',nm:'Check yourself',
   proc:`<div class="proc"><p>Answer the lab questions. The picture on the left builds up as you get them right. Wrong answers give a hint.</p></div>`,
-  goals:[{t:'Answer all five lab questions',ok:()=>QS.slice(0,5).every(q=>qOK(q.k)),live:()=>`Answer all five lab questions <span class="muted">(${QS.slice(0,5).filter(q=>qOK(q.k)).length}/5)</span>`},{t:'Bonus: answer the atom-level question',ok:()=>qOK('q6')}],
-  controls(){ return `<div id="s7q">${QS.map(q=>qaHTML(q.k,q)).join('')}</div>`; },
-  init(s){ const map={}; QS.forEach(q=>map[q.k]=q); qaWire($('#s7q'),map,()=>s.check()); },
-  update_(){},
+  goals:[{t:'Answer all five lab questions',ok:()=>QS.slice(0,5).every(q=>qOK(q.k)),live:()=>`Answer all five lab questions <span class="muted">(${QS.slice(0,5).filter(q=>qOK(q.k)).length}/5)</span>`}],
+  controls(){ return `<div id="s7q">${QS.map(q=>qaHTML(q.k,q)).join('')}</div><div class="rowbtns" id="s7code" style="display:none"><button class="btn" id="s7codeBtn">🏅 Get my code</button></div><div class="hintline" id="s7hint"></div>`; },
+  init(s){ const map={}; QS.forEach(q=>map[q.k]=q); qaWire($('#s7q'),map,()=>s.check()); $('#s7codeBtn').onclick=openName; },
+  upd(dt,s){ const ok=canGetCode(); $('#s7code').style.display=ok?'':'none'; $('#s7hint').textContent=ok?'🎉 All done! Press the button to get your completion code.':'Finish every step and answer all five lab questions to get your completion code. (The bonus question is optional.)'; },
   drawBench(s){ ctx.fillStyle=lg(0,0,0,H,[[0,'#0f1a3a'],[1,'#0b1330']]); ctx.fillRect(0,0,W,H);
     txt('WHAT KIND OF MATTER?',330,30,14,'#ffd166','center',900);
     const box=(x,y,w,h,label,lit,sub)=>{ fillRR(x,y,w,h,12,lit?'rgba(21,59,40,.9)':'rgba(22,33,62,.85)',lit?'#2fbf57':'rgba(127,184,255,.45)',lit?2.5:1.5); txt(label,x+w/2,y+(sub?22:h/2),14,lit?'#8ff0b6':'#eaf0ff'); if(sub) txt(sub,x+w/2,y+h-16,12,lit?'#bff5d3':'rgba(200,215,245,.7)','center',600); };
@@ -838,6 +855,28 @@ const S7=makeStep({id:'s7',g:'pre',n:'Questions',nm:'Check yourself',
     txt('Part 1:',780,520,12,'#cfdcf7'); txt('one liquid',780,535,12,'#cfdcf7'); txt('Part 2:',910,520,12,'#cfdcf7'); txt('two layers',910,535,12,'#cfdcf7'); txt('the top layer burns,',845,45,11,'rgba(200,215,245,.75)'); txt('the bottom layer does not',845,60,11,'rgba(200,215,245,.75)'); },
   zoomOK:()=>false });
 
+/* ---------------- completion code (same scheme as the other classroom apps) ---------------- */
+const canGetCode=()=>UNLOCK||(STEPS.every(st=>state.done[st.id])&&QS.slice(0,5).every(q=>qOK(q.k)));
+function afterDone(){ $('#codeBtn').style.display=canGetCode()?'':'none'; if(canGetCode()&&!state.code) setTimeout(()=>{ if(!state.code&&canGetCode()) openName(); },1800); }
+function letter(c){ c=(c||'').toUpperCase(); return /[A-Z]/.test(c)?c:'X'; }
+function initials(name){ const p=name.trim().split(/\s+/).filter(Boolean);
+  const a=letter((p[0]||'')[0]); const b=letter(p.length>1?(p[p.length-1]||'')[0]:((p[0]||'')[1]||(p[0]||'')[0])); return [a,b]; }
+function makeCode(name){ const [i1,i2]=initials(name); const cs='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; const r=()=>cs[Math.floor(Math.random()*cs.length)];
+  return [r(),r(),i1,r(),r(),i2,r(),r()].join(''); }
+function openName(){ if(!canGetCode()) return; if(state.code){ showCode(); return; } $('#nameField').value=''; $('#nameErr').textContent=''; $('#nameModal').classList.add('show'); setTimeout(()=>$('#nameField').focus(),50); }
+const FORM_BASE='https://docs.google.com/forms/d/e/1FAIpQLSfrKzoNq9xF3IY4FJFVTo8wb4IjBF5UtdH3qtcXc1KqdHmSQw/viewform';
+const FORM_ENTRY={name:'entry.2072631698',code:'entry.1611661514'}; // "Name" and "Code" questions on the class form
+function turnInURL(){ const q=new URLSearchParams({usp:'pp_url'}); q.append(FORM_ENTRY.name,state.name||''); q.append(FORM_ENTRY.code,state.code||''); return FORM_BASE+'?'+q.toString(); }
+function showCode(){ $('#turnIn').href=turnInURL(); $('#winName').textContent=(state.name||'').split(/\s+/)[0]; $('#codeOut').textContent=state.code; $('#nameModal').classList.remove('show'); $('#winModal').classList.add('show'); }
+$('#nameGo').onclick=()=>{ const name=$('#nameField').value.trim();
+  if(name.replace(/[^A-Za-z]/g,'').length<2){ $('#nameErr').textContent='Please enter your first and last name.'; return; }
+  state.name=name; state.code=makeCode(name); save(); showCode(); };
+$('#nameField').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#nameGo').click(); });
+$('#nameCancel').onclick=()=>$('#nameModal').classList.remove('show');
+$('#winClose').onclick=()=>$('#winModal').classList.remove('show');
+$('#copyBtn').onclick=()=>{ try{ navigator.clipboard.writeText(state.code); $('#copyBtn').textContent='Copied ✓'; }catch(e){} };
+$('#codeBtn').onclick=openName;
+
 /* =====================================================================
    Stage plumbing
    ===================================================================== */
@@ -845,7 +884,7 @@ const STEPS=[S0,S1,S2,S3,S4,S5,S6,S7];
 const unlocked=i=>UNLOCK||i===0||!!state.done[STEPS[i-1].id];
 function renderChrome(){
   $('#tabs').innerHTML=STEPS.map((s,i)=>`<button class="tab ${i===cur_i?'sel':''} ${unlocked(i)?'':'locked'}" data-i="${i}" data-g="${s.def.g}"><span class="badge">${state.done[s.id]?'⭐':unlocked(i)?'':'🔒'}</span><div class="n">${s.def.n}</div><div class="nm">${s.def.nm}</div></button>`).join('');
-  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchTo(+b.dataset.i)); }
+  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchTo(+b.dataset.i)); $('#codeBtn').style.display=canGetCode()?'':'none'; }
 function updateNav(){ const last=cur_i===STEPS.length-1, ok=!!state.done[STEPS[cur_i].id];
   $('#prevBtn').style.visibility=cur_i>0?'visible':'hidden'; $('#nextBtn').style.display=last?'none':''; $('#nextBtn').disabled=!ok; $('#nextBtn').style.opacity=ok?1:.45;
   const g=STEPS[cur_i].def.goals||[], left=g.filter(x=>!x.ok(STEPS[cur_i])).length;
