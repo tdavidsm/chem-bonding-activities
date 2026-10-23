@@ -494,7 +494,7 @@ const CAW={ id:'caw', title:'ATOMIC SCALE · a tiny piece of the flask, magnifie
     for(const p of this.pops) p.t+=dt*2; this.pops=this.pops.filter(p=>p.t<1);
     // narration: a stage only ever moves forward
     const c=this.cnt; let s=0; if(this.relIdx>0) s=1; if(c.split>0) s=2; if(c.h2>0) s=3; if(c.ion>0) s=4;
-    if(this.relIdx>=8&&this.ions.length>=8&&this.H.length===0&&this.fly.length===0&&t>this.nextRel+1.5){ s=5; this.done=true; }
+    if(this.relIdx>=8&&this.ions.length>=8&&(this.H.length===0||t>this.nextRel+12)&&this.fly.length===0&&t>this.nextRel+1.5){ s=5; this.done=true; }
     this.stage=Math.max(this.stage,s); },
   caption(){ return ['Solid calcium (a silvery metal). The Ca atoms are packed together, each one holding 2 loose outer electrons (gold). Water molecules (H₂O) bump into the surface.',
     'A calcium atom at the surface gives away its 2 outer electrons (gold). Watch where they go!',
@@ -638,7 +638,7 @@ function makeStep(def){ const s={ id:def.id, def, view:'bench', zt:0, qt:0,
     updateNav(); },
   update(dt){ this.qt+=dt; if(this.view==='atoms'&&this.zt<1) this.zt=Math.min(1,this.zt+dt*2.2); if(this.view==='bench'&&this.zt>0) this.zt=Math.max(0,this.zt-dt*2.2);
     this.b.update(dt); def.upd&&def.upd(dt,this);
-    if(this.zt>0&&def.atom){ def.atom.update(dt); if(def.atom.done&&!state.watched[def.id]){ state.watched[def.id]=true; save(); } }
+    if(this.zt>0&&def.atom){ def.atom.update(dt); if(def.atom.done&&!state.watched[def.id]){ state.watched[def.id]=true; save(); toast('✓ You watched the whole animation. Tap “Back to the bench”.'); } }
     if(this.qt>.3){ this.qt=0; this.check(); } },
   draw(){ if(this.zt<1){ drawBenchBG(); def.drawBench(this); this.b.draw(); def.over&&def.over(this); }
     if(this.zt>0&&def.atom){ const z=def.zoomPos; ctx.save(); if(this.zt<1){ ctx.beginPath(); ctx.arc(z.x,z.y,lerp(24,1150,ease(this.zt)),0,TAU); ctx.clip(); } def.atom.draw(); ctx.restore();
@@ -802,7 +802,7 @@ const S3=makeStep({id:'s3',g:'d1',n:'Steps 3–4',nm:'Water + pH',
     const b=s.b, cylTop=S3FLY-18-26*8.6-4;
     b.add({id:'flask',x:S3X.fl,y:S3FLY,hit:boxHit(-60,-175,60,6),drag:false,click(){},draw(it){ drawFlask(it.x,it.y,1,s.fl); labelUnder(it.x,it.y+18,s.poured?'calcium + water':'flask with calcium'); }});
     b.add({id:'cyl',x:S3X.cyl,y:S3FLY,hit:boxHit(-30,-240,30,6),stay:false,
-      onDrop(it){ if(Math.abs(it.x-(S3X.fl-60))<115&&it.y<S3FLY-20&&s.cyl>0){ if(!waterOK(s.cyl)){ toast(`The cylinder reads ${s.cyl.toFixed(1)} mL. You need about 25 mL (24 to 26). Adjust it first.`,true); return false; } s.measured=true; s.pourAnim={t:0,amt:s.cyl}; it.lock=true; it.x=418; it.y=442; return true; } return false; },
+      onDrop(it){ if(Math.abs(it.x-S3X.fl)<200&&Math.hypot(it.x-it.hx,it.y-it.hy)>80&&s.cyl>0){ if(!waterOK(s.cyl)){ toast(`The cylinder reads ${s.cyl.toFixed(1)} mL. You need about 25 mL (24 to 26). Adjust it first.`,true); return false; } s.measured=true; s.pourAnim={t:0,amt:s.cyl}; it.lock=true; it.x=418; it.y=442; return true; } if(s.cyl>0&&Math.hypot(it.x-it.hx,it.y-it.hy)>30) toast('Carry the cylinder over to the flask, then let go.'); return false; },
       draw(it){ if(s.pourAnim){ ctx.save(); ctx.translate(it.x,it.y); ctx.rotate(.9*Math.min(1,s.pourAnim.t*3)); ctx.translate(-it.x,-it.y); drawCylinder(it.x,it.y,s.cyl,{ok:waterOK(s.cyl)}); ctx.restore(); } else { drawCylinder(it.x,it.y,s.cyl,{ok:waterOK(s.cyl)}); if(!it.held) labelUnder(it.x,it.y+22,'25 mL graduated cylinder'); } } });
     b.add({id:'bot',x:S3X.bot,y:S3FLY,hit:boxHit(-34,-125,38,4),stay:false,
       onMove(p){ },

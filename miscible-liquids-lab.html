@@ -375,7 +375,7 @@ function stopperKit(s,tube,tx,home){ const b=s.b, mouthY=TY-TB.H;
   const st=b.add({id:'stopper',x:home.x,y:home.y,hit:boxHit(-28,-24,28,16),stay:false,vis:!tube().stopper,
     onDrop(it){ if(s.stopperBlock&&s.stopperBlock()) return false; if(Math.abs(it.x-tx)<75&&it.y<mouthY+90&&it.y>mouthY-120){ tube().stopper=true; it.vis=false; s.onStopper&&s.onStopper(true); return true; } return false; },
     draw(it){ drawStopper(it.x,it.y,1); if(!it.held&&!it.back) labelUnder(it.x,it.y+26,'stopper'); } });
-  b.add({id:'mouth',x:tx,y:mouthY,hit(p){ return tube().stopper&&Math.abs(p.x-this.x)<30&&p.y>this.y-26&&p.y<this.y+18; },click(){ if(s.stopperBlock&&s.stopperBlock(true)) return; tube().stopper=false; st.vis=true; st.x=st.hx; st.y=st.hy; s.onStopper&&s.onStopper(false); },draw(){}});
+  b.add({id:'mouth',x:tx,y:mouthY,hit(p){ return tube().stopper&&Math.abs(p.x-this.x)<26&&p.y>this.y-24&&p.y<this.y+8; },click(){ if(s.stopperBlock&&s.stopperBlock(true)) return; tube().stopper=false; st.vis=true; st.x=st.hx; st.y=st.hy; s.onStopper&&s.onStopper(false); },draw(){}});
   return st; }
 /* wash bottle that pours into a tube while it is held over it (big landing zone) */
 function addWashBottle(s,id,x,kind,tubeFn,tx,label,rate){ const th=.9; return s.b.add({id,x,y:TY,hit:boxHit(-34,-125,38,4),stay:false,
@@ -432,6 +432,7 @@ function drawHCl(m,t){ ctx.save(); ctx.translate(m.x,m.y); ctx.rotate(m.a); cons
 function wrap(str,x,y,maxW,lh,size,color,align){ ctx.font=`600 ${size}px ${FONT}`; const words=str.split(' '); let line='',yy=y; const lines=[];
   for(const w of words){ const tst=line?line+' '+w:w; if(ctx.measureText(tst).width>maxW&&line){ lines.push(line); line=w; } else line=tst; } lines.push(line);
   lines.forEach((l,i)=>txt(l,x,yy+i*lh,size,color,align||'left',600)); return lines.length; }
+function watchBar(frac,done){ const x=W-250,y=14; fillRR(x,y,226,14,7,'rgba(255,255,255,.1)','rgba(255,255,255,.35)',1.2); ctx.fillStyle=done?'#3ddc84':'#ffd166'; fillRR(x+2,y+2,Math.max(8,222*clamp(frac,0,1)),10,5,ctx.fillStyle); txt(done?'✓ you watched it all':'keep watching… '+Math.round(frac*100)+'%',x+113,y+28,11,done?'#8ff0b6':'#ffd166'); }
 function atomChrome(title,cap,legend){ ctx.fillStyle=lg(0,0,0,H,[[0,'#0a1a38'],[1,'#0b2b4d']]); ctx.fillRect(0,0,W,H);
   ctx.strokeStyle='rgba(120,190,255,.05)'; ctx.lineWidth=1; for(let y=FT;y<FB;y+=26){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
   txt(title,16,22,13,'rgba(180,215,255,.85)','left',800);
@@ -491,17 +492,17 @@ const MIX={ id:'mix', title:'ATOMIC SCALE · the boundary between water and isop
   legend:[[E_OWN,"water's electrons"],[E_IPA,"alcohol's electrons"],['#ffffff','dashed line = hydrogen bond']],
   reset(){ this.t=0; this.done=false; this.stage=0; const bl={x0:30,x1:486,y0:FT+8,y1:FB-4}, br={x0:514,x1:970,y0:FT+8,y1:FB-4};
     this.wat=placeRandom(62,[],38,bl,(x,y)=>{ const m=mkWater(x,y); m.md=36; return m; }); this.ipa=placeRandom(15,[],68,br,mkIPA); this.hb={lines:[],ww:0,wa:0,aa:0}; },
-  update(dt){ if(ATOMCTL.paused) return; dt*=ATOMCTL.spd; this.t+=dt; const t=this.t, S=58, open=t>=4;
+  update(dt){ if(ATOMCTL.paused) return; dt*=ATOMCTL.spd; this.t+=dt; const t=this.t, S=80, open=t>=4;
     const bw={x0:30,x1:open?970:486,y0:FT+8,y1:FB-4}, bi={x0:open?30:514,x1:970,y0:FT+8,y1:FB-4};
     for(const w of this.wat){ jig(w,dt,S,1.5,bw); w.a+=w.va*dt*.3; } for(const m of this.ipa){ jig(m,dt,S*.85,1.5,bi); m.a+=m.va*dt*.3; }
     const all=[...this.wat,...this.ipa]; sepAll(all,36); alignMols(all,dt); this.hb=hbonds(all);
     const left=this.ipa.filter(m=>m.x<500).length/this.ipa.length; this.left=left;
-    let s=0; if(t>=4) s=1; if(t>=10&&this.hb.wa>=3) s=2; if(t>26&&left>.3){ s=3; this.done=true; } this.stage=Math.max(this.stage,s); },
+    let s=0; if(t>=4) s=1; if(t>=10&&this.hb.wa>=3) s=2; if(t>20&&(left>.3||t>24)){ s=3; this.done=true; } this.stage=Math.max(this.stage,s); },
   caption(){ return ['Water molecules (H₂O) on one side and isopropyl alcohol molecules (C₃H₈O) on the other. Both have a polar O–H: the shared electrons sit closer to the O, so O is slightly negative (δ−) and H slightly positive (δ+).',
     'The barrier is gone. The molecules jiggle randomly and begin to spread into each other (diffusion).',
     'An alcohol’s O–H can make hydrogen bonds (dashed lines) with water, just like water does with water. Water and alcohol attract each other about as strongly as they attract themselves, so nothing pushes them apart.',
     'Result: the molecules are evenly mixed, one uniform solution (a homogeneous mixture). Liquids that mix completely like this are MISCIBLE.'][this.stage]; },
-  draw(){ const t=this.t; atomChrome(this.title,this.caption(),this.legend);
+  draw(){ const t=this.t; atomChrome(this.title,this.caption(),this.legend); watchBar(this.done?1:Math.min(.97,t/24),this.done);
     if(t<4){ ctx.save(); ctx.setLineDash([8,6]); ctx.strokeStyle='rgba(255,209,102,.8)'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(500,FT); ctx.lineTo(500,FB); ctx.stroke(); ctx.restore(); txt('barrier',500,FT+12,11,'#ffd166'); txt('water',260,FT+14,13,'rgba(143,211,255,.8)'); txt('isopropyl alcohol',740,FT+14,13,'rgba(199,146,255,.85)'); }
     drawHB(this.hb); for(const w of this.wat){ drawMol(w,false); } for(const m of this.ipa) drawIPA(m,t<12);
     if(t<12) for(const w of this.wat.slice(0,6)) drawWaterPolar(w);
@@ -531,7 +532,7 @@ const SALT={ id:'salt', title:'ATOMIC SCALE · adding salt (NaCl) to the water +
     let cx=0,cyy=0; for(const m of this.ipa){ cx+=m.x; cyy+=m.y; } cx/=this.ipa.length; cyy/=this.ipa.length;
     for(const m of this.ipa){ if(sep>.15){ m.vx+=(cx-m.x)*.5*sep*dt; m.vy-=60*sep*dt; } jig(m,dt,S*.85,1.5,{x0:30,x1:970,y0:FT+8,y1:yIpa}); m.a+=m.va*dt*.3; }
     const free=[...this.wat.filter(w=>!w.bound),...this.ipa]; sepAll([...this.wat,...this.ipa],36); alignMols(free,dt); this.hb=hbonds(free);
-    let s=0; if(this.sp[0]) s=1; if(this.nRel>=1) s=2; if(this.nRel>=6&&t>=17) s=3; if(this.sp[1]) s=4; if(sep>.3) s=5; if(sep>.97&&t>48){ s=6; this.done=true; } this.stage=Math.max(this.stage,s); },
+    let s=0; if(this.sp[0]) s=1; if(this.nRel>=1) s=2; if(this.nRel>=6&&t>=17) s=3; if(this.sp[1]) s=4; if(sep>.3) s=5; if((sep>.97&&t>48)||t>62){ s=6; this.done=true; } this.stage=Math.max(this.stage,s); },
   caption(){ return ['The water + alcohol mixture from Part 1: one uniform solution. Hydrogen bonds (dashed lines) join water to water and water to alcohol.',
     'A scoop of salt falls in. NaCl is an ionic crystal: Na⁺ and Cl⁻ stuck together, since Na gave an electron (gold) to Cl.',
     'Water molecules pull the crystal apart. Their δ− oxygen ends point at Na⁺ and their δ+ hydrogen ends point at Cl⁻. Each ion ends up wrapped in water (dotted lines): that is how salt dissolves.',
@@ -539,7 +540,7 @@ const SALT={ id:'salt', title:'ATOMIC SCALE · adding salt (NaCl) to the water +
     'More ions mean more water molecules get tied up around ions. Fewer free water molecules are left to hydrogen-bond with the alcohol (watch the counter drop).',
     'The alcohol is attracted to the ions much less than water is, so it is squeezed out. The alcohol molecules gather together and, being less dense, float to the top. This is called SALTING OUT.',
     'Two layers: the top is mostly isopropyl alcohol, the bottom is salt water. Salt that could not dissolve sits on the bottom.'][this.stage]; },
-  draw(){ const t=this.t, sep=this.sep; atomChrome(this.title,this.caption(),this.legend);
+  draw(){ const t=this.t, sep=this.sep; atomChrome(this.title,this.caption(),this.legend); watchBar(this.done?1:Math.min(.97,t/50),this.done);
     if(sep>.35){ ctx.save(); ctx.setLineDash([10,6]); ctx.strokeStyle=`rgba(255,255,255,${.6*sep})`; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,212); ctx.lineTo(W,212); ctx.stroke(); ctx.restore(); ctx.globalAlpha=sep; txt('TOP LAYER: mostly isopropyl alcohol',20,FT+22,12,'#e0b8ff','left',800); txt('BOTTOM LAYER: salt water',20,236,12,'#8fd3ff','left',800); ctx.globalAlpha=1; }
     drawHB(this.hb); ctx.save(); ctx.strokeStyle='rgba(255,209,102,.5)'; ctx.setLineDash([2,4]); ctx.lineWidth=1.5; ctx.beginPath(); for(const i of this.ions) for(const w of i.shell){ ctx.moveTo(i.x,i.y); ctx.lineTo(w.x,w.y); } ctx.stroke(); ctx.restore();
     for(const w of this.wat) drawMol(w,false); for(const m of this.ipa) drawIPA(m,false);
@@ -564,14 +565,14 @@ const BURN={ id:'burn', title:'ATOMIC SCALE · why the alcohol burns (a tiny sam
         this.nCO2+=6; this.nH2O+=8; this.glow=1; this.fx.push({x:e.cx,y:e.cy,t:0}); } }
     for(const m of [...this.ipa.filter(m=>!m.used),...this.o2.filter(m=>!m.used),...this.co2,...this.h2o]){ jig(m,dt,S,1.4,bn); m.a+=(m.va||0)*dt; }
     sepAll([...this.ipa,...this.o2,...this.co2,...this.h2o].filter(m=>!m.used),34); for(const f of this.fx) f.t+=dt*1.4; this.fx=this.fx.filter(f=>f.t<1);
-    let s=0; if(t>=6) s=1; if(this.evs.length) s=2; if(this.nCO2>0) s=3; if(this.nCO2>6) s=4; if(t>44&&this.nCO2>=12){ s=5; this.done=true; } this.stage=Math.max(this.stage,s); },
+    let s=0; if(t>=6) s=1; if(this.evs.length) s=2; if(this.nCO2>0) s=3; if(this.nCO2>6) s=4; if((t>44&&this.nCO2>=12)||t>60){ s=5; this.done=true; } this.stage=Math.max(this.stage,s); },
   caption(){ return ['The top layer is mostly isopropyl alcohol. Its molecules are held to each other only weakly, so many escape into the air as vapor and mix with oxygen (O₂). The vapor, not the liquid, is what burns.',
     'The lit match gives the molecules energy: they move faster and collide harder. That energy gets the reaction started.',
     'Bonds in the alcohol and in O₂ break, and the atoms are rearranged…',
     '…into new molecules: carbon dioxide (CO₂) and water (H₂O). Look at the new bonds: each shared pair now holds an electron from the alcohol (violet) and one from oxygen (teal).',
     'The new bonds are stronger than the old ones, and the difference is released as heat and light. That is the flame. It keeps going as long as there is fuel vapor and oxygen.',
     'Alcohol burns because it has C–H and C–O bonds that can react with O₂ and release energy. Water can’t burn: it is already a product of burning hydrogen. The bottom layer (mostly water and salt) won’t burn.'][this.stage]; },
-  draw(){ const t=this.t; atomChrome(this.title,this.caption(),this.legend);
+  draw(){ const t=this.t; atomChrome(this.title,this.caption(),this.legend); watchBar(this.done?1:Math.min(.97,t/44),this.done);
     if(this.glow>0){ for(const e of this.evs){ ctx.fillStyle=rg(e.cx,e.cy,5,170,[[0,`rgba(255,220,120,${.55*this.glow})`],[.5,`rgba(255,140,40,${.25*this.glow})`],[1,'rgba(255,100,20,0)']]); ctx.fillRect(0,FT,W,FB-FT); } }
     drawMatch(110,420,this.heat>0,t); txt('lit match',110,500,11,'rgba(200,215,245,.7)');
     if(this.heat>0){ ctx.fillStyle=rg(120,420,5,150,[[0,`rgba(255,170,60,${.35*this.heat})`],[1,'rgba(255,170,60,0)']]); ctx.fillRect(0,260,330,230); }
@@ -603,7 +604,7 @@ function makeStep(def){ const s={ id:def.id, def, view:'bench', zt:0, qt:0,
     updateNav(); },
   update(dt){ this.qt+=dt; if(this.view==='atoms'&&this.zt<1) this.zt=Math.min(1,this.zt+dt*2.2); if(this.view==='bench'&&this.zt>0) this.zt=Math.max(0,this.zt-dt*2.2);
     this.b.update(dt); def.upd&&def.upd(dt,this);
-    if(this.zt>0&&def.atom){ def.atom.update(dt); if(def.atom.done&&!state.watched[def.id]){ state.watched[def.id]=true; save(); } }
+    if(this.zt>0&&def.atom){ def.atom.update(dt); if(def.atom.done&&!state.watched[def.id]){ state.watched[def.id]=true; save(); toast('✓ You watched the whole animation. Tap “Back to the bench”.'); } }
     if(this.qt>.3){ this.qt=0; this.check(); } },
   draw(){ if(this.zt<1){ drawBenchBG(); def.drawBench(this); this.b.draw(); def.over&&def.over(this); }
     if(this.zt>0&&def.atom){ const z=def.zoomPos; ctx.save(); if(this.zt<1){ ctx.beginPath(); ctx.arc(z.x,z.y,lerp(24,1150,ease(this.zt)),0,TAU); ctx.clip(); } def.atom.draw(); ctx.restore();
@@ -712,14 +713,14 @@ const S2=makeStep({id:'s2',g:'d1',n:'Steps 3–4',nm:'Combine & rock',
   goals:[{t:'Pour the water into the alcohol tube',ok:s=>s.poured},{t:'Put the stopper on the tube',ok:s=>s.poured&&LAB.B.stopper},{t:'Gently rock the tube until the liquids combine',ok:s=>s.mixed},{t:'Zoom in: how do water and alcohol molecules mix?',ok:()=>!!state.watched.s2}],
   controls(){ return `<div class="rowbtns" style="margin-top:0"><button class="btn secondary" id="s2rock">🔄 Rock gently</button></div><div class="hintline">Drag the water tube over the alcohol tube to pour. Drag the stopper onto the alcohol tube. To rock it, drag the stoppered tube side to side (or press the button).</div>`; },
   init(s){ tubesFor(2); s.poured=false; s.mixed=false; s.rockE=0; s.auto=0; s.pa=null; s.rk=null;
-    stopperKit(s,()=>LAB.B,TX.B,{x:470,y:458}); s.stopperBlock=rem=>{ if(rem) return false; if(!s.poured){ toast('Pour the water into the alcohol first.',true); return true; } return false; };
+    stopperKit(s,()=>LAB.B,TX.B,{x:470,y:458}); s.stopperBlock=rem=>{ if(rem){ if(s.poured&&!s.mixed){ toast('Keep the stopper on while you rock the tube. Grab the tube lower down.'); return true; } return false; } if(!s.poured){ toast('Pour the water into the alcohol first.',true); return true; } return false; };
     s.b.add({id:'tubeA',x:TX.A,y:TY,hit:boxHit(-26,-TB.H-6,26,6),stay:false,
-      onDrop(it){ if(s.poured||s.pa) return false; if(LAB.B.stopper){ toast('Take the stopper off the alcohol tube first.',true); return false; } if(Math.abs(it.x-(TX.B-150))<190&&it.y<TY-30){ s.pa={t:0}; it.lock=true; it.x=363; it.y=316; return true; } return false; },
-      draw(it){ drawTube(it.x,it.y,LAB.A); if(!it.held&&!it.back&&!s.pa) labelUnder(it.x,it.y+20,'tube 1 (water)'); if(s.pa&&s.pa.t>.2&&s.pa.t<.8){ ctx.strokeStyle='rgba(140,205,255,.9)'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(it.x+251-4,it.y-128); ctx.lineTo(TX.B-2,mouthY+50); ctx.lineTo(TX.B-2,TY-2-(LAB.B.w+LAB.B.a)*TB.PX); ctx.stroke(); } } });
+      onDrop(it){ if(s.poured||s.pa) return false; if(LAB.B.stopper){ toast('Take the stopper off the alcohol tube first.',true); return false; } if(Math.abs(it.x-TX.B)<290&&Math.hypot(it.x-it.hx,it.y-it.hy)>70){ s.pa={t:0}; it.lock=true; it.x=363; it.y=316; return true; } if(Math.hypot(it.x-it.hx,it.y-it.hy)>25) toast('Carry the water tube over to the alcohol tube, then let go.'); return false; },
+      draw(it){ if(it.held&&!s.poured){ ctx.save(); ctx.setLineDash([8,6]); ctx.strokeStyle='rgba(255,209,102,.7)'; ctx.lineWidth=2; rr(TX.B-120,mouthY-70,170,110,14); ctx.stroke(); ctx.restore(); txt('carry it here, then let go',TX.B-35,mouthY-84,12,'#ffd166'); } drawTube(it.x,it.y,LAB.A); if(!it.held&&!it.back&&!s.pa) labelUnder(it.x,it.y+20,'tube 1 (water)'); if(s.pa&&s.pa.t>.2&&s.pa.t<.8){ ctx.strokeStyle='rgba(140,205,255,.9)'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(it.x+251-4,it.y-128); ctx.lineTo(TX.B-2,mouthY+50); ctx.lineTo(TX.B-2,TY-2-(LAB.B.w+LAB.B.a)*TB.PX); ctx.stroke(); } } });
     zoomHint(s,{x:720,y:230},()=>s.mixed);
     $('#s2rock').onclick=()=>{ if(!s.poured||!LAB.B.stopper){ toast('Pour the water in and put the stopper on first.',true); return; } s.auto=2.6; };
     s.say('Drag the water tube over the alcohol tube and let go to pour.'); },
-  down(p,s){ const B=LAB.B; if(s.poured&&B.stopper&&Math.abs(p.x-TX.B)<32&&p.y>mouthY+6&&p.y<TY){ s.rk={x0:p.x,last:p.x}; } else if(s.poured&&!B.stopper&&Math.abs(p.x-TX.B)<32&&p.y>mouthY&&p.y<TY) toast('Put the stopper on before you rock the tube.',true); },
+  down(p,s){ const B=LAB.B; if(s.poured&&B.stopper&&Math.abs(p.x-TX.B)<60&&p.y>mouthY&&p.y<TY+14){ s.rk={x0:p.x,last:p.x}; } else if(s.poured&&!B.stopper&&Math.abs(p.x-TX.B)<60&&p.y>mouthY&&p.y<TY+14) toast('Put the stopper on before you rock the tube.',true); },
   move(p,s){ if(s.rk&&!s.mixed){ s.rockE+=Math.abs(p.x-s.rk.last)/330; s.rk.last=p.x; } if(s.rk) LAB.B.tilt=clamp((p.x-s.rk.x0)/300,-.4,.4); },
   up(p,s){ s.rk=null; },
   upd(dt,s){ const A=LAB.A,B=LAB.B; tubeLoop(dt,A); tubeLoop(dt,B); const it=s.b.get('tubeA');
@@ -727,7 +728,7 @@ const S2=makeStep({id:'s2',g:'d1',n:'Steps 3–4',nm:'Combine & rock',
       if(pa.t>=1){ s.pa=null; A.w=0; A.rot=0; B.w=4; s.poured=true; it.lock=false; it.back=true; it.hx=TX.A; it.hy=TY; it.x=it.hx; it.y=it.hy; s.say('Now put the stopper on the tube.'); } }
     if(s.auto>0){ s.auto-=dt; B.tilt=.34*Math.sin(performance.now()/110); if(!s.mixed) s.rockE+=dt*.4; } else if(!s.rk) B.tilt*=Math.exp(-8*dt);
     if(s.poured&&!s.mixed){ B.q=1-clamp(s.rockE,0,1); if(s.rockE>=1){ s.mixed=true; B.q=0; B.tilt=0; record('mixed','Yes: they combined into one uniform liquid'); s.say('✓ The liquids combined. No layers! Tap 🔬 to see why.'); toast('✓ They mixed completely!'); } else if(s.rockE>0.05&&B.stopper) s.say(`Rocking… the liquids are combining (${Math.round(s.rockE*100)}%).`); } },
-  drawBench(s){ drawTube(TX.B,TY,LAB.B); labelUnder(TX.B,TY+20,s.poured?'tube 2 (water + alcohol)':'tube 2 (alcohol)'); },
+  drawBench(s){ drawTube(TX.B,TY,LAB.B); labelUnder(TX.B,TY+20,s.poured?'tube 2 (water + alcohol)':'tube 2 (alcohol)'); if(s.poured&&LAB.B.stopper&&!s.mixed){ const f=clamp(s.rockE,0,1); fillRR(TX.B+50,TY-150,16,110,6,'rgba(255,255,255,.1)','rgba(255,255,255,.4)',1.5); ctx.fillStyle='#3ddc84'; ctx.fillRect(TX.B+53,TY-42-104*f,10,104*f); txt('rocking',TX.B+58,TY-160,11,'#cfdcf7'); txt(Math.round(f*100)+'%',TX.B+58,TY-24,11,'#8ff0b6'); if(f<.02) txt('drag the tube side to side',TX.B,TY-TB.H-34,12,'#ffd166'); } },
   zoomOK:s=>s.mixed, zoomHint:'Rock the tube until the liquids combine first!', atom:MIX, zoomPos:{x:620,y:330} });
 
 /* =====================================================================
